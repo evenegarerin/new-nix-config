@@ -229,30 +229,19 @@
     users.castle =
       { pkgs, inputs, ... }:
       {
-        home.stateVersion = "25.11";
+        home.stateVersion = "26.05";
 
-        imports =
-          let
-            dir = ./home;
-            files = builtins.readDir dir;
-          in
-          builtins.map (name: dir + ("/" + name)) (
-            builtins.filter (name: files.${name} == "regular" && builtins.match ".*\\.nix" name != null) (
-              builtins.attrNames files
-            )
-          );
+        imports = [ ./home.nix ]
       };
 
     users.admin =
       { pkgs, ... }:
       {
-        home.stateVersion = "25.11";
+        home.stateVersion = "26.05";
 
-        imports = [
-          ./home/zsh.nix
-        ];
+        imports = [ ./home.nix ]
       };
   };
 
-  system.stateVersion = "25.11";
+  system.stateVersion = "26.05";
 }
