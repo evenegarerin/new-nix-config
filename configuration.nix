@@ -69,7 +69,18 @@
     };
   };
 
-  programs.zsh.enable = true;
+  programs.zsh = {
+    enable = true;
+    enableCompletion = true;
+    autosuggestions.enable = true;
+    syntaxHighlighting.enable = true;
+
+    ohMyZsh = {
+      enable = true;
+      plugins = [ "git" "sudo", "history", "command-not-found" ];
+      theme = "af-magic";
+    };
+  };
 
   programs.hyprland.enable = true;
   services.udisks2.enable = true;
@@ -206,6 +217,7 @@
     shell = pkgs.zsh;
     extraGroups = [
       "networkmanager"
+      "wheel"
     ];
   };
 
@@ -234,7 +246,7 @@
       {
         home.stateVersion = "26.05";
 
-        imports = [ ./home.nix ]
+        imports = [ ./home.nix ];
       };
 
     users.admin =
@@ -242,7 +254,7 @@
       {
         home.stateVersion = "26.05";
 
-        imports = [ ./home.nix ]
+        imports = [ ./home.nix ];
       };
   };
 
