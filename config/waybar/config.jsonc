@@ -1,0 +1,109 @@
+// Waybar configuration
+// translated from nixos-config/home/waybar.nix
+{
+  "modules-left": [
+    "group/left",
+    "hyprland/submap"
+  ],
+  "modules-center": [
+    "hyprland/workspaces"
+  ],
+  "modules-right": [
+    "tray",
+    "bluetooth",
+    "pulseaudio",
+    "network",
+    "battery"
+  ],
+  "group/left": {
+    "orientation": "horizontal",
+    "modules": [
+      "custom/logo",
+      "clock",
+      "disk",
+      "memory",
+      "cpu",
+      "temperature"
+    ]
+  },
+  "custom/logo": {
+    "format": ">>",
+    "tooltip": false
+  },
+  "hyprland/workspaces": {
+    "all-outputs": true,
+    "format": "{icon}",
+    "format-icons": {
+      "active": "",
+      // "visible": "",
+      "default": ""
+    }
+  },
+  "hyprland/submap": {
+    "format": "{}",
+    "tooltip": false
+  },
+  "clock": {
+    "format": "{:%d.%m %H:%M:%S}",
+    "interval": 1,
+    "tooltip-format": "\n<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+    "calendar-weeks-pos": "right",
+    "today-format": "<span color='#7645AD'><b><u>{}</u></b></span>",
+    "format-calendar": "<span color='#aeaeae'><b>{}</b></span>",
+    "format-calendar-weeks": "<span color='#aeaeae'><b>W{:%V}</b></span>",
+    "format-calendar-weekdays": "<span color='#aeaeae'><b>{}</b></span>"
+  },
+  "disk": {
+    "interval": 30,
+    "format": " {percentage_used}%",
+    "path": "/"
+  },
+  "memory": {
+    "format": " {percentage:>2}%"
+  },
+  "cpu": {
+    "interval": 2,
+    "format": " {usage:>2}%"
+  },
+  "temperature": {
+    "format": " {temperatureC:>2}°C",
+    "interval": 1,
+    "critical-threshold": 80,
+    "on-click": "kitty btop"
+  },
+  "tray": {
+    "icon-size": 14,
+    "spacing": 10
+  },
+  "bluetooth": {
+    "format": "",
+    "format-on": "",
+    "format-connected": " {device_alias}",
+    "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
+    "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
+    "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
+    "tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_address}\t{device_battery_percentage}%"
+  },
+  "pulseaudio": {
+    "format": "  {volume:>2}%",
+    "format-muted": "  "
+  },
+  "network": {
+    "format-wifi": "  {essid}",
+    "format-ethernet": " ",
+    "format-disconnected": " no connection",
+    "tooltip-format": "{ipaddr}",
+    "tooltip-format-wifi": "{essid} ({signalStrength}%)  | {ipaddr}",
+    "tooltip-format-ethernet": "{ifname} 🖧 | {ipaddr}"
+  },
+  "battery": {
+    "interval": 1,
+    "states": {
+      "good": 70,
+      "warning": 30,
+      "critical": 15
+    },
+    "format": "󰂀 {capacity}%",
+    "format-charging": "󰂄 {capacity}%"
+  }
+}

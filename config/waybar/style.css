@@ -1,0 +1,136 @@
+@define-color bg_color rgba(0, 0, 0, 0.8);
+
+* {
+  border: none;
+  font-size: 14px;
+  font-family: "JetBrainsMono Nerd Font, JetBrainsMono NF";
+  min-height: 25px;
+}
+
+window#waybar {
+  background: transparent;
+  margin: 5px;
+}
+
+#custom-logo {
+  padding: 0 10px;
+  color: rgba(250, 95, 95, 0.6);
+}
+
+.modules-right {
+  padding: 0 10px;
+  border-radius: 15px 0 0 15px;
+  margin-top: 2px;
+  background: @bg_color;
+}
+
+.modules-center {
+  padding: 0 15px;
+  margin-top: 2px;
+  border-radius: 15px 15px 15px 15px;
+  background: @bg_color;
+}
+
+.modules-left {
+  padding: 0;
+  margin-top: 2px;
+  background: transparent;
+}
+
+#left {
+  padding: 0 10px;
+  border-radius: 0 15px 15px 0;
+  background: @bg_color;
+}
+
+#battery,
+#bluetooth,
+#disk,
+#memory,
+#cpu,
+#temperature,
+#tray,
+#workspaces,
+#network,
+#pulseaudio,
+#clock {
+  padding: 0 5px;
+}
+
+#workspaces button {
+  color: whitesmoke;
+  opacity: 0.5;
+}
+
+#workspaces button.hosting-monitor {
+  opacity: 1;
+}
+
+#submap {
+  color: whitesmoke;
+  padding: 0 0 0 10px;
+  font-size: 110%;
+}
+
+#workspaces button:hover {
+  background: none;
+  box-shadow: none;
+  border: none;
+  color: inherit;
+}
+
+#clock {
+  color: rgba(95, 209, 250, 0.6);
+}
+
+#disk {
+  color: rgba(95, 250, 147, 0.6);
+}
+
+#memory {
+  color: rgba(237, 95, 250, 0.6);
+}
+
+#cpu {
+  color: rgba(250, 196, 95, 0.6);
+}
+
+#temperature {
+  color: rgba(250, 95, 160, 0.6);
+}
+
+#bluetooth {
+  color: rgba(255, 251, 0, 0.6);
+}
+
+#pulseaudio {
+  color: rgba(212, 0, 255, 0.6);
+}
+
+#network {
+  color: rgba(0, 183, 255, 0.6);
+}
+
+#battery {
+  color: rgba(38, 166, 91, 0.6);
+  background-color: rgba(0, 0, 0, 0);
+}
+
+#battery.warning:not(.charging) {
+  color: rgba(255, 190, 97, 0.6);
+}
+
+#battery.critical:not(.charging) {
+  color: rgba(245, 60, 60, 0.6);
+  animation-name: blink;
+  animation-duration: 1s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+@keyframes blink {
+  to {
+    color: rgba(245, 60, 60, 0.25);
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "exclusionRules": [],
+  "grabBackFocus": true,
+  "searchEngines": "g: https://www.google.com/search?q=%s Google\ny: https://www.youtube.com/results?search_query=%s Youtube\ngm: https://www.google.com/maps?q=%s Google maps\n\nnix: https://search.nixos.org/packages?channel=25.11&query=%s\nhome: https://home-manager-options.extranix.com/?query=%s&release=release-25.11",
+  "settingsVersion": "2.4.2"
+}

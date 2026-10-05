@@ -1,0 +1,20 @@
+{
+  "workbench.colorTheme": "Dark Modern",
+  "editor.renderWhitespace": "all",
+  "explorer.sortOrder": "type",
+  "editor.formatOnSave": true,
+  "chat.disableAIFeatures": true,
+  "files.autoSave": "onFocusChange",
+  "editor.wordWrap": "on",
+  "editor.fontFamily": "'Droid Sans Mono', 'monospace', monospace, 'JetBrainsMono Nerd Font'",
+  "cSpell.language": "en,de-De",
+  "git.openRepositoryInParentFolders": "always",
+  "extensions.autoUpdate": false,
+  "update.mode": "manual",
+  "python.analysis.typeCheckingMode": "standard",
+  "workbench.startupEditor": "none",
+  "workbench.welcomePage.extraAnnouncements": false,
+  "editor.minimap.enabled": false,
+  "explorer.confirmDragAndDrop": false,
+  "workbench.externalBrowser": "firefox"
+}
