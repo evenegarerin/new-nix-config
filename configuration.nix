@@ -63,7 +63,7 @@
     enable = true;
     settings = {
       default_session = {
-        command = "Hyprland";
+        command = "start-hyprland";
         user = "castle";
       };
     };
@@ -147,18 +147,21 @@
     elmPackages.elm-language-server
     elmPackages.elm
     elmPackages.elm-review
-    hyprlauncher
     elm-land
     typescript
     wl-clipboard
     wl-clip-persist
-    datasette
     sqlite-utils
     localsend
     polkit
     polkit_gnome
     postman
     qalculate-gtk
+    yazi
+    wofi
+    qutebrowser
+    hyprlock
+    hypridle
   ];
 
   environment.pathsToLink = [

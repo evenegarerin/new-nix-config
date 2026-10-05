@@ -25,5 +25,6 @@
     ".config/wofi".source = config.lib.file.mkOutOfStoreSymlink ./config/wofi;
     ".config/yazi".source = config.lib.file.mkOutOfStoreSymlink ./config/yazi;
     ".config/.zshrc".source = config.lib.file.mkOutOfStoreSymlink ./config/zsh/.zshrc;
+    ".config/wallpapers".source = config.lib.file.mkOutOfStoreSymlink ./config/wallpapers;
   };
 }
