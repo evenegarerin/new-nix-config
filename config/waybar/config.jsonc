@@ -1,6 +1,8 @@
 // Waybar configuration
-// translated from nixos-config/home/waybar.nix
 {
+  // "layer": "bottom",
+  // "exclusive": false,
+  
   "modules-left": [
     "group/left",
     "hyprland/submap"

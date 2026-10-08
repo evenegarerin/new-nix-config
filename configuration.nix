@@ -7,7 +7,7 @@
 
 {
   imports = [
-    ./hardware-configuration.nix
+    /etc/nixos/hardware-configuration.nix
   ];
 
   nix.settings.experimental-features = [
@@ -77,7 +77,7 @@
 
     ohMyZsh = {
       enable = true;
-      plugins = [ "git" "sudo", "history", "command-not-found" ];
+      plugins = [ "git" "sudo" "history" "command-not-found" ];
       theme = "af-magic";
     };
   };
@@ -173,7 +173,17 @@
     qutebrowser
     hyprlock
     hypridle
+    firefox
+    vscodium
+    claude-code
+    gnupg
+    pinentry-tty
+    gnome-text-editor
   ];
+
+  environment.etc."firefox/policies/policies.json".source =
+    ./config/firefox/policies.json;
+
 
   environment.pathsToLink = [
     "/share/glib-2.0/schemas"
@@ -221,16 +231,6 @@
     ];
   };
 
-  users.users.admin = {
-    initialPassword = "password"; # remember to change using "passwd"
-    isNormalUser = true;
-    description = "admin";
-    shell = pkgs.zsh;
-    extraGroups = [
-      "wheel"
-    ];
-  };
-
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
@@ -243,14 +243,6 @@
 
     users.castle =
       { pkgs, inputs, ... }:
-      {
-        home.stateVersion = "26.05";
-
-        imports = [ ./home.nix ];
-      };
-
-    users.admin =
-      { pkgs, ... }:
       {
         home.stateVersion = "26.05";
 
