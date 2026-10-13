@@ -87,6 +87,7 @@
   services.udisks2.enable = true;
   services.gvfs.enable = true;
   services.dbus.enable = true;
+  programs.direnv.enable = true;
 
   services.blueman.enable = true;
 
@@ -185,6 +186,8 @@
     bubblewrap
     nftables
     passt
+    psmisc
+    openbao
   ];
 
   programs.dconf = {
