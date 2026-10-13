@@ -103,6 +103,24 @@
 
   programs.virt-manager.enable = true;
 
+  services.keyd = {
+    enable = true;
+
+    keyboards.default = {
+      ids = [ "*" ];
+
+      # Hold Strg+Alt to reach the AltGr level, Windows-style.
+      settings."control+alt" = {
+        "7" = "G-7";                                              # {
+        "8" = "G-8";                                              # [
+        "9" = "G-9";                                              # ]
+        "0" = "G-0";                                              # }
+        minus = "G-minus";                                        # ß -> \
+        rightbrace = "G-rightbrace";                              # + -> ~
+      };
+    };
+  };
+
   environment.systemPackages = with pkgs; [
     kitty
     file
