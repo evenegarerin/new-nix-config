@@ -1,7 +1,6 @@
 // Waybar configuration
 {
-  // "layer": "bottom",
-  // "exclusive": false,
+  "start_hidden": true,
   
   "modules-left": [
     "group/left",

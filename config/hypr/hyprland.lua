@@ -1,5 +1,37 @@
 -- Hyprland configuration
 
+
+---------------------------------------------------------------------
+-- generic state storage (survives config reloads, cleared on logout)
+---------------------------------------------------------------------
+
+local state_prefix = (os.getenv("XDG_RUNTIME_DIR") or "/tmp") .. "/hypr_state_"
+
+-- returns the stored value, converted to the type of `default`
+local function read_state(name, default)
+    local f = io.open(state_prefix .. name, "r")
+    if not f then return default end
+    local content = f:read("*l")
+    f:close()
+    if content == nil then return default end
+
+    local t = type(default)
+    if t == "boolean" then
+        return content == "true"
+    elseif t == "number" then
+        return tonumber(content) or default
+    else
+        return content
+    end
+end
+
+local function write_state(name, value)
+    local f = io.open(state_prefix .. name, "w")
+    if not f then return end
+    f:write(tostring(value))
+    f:close()
+end
+
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Environment
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -18,9 +50,9 @@ hl.env("HYPRSHOT_DIR", "$HOME/Pictures/Screenshots")
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 hl.on("hyprland.start", function()
+    hl.exec_cmd("hyprlock --immediate-render --no-fade-in")
     hl.exec_cmd("hyprpaper")
     hl.exec_cmd("hypridle")
-    hl.exec_cmd("hyprlock")
     hl.exec_cmd("kitty")
     hl.exec_cmd("waybar")
     hl.exec_cmd("nm-applet")
@@ -51,55 +83,18 @@ hl.window_rule({
     fullscreen_state = "0 0",
 })
 
-hl.on("window.open", function(w)
-    if w == nil then return end
-
-    local windows = hl.get_workspace_windows(w.workspace)
-
-    if #windows == 0 or (#windows == 1 and windows[1] == w) then
-        hl.dispatch(hl.dsp.window.fullscreen_state({
-            window = w,
-            action = "set",
-            internal = 2,
-            client = -1,
-        }))
-    end
-end)
-
-hl.on("window.close", function(w)
-    if w == nil then return end
-
-    local windows = hl.get_workspace_windows(w.workspace)
-
-    if #windows == 2 then
-        for _, window in ipairs(windows) do
-            if window ~= w then
-                hl.dispatch(hl.dsp.window.fullscreen_state({
-                    window = window,
-                    action = "set",
-                    internal = 2,
-                    client = -1,
-                }))
-
-                hl.dispatch(hl.dsp.focus({window = window }))
-                break
-            end
-        end
-    end
-end)
-
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Look & feel
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 hl.config({
     general = {
-        gaps_in = 3,
-        gaps_out = 6
+        gaps_in = 0,
+        gaps_out = 0
     },
 
     decoration = {
-        rounding = 10
+        rounding = 0
     },
 
     misc = {
@@ -142,7 +137,6 @@ hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("wofi"))
 hl.bind(mainMod .. " + Q",
     hl.dsp.exec_cmd(
         "if [ $(hyprctl activeworkspace -j | jq -r .windows) -le 1 ]; then hyprctl dispatch 'hl.dsp.window.close()'; hyprctl dispatch 'hl.dsp.focus({ workspace = \"previous\" })'; else hyprctl dispatch 'hl.dsp.window.close()'; fi"))
-hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock --grace 3"))
 hl.bind(mainMod .. " + N",
     hl.dsp.exec_cmd(
@@ -172,10 +166,31 @@ hl.bind("switch:on:Lid Switch",
 hl.bind(mainMod .. " + J", hl.dsp.focus({ workspace = "m-1" }))
 hl.bind(mainMod .. " + K", hl.dsp.focus({ workspace = "m+1" }))
 
-hl.bind(mainMod .. " + SHIFT + J", hl.dsp.workspace.move({ monitor = "-1" }))
-hl.bind(mainMod .. " + SHIFT + K", hl.dsp.workspace.move({ monitor = "+1" }))
+hl.bind(mainMod .. " + H", hl.dsp.focus({ monitor = "-1" }))
+hl.bind(mainMod .. " + L", hl.dsp.focus({ monitor = "+1" }))
 
-hl.bind(mainMod .. " + H", hl.dsp.window.cycle_next())
+hl.bind(mainMod .. " + SHIFT + H", hl.dsp.workspace.move({ monitor = "-1" }))
+hl.bind(mainMod .. " + SHIFT + L", hl.dsp.workspace.move({ monitor = "+1" }))
+
+hl.bind(mainMod .. " + N", hl.dsp.window.cycle_next())
+hl.bind(mainMod .. " + SHIFT + N", function()
+  local active = hl.get_active_window()
+
+  local wins = {}
+  for _, w in ipairs(hl.get_windows({ workspace = hl.get_active_workspace() })) do
+    if not w.floating then table.insert(wins, w) end
+  end
+  local n = #wins
+  if n < 2 then return end
+
+  -- last window swaps its way through all others = one rotation step
+  for i = n - 1, 1, -1 do
+    hl.dispatch(hl.dsp.focus({ window = wins[n] }))
+    hl.dispatch(hl.dsp.window.swap({ window = wins[n], target = wins[i] }))
+  end
+
+  if active then hl.dispatch(hl.dsp.focus({ window = active })) end
+end)
 
 for i = 1, 10 do
     local key = i % 10 -- 10 maps to key 0
@@ -184,6 +199,43 @@ for i = 1, 10 do
 end
 
 hl.bind(mainMod .. " + R", hl.dsp.submap("resize"))
+
+local gaps_in_normal  = 3
+local gaps_out_normal = 6
+local rounding_normal = 10
+
+local function apply_layout(state)
+    if state then
+        hl.config({
+            general = { gaps_in = 0, gaps_out = 0 },
+            decoration = { rounding = 0 }
+        })
+    else
+        hl.config({
+            general = { gaps_in = gaps_in_normal, gaps_out = gaps_out_normal },
+            decoration = { rounding = rounding_normal }
+        })
+    end
+end
+
+local function set_fullscreen(state)
+    local active_state = read_state("fullscreen", false)
+
+    if state ~= active_state then
+        hl.dispatch(hl.dsp.exec_cmd("pkill -SIGUSR1 waybar"))
+
+        write_state("fullscreen", state)
+        apply_layout(state)
+    end
+end
+
+hl.on("hyprland.start", function()
+    write_state("fullscreen", false)
+end)
+
+hl.bind(mainMod .. " + F", function()
+    set_fullscreen(not read_state("fullscreen", false))
+end)
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Resize submap

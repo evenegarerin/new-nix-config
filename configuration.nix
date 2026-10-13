@@ -1,4 +1,5 @@
 {
+  lib,
   config,
   pkgs,
   inputs,
@@ -108,7 +109,6 @@
     gnote
     glib
     andromeda-gtk-theme
-    gedit
     lowfi
     spotify
     wev
@@ -179,7 +179,34 @@
     gnupg
     pinentry-tty
     gnome-text-editor
+    chromium
+    tmux
+    just
+    bubblewrap
+    nftables
+    passt
   ];
+
+  programs.dconf = {
+    enable = true;
+    profiles.user.databases = [{
+      settings = {
+        "org/gnome/desktop/interface" = {
+          color-scheme = "prefer-dark";
+          monospace-font-name = "JetBrainsMono Nerd Font";
+        };
+        "org/gnome/TextEditor" = {
+          auto-indent = true;
+          show-line-numbers = true;
+          highlight-current-line = true;
+          spellcheck = false;
+          tab-width = lib.gvariant.mkUint32 4;
+          use-system-font = true;
+          wrap-text = true;
+        };
+      };
+    }];
+  };
 
   environment.etc."firefox/policies/policies.json".source =
     ./config/firefox/policies.json;

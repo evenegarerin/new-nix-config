@@ -29,7 +29,7 @@ in
   home.activation.createConfigSymlinks =
     config.lib.dag.entryAfter [ "writeBoundary" ] ''
       mkdir -p "$HOME/.config"
-      mkdir -p "$HOME/.config/vscodium/User/settings.json"
+      mkdir -p "$HOME/.config/vscodium/User"
       mkdir -p "$HOME/.gnupg"
 
       ln -sfn "${nixConfig}/config/gtk-3.0" "$HOME/.config/gtk-3.0"
@@ -39,12 +39,13 @@ in
       ln -sfn "${nixConfig}/config/nvim" "$HOME/.config/nvim"
       ln -sfn "${nixConfig}/config/qutebrowser" "$HOME/.config/qutebrowser"
       ln -sfn "${nixConfig}/config/swaync" "$HOME/.config/swaync"
-      ln -sfn "${nixConfig}/config/vscodium/settings.json" "$HOME/.config/vscodium/User/settings.json"
+      ln -sfn "${nixConfig}/config/vscodium/settings.json" "$HOME/.config/VSCodium/User/settings.json"
       ln -sfn "${nixConfig}/config/waybar" "$HOME/.config/waybar"
       ln -sfn "${nixConfig}/config/wofi" "$HOME/.config/wofi"
       ln -sfn "${nixConfig}/config/yazi" "$HOME/.config/yazi"
       ln -sfn "${nixConfig}/config/wallpapers" "$HOME/.config/wallpapers"
       ln -sfn "${nixConfig}/config/zsh/.zshrc" "$HOME/.zshrc"
       ln -sfn "${nixConfig}/config/gnupg/gpg-agent.conf" "$HOME/.gnupg/gpg-agent.conf"
+      ln -sfn "${nixConfig}/config/tmux/.tmux.conf" "$HOME/.tmux.conf"
     '';
 }
