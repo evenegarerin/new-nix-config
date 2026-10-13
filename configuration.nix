@@ -206,6 +206,7 @@
     passt
     psmisc
     openbao
+    # steam
   ];
 
   programs.dconf = {

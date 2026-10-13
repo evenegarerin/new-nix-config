@@ -1,0 +1,1 @@
+export VAULT_ADDR=https://secrets.progeek.de

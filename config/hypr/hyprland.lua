@@ -230,7 +230,7 @@ local function set_fullscreen(state)
 end
 
 hl.on("hyprland.start", function()
-    write_state("fullscreen", false)
+    write_state("fullscreen", true)
 end)
 
 hl.bind(mainMod .. " + F", function()
