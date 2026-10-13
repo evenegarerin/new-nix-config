@@ -1,7 +1,6 @@
 // Waybar configuration
 {
   "start_hidden": true,
-  
   "modules-left": [
     "group/left",
     "hyprland/submap"
@@ -45,7 +44,7 @@
     "tooltip": false
   },
   "clock": {
-    "format": "{:%d.%m %H:%M:%S}",
+    "format": "{:%d.%m. %H:%M:%S}",
     "interval": 1,
     "tooltip-format": "\n<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
     "calendar-weeks-pos": "right",

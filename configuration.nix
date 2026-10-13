@@ -207,6 +207,7 @@
     psmisc
     openbao
     # steam
+    papirus-icon-theme
   ];
 
   programs.dconf = {
@@ -216,6 +217,7 @@
         "org/gnome/desktop/interface" = {
           color-scheme = "prefer-dark";
           monospace-font-name = "JetBrainsMono Nerd Font";
+          icon-theme = "Papirus-Dark";
         };
         "org/gnome/TextEditor" = {
           auto-indent = true;

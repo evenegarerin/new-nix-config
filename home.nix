@@ -47,5 +47,6 @@ in
       ln -sfn "${nixConfig}/config/zsh/.zshrc" "$HOME/.zshrc"
       ln -sfn "${nixConfig}/config/gnupg/gpg-agent.conf" "$HOME/.gnupg/gpg-agent.conf"
       ln -sfn "${nixConfig}/config/tmux/.tmux.conf" "$HOME/.tmux.conf"
+      ln -sfn "${nixConfig}/config/pcmanfm" "$HOME/.config/pcmanfm"
     '';
 }

@@ -59,6 +59,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("swaync")
     hl.exec_cmd("blueman-applet")
     hl.exec_cmd("wl-clip-persist")
+    hl.exec_cmd("pcmanfm --daemon-mode")
 end)
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
