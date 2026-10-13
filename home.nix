@@ -29,7 +29,7 @@ in
   home.activation.createConfigSymlinks =
     config.lib.dag.entryAfter [ "writeBoundary" ] ''
       mkdir -p "$HOME/.config"
-      mkdir -p "$HOME/.config/vscodium/User"
+      mkdir -p "$HOME/.config/VSCodium/User"
       mkdir -p "$HOME/.gnupg"
 
       ln -sfn "${nixConfig}/config/gtk-3.0" "$HOME/.config/gtk-3.0"

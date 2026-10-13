@@ -9,5 +9,3 @@ change border color for an active window on an inactive monitor !!
 disable monitor output if the monitor lid is closeds
 
 screen ruler
-
-pcmanfm looks like shit
