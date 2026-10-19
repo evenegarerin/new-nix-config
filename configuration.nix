@@ -28,6 +28,14 @@
 
   networking.hostName = "thinkpad";
 
+  security.sudo.extraConfig = ''
+    Defaults rootpw
+  '';
+
+  security.polkit.adminIdentities = [ "unix-user:0" ];
+
+  hardware.i2c.enable = true;
+
   services.tlp = {
     enable = true;
 
@@ -203,11 +211,15 @@
     just
     bubblewrap
     nftables
-    passt
+    # passt
     psmisc
     openbao
     # steam
     papirus-icon-theme
+    kdePackages.filelight
+    pinta
+    blender
+    # ddcutil
   ];
 
   programs.dconf = {
@@ -215,6 +227,7 @@
     profiles.user.databases = [{
       settings = {
         "org/gnome/desktop/interface" = {
+          gtk-theme = "Andromeda";
           color-scheme = "prefer-dark";
           monospace-font-name = "JetBrainsMono Nerd Font";
           icon-theme = "Papirus-Dark";
@@ -234,7 +247,6 @@
 
   environment.etc."firefox/policies/policies.json".source =
     ./config/firefox/policies.json;
-
 
   environment.pathsToLink = [
     "/share/glib-2.0/schemas"
@@ -260,6 +272,10 @@
     ];
   };
 
+  environment.etc."xdg/kdeglobals".source = pkgs.runCommand "kdeglobals" { } ''
+    cat ${pkgs.dracula-theme}/share/color-schemes/Dracula.colors > $out
+  '';
+
   console.keyMap = "de";
 
   services.pulseaudio.enable = false;
@@ -279,8 +295,11 @@
     extraGroups = [
       "networkmanager"
       "wheel"
+      "i2c"
     ];
   };
+
+  users.users.root.initialPassword = "password"; # change this!!!
 
   home-manager = {
     useGlobalPkgs = true;

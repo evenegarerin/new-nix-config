@@ -23,19 +23,41 @@
       "addon@darkreader.org": {
         "install_url": "https://addons.mozilla.org/firefox/downloads/latest/darkreader/latest.xpi",
         "installation_mode": "force_installed"
+      },
+      "@vimium-new-tab": {
+        "install_url": "https://addons.mozilla.org/firefox/downloads/latest/vimium-new-tab-page/latest.xpi",
+        "installation_mode": "force_installed"
+      },
+      "{7be2ba16-0f1e-4d93-9ebc-5164397477a9}": {
+        "install_url": "https://addons.mozilla.org/firefox/downloads/latest/videospeed/latest.xpi",
+        "installation_mode": "force_installed"
       }
     },
-    "Homepage": {
-      "URL": "https://en.wikipedia.org/wiki/Special:Random/Wikipedia",
-      "StartPage": "homepage"
-    },
     "Bookmarks": [
-      { "Title": "stud", "URL": "https://elearning.hs-flensburg.de" },
-      { "Title": "mail", "URL": "https://mail.stud.hs-flensburg.de" },
-      { "Title": "flex", "URL": "https://pm.hs-flensburg.de" },
-      { "Title": "git", "URL": "https://github.com/" },
-      { "Title": "youtube", "URL": "https://youtube.com/" }
+      {
+        "Title": "stud",
+        "URL": "https://elearning.hs-flensburg.de"
+      },
+      {
+        "Title": "mail",
+        "URL": "https://mail.stud.hs-flensburg.de"
+      },
+      {
+        "Title": "flex",
+        "URL": "https://pm.hs-flensburg.de"
+      },
+      {
+        "Title": "git",
+        "URL": "https://github.com/"
+      },
+      {
+        "Title": "youtube",
+        "URL": "https://youtube.com/"
+      }
     ],
-    "RequestedLocales": ["en-US", "de"]
+    "RequestedLocales": [
+      "en-US",
+      "de"
+    ]
   }
 }

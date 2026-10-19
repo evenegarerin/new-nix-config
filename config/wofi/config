@@ -1,4 +1,3 @@
 # Wofi configuration
 
-drun-print_command=true
 allow_images=true

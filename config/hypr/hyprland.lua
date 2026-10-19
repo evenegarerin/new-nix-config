@@ -59,7 +59,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("swaync")
     hl.exec_cmd("blueman-applet")
     hl.exec_cmd("wl-clip-persist")
-    hl.exec_cmd("pcmanfm --daemon-mode")
+    hl.exec_cmd("env -u HL_INITIAL_WORKSPACE_TOKEN pcmanfm --daemon-mode")
 end)
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -133,11 +133,25 @@ local mainMod = "SUPER"
 
 hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd("kitty"))
 hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("bash ~/.config/wofi/wofi-into-empty-workspace.sh"))
-hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("wofi"))
+hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("bash ~/.config/wofi/wofi-into-current-workspace.sh"))
 
-hl.bind(mainMod .. " + Q",
-    hl.dsp.exec_cmd(
-        "if [ $(hyprctl activeworkspace -j | jq -r .windows) -le 1 ]; then hyprctl dispatch 'hl.dsp.window.close()'; hyprctl dispatch 'hl.dsp.focus({ workspace = \"previous\" })'; else hyprctl dispatch 'hl.dsp.window.close()'; fi"))
+hl.bind(mainMod .. " + Q", function()
+    local ws = hl.get_active_workspace()
+    local wins = hl.get_windows({ workspace = ws })
+    local active = hl.get_active_window()
+    local last = hl.get_last_window()
+
+    if active == nil then return end
+    hl.dispatch(hl.dsp.window.close({ window = active }))
+    
+    if last == nil then return end
+    if 1 < #wins then return end
+
+    if last.monitor.id == ws.monitor.id then
+        hl.dispatch(hl.dsp.focus({ window = last }))
+    end
+end)
+
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock --grace 3"))
 hl.bind(mainMod .. " + N",
     hl.dsp.exec_cmd(
@@ -160,9 +174,23 @@ hl.bind("XF86HangupPhone", hl.dsp.exec_cmd("playerctl -a pause"))
 
 hl.bind("F1", hl.dsp.exec_cmd("playerctl --player=playerctld play-pause"))
 
+local panel = "eDP-1" --might not work on all system, have yet to find a better way
+
+hl.bind("switch:on:Lid Switch", function()
+  if #(hl.get_monitors()) <= 1 then
+    hl.exec_cmd("hyprlock --immediate-render --no-fade-in") 
+  end
+
+  hl.monitor({ output = panel, disabled = true })
+end)
+
+hl.bind("switch:off:Lid Switch", function()
+  hl.monitor({ output = panel, disabled = false })
+end)
+
 -- lock on lid close, only if there are no other monitors connected
-hl.bind("switch:on:Lid Switch",
-    hl.dsp.exec_cmd("sh -c '[ $(hyprctl -j monitors | jq length) -eq 1 ] && hyprlock --immediate-render'"))
+-- hl.bind("switch:on:Lid Switch",
+--     hl.dsp.exec_cmd("sh -c '[ $(hyprctl -j monitors | jq length) -eq 1 ] && hyprlock --immediate-render'"))
 
 hl.bind(mainMod .. " + J", hl.dsp.focus({ workspace = "m-1" }))
 hl.bind(mainMod .. " + K", hl.dsp.focus({ workspace = "m+1" }))
@@ -176,6 +204,7 @@ hl.bind(mainMod .. " + SHIFT + L", hl.dsp.workspace.move({ monitor = "+1" }))
 hl.bind(mainMod .. " + N", hl.dsp.window.cycle_next())
 hl.bind(mainMod .. " + SHIFT + N", function()
   local active = hl.get_active_window()
+  if active == nil then return end
 
   local wins = {}
   for _, w in ipairs(hl.get_windows({ workspace = hl.get_active_workspace() })) do

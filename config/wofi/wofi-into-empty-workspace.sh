@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Use wofi to select an app from the "drun" menu (all installed apps)
-selected_app=$(wofi --show drun -a -i)
+selected_app=$(wofi --show drun -a -i -D drun-print_command=true)
 
 # apps that cant be launched into a gui still open a new workspace
 # might be nice to find a workaround for that at some point
