@@ -220,7 +220,10 @@
     pinta
     blender
     # ddcutil
-    nvim
+    neovim
+    # wlr-randr
+    # usbutils
+    grim
   ];
 
   programs.dconf = {

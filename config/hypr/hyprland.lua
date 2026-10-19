@@ -295,6 +295,7 @@ end)
 -- Resize submap
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+
 hl.define_submap("resize", function()
     -- Set repeating binds for resizing the active window.
     hl.bind("J", hl.dsp.window.resize({ x = -18, y = 0, relative = true }), { repeating = true })
@@ -305,4 +306,8 @@ hl.define_submap("resize", function()
     -- Use `reset` to go back to the global submap
     hl.bind("escape", hl.dsp.submap("reset"))
     hl.bind("R", hl.dsp.submap("reset"))
+    
+    -- broken in current hyprland version as catchall does also trigger on the resizing keys
+    -- hl.bind("catchall", hl.dsp.submap("reset"))
 end)
+
