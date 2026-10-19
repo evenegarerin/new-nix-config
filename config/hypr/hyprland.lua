@@ -126,6 +126,28 @@ hl.animation({ leaf = "workspaces", enabled = true, speed = 6, bezier = "default
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Focus
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-- When the focused window goes away, follow the focus history to the last window
+hl.on("window.close", function(win)
+    if not win.active then return end
+
+    -- the closing window is still listed here and still holds id 0,
+    -- so the previous window is the lowest id left over
+    local target = nil
+    for _, w in ipairs(hl.get_windows()) do
+        if w.address ~= win.address and (target == nil or w.focus_history_id < target.focus_history_id) then
+            target = w
+        end
+    end
+
+    if target == nil then return end
+
+    hl.dispatch(hl.dsp.focus({ window = target }))
+end)
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Keybindings
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -146,20 +168,10 @@ fi
 hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("bash -c 'wofi --show drun -a -i'"))
 
 hl.bind(mainMod .. " + Q", function()
-    local ws = hl.get_active_workspace()
-    local wins = hl.get_windows({ workspace = ws })
     local active = hl.get_active_window()
-    local last = hl.get_last_window()
 
     if active == nil then return end
     hl.dispatch(hl.dsp.window.close({ window = active }))
-    
-    if last == nil then return end
-    if 1 < #wins then return end
-
-    if last.monitor.id == ws.monitor.id then
-        hl.dispatch(hl.dsp.focus({ window = last }))
-    end
 end)
 
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock --grace 3"))

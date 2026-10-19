@@ -10,4 +10,6 @@ skanlite
 
 when i open a new tab in firefox the focus is on the url bar instead of the vimium input
 
-if an app has a quit conformation like text editor if there are unsaved changes, super q does navigate back but does not close the app
+how to properly escape submap since catchall does not seem to work anymore
+
+super u to focus the last active window? do i want that?
