@@ -220,6 +220,7 @@
     pinta
     blender
     # ddcutil
+    nvim
   ];
 
   programs.dconf = {
