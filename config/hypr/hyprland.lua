@@ -132,8 +132,18 @@ hl.animation({ leaf = "workspaces", enabled = true, speed = 6, bezier = "default
 local mainMod = "SUPER"
 
 hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd("kitty"))
-hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("bash ~/.config/wofi/wofi-into-empty-workspace.sh"))
-hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("bash ~/.config/wofi/wofi-into-current-workspace.sh"))
+
+-- opens an app selected via wofi into its own workspace
+hl.bind(mainMod .. " + D", hl.dsp.exec_cmd([==[bash -c '
+selected_app=$(wofi --show drun -a -i -D drun-print_command=true)
+
+if [[ -n "$selected_app" ]]; then
+    hyprctl dispatch "hl.dsp.focus({ workspace = \"emptym\" })"
+    hyprctl dispatch "hl.dsp.exec_cmd(\"$selected_app\")"
+fi
+']==]))
+
+hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("bash -c 'wofi --show drun -a -i'"))
 
 hl.bind(mainMod .. " + Q", function()
     local ws = hl.get_active_workspace()
@@ -174,24 +184,6 @@ hl.bind("XF86HangupPhone", hl.dsp.exec_cmd("playerctl -a pause"))
 
 hl.bind("F1", hl.dsp.exec_cmd("playerctl --player=playerctld play-pause"))
 
-local panel = "eDP-1" --might not work on all system, have yet to find a better way
-
-hl.bind("switch:on:Lid Switch", function()
-  if #(hl.get_monitors()) <= 1 then
-    hl.exec_cmd("hyprlock --immediate-render --no-fade-in") 
-  end
-
-  hl.monitor({ output = panel, disabled = true })
-end)
-
-hl.bind("switch:off:Lid Switch", function()
-  hl.monitor({ output = panel, disabled = false })
-end)
-
--- lock on lid close, only if there are no other monitors connected
--- hl.bind("switch:on:Lid Switch",
---     hl.dsp.exec_cmd("sh -c '[ $(hyprctl -j monitors | jq length) -eq 1 ] && hyprlock --immediate-render'"))
-
 hl.bind(mainMod .. " + J", hl.dsp.focus({ workspace = "m-1" }))
 hl.bind(mainMod .. " + K", hl.dsp.focus({ workspace = "m+1" }))
 
@@ -230,8 +222,8 @@ end
 
 hl.bind(mainMod .. " + R", hl.dsp.submap("resize"))
 
-local gaps_in_normal  = 3
-local gaps_out_normal = 6
+local gaps_in_normal  = 2
+local gaps_out_normal = 4
 local rounding_normal = 10
 
 local function apply_layout(state)
@@ -265,6 +257,26 @@ end)
 
 hl.bind(mainMod .. " + F", function()
     set_fullscreen(not read_state("fullscreen", false))
+end)
+
+-- handle laptop monitor close and open
+
+local panel = "eDP-1" -- might not work on all system, have yet to find a better way
+
+hl.bind("switch:on:Lid Switch", function()
+  if #(hl.get_monitors()) <= 1 then
+    hl.exec_cmd("hyprlock --immediate-render --no-fade-in")
+
+    return
+  end
+
+  hl.monitor({ output = panel, disabled = true })
+end)
+
+hl.bind("switch:off:Lid Switch", function()
+  set_fullscreen(true)
+
+  hl.monitor({ output = panel, disabled = false, mode = "preferred", position = "auto", scale = 1 })
 end)
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
