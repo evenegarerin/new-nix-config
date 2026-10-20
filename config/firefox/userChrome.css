@@ -1,0 +1,5 @@
+#tabs-newtab-button,
+#vertical-tabs-newtab-button,
+.buttons-wrapper:has(.tools-and-extensions) {
+    display: none !important;
+}

@@ -9,6 +9,8 @@
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    herdr.url = "github:herdrdev/herdr/v0.9.5";
   };
 
   outputs =

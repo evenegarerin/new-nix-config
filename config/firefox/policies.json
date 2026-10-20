@@ -58,6 +58,24 @@
     "RequestedLocales": [
       "en-US",
       "de"
-    ]
+    ],
+    "Preferences": {
+      "toolkit.legacyUserProfileCustomizations.stylesheets": {
+        "Value": true,
+        "Status": "locked"
+      },
+      "browser.startup.homepage": {
+        "Value": "https://www.google.com",
+        "Status": "locked"
+      },
+      "sidebar.revamp": {
+        "Value": true,
+        "Status": "locked"
+      },
+      "sidebar.verticalTabs": {
+        "Value": true,
+        "Status": "locked"
+      }
+    }
   }
 }

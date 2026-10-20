@@ -6,6 +6,9 @@
   ...
 }:
 
+let
+  herdr = inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default;
+in
 {
   imports = [
     /etc/nixos/hardware-configuration.nix
@@ -230,6 +233,7 @@
     # usbutils
     grim
     lazygit
+    herdr
   ];
 
   programs.dconf = {

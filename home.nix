@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 
 let
-  nixConfig = "/home/castle/nix-config";
+  nixConfig = "/home/castle/nix-config/config";
 in
 {
   home.pointerCursor = {
@@ -32,21 +32,28 @@ in
       mkdir -p "$HOME/.config/VSCodium/User"
       mkdir -p "$HOME/.gnupg"
 
-      ln -sfn "${nixConfig}/config/gtk-3.0" "$HOME/.config/gtk-3.0"
-      ln -sfn "${nixConfig}/config/gtk-4.0" "$HOME/.config/gtk-4.0"
-      ln -sfn "${nixConfig}/config/hypr" "$HOME/.config/hypr"
-      ln -sfn "${nixConfig}/config/kitty" "$HOME/.config/kitty"
-      ln -sfn "${nixConfig}/config/nvim" "$HOME/.config/nvim"
-      ln -sfn "${nixConfig}/config/qutebrowser" "$HOME/.config/qutebrowser"
-      ln -sfn "${nixConfig}/config/swaync" "$HOME/.config/swaync"
-      ln -sfn "${nixConfig}/config/vscodium/settings.json" "$HOME/.config/VSCodium/User/settings.json"
-      ln -sfn "${nixConfig}/config/waybar" "$HOME/.config/waybar"
-      ln -sfn "${nixConfig}/config/wofi" "$HOME/.config/wofi"
-      ln -sfn "${nixConfig}/config/yazi" "$HOME/.config/yazi"
-      ln -sfn "${nixConfig}/config/wallpapers" "$HOME/.config/wallpapers"
-      ln -sfn "${nixConfig}/config/zsh/.zshrc" "$HOME/.zshrc"
-      ln -sfn "${nixConfig}/config/gnupg/gpg-agent.conf" "$HOME/.gnupg/gpg-agent.conf"
-      ln -sfn "${nixConfig}/config/tmux/.tmux.conf" "$HOME/.tmux.conf"
-      ln -sfn "${nixConfig}/config/pcmanfm" "$HOME/.config/pcmanfm"
+      ln -sfn "${nixConfig}/gtk-3.0" "$HOME/.config/gtk-3.0"
+      ln -sfn "${nixConfig}/gtk-4.0" "$HOME/.config/gtk-4.0"
+      ln -sfn "${nixConfig}/hypr" "$HOME/.config/hypr"
+      ln -sfn "${nixConfig}/kitty" "$HOME/.config/kitty"
+      ln -sfn "${nixConfig}/nvim" "$HOME/.config/nvim"
+      ln -sfn "${nixConfig}/qutebrowser" "$HOME/.config/qutebrowser"
+      ln -sfn "${nixConfig}/swaync" "$HOME/.config/swaync"
+      ln -sfn "${nixConfig}/vscodium/settings.json" "$HOME/.config/VSCodium/User/settings.json"
+      ln -sfn "${nixConfig}/waybar" "$HOME/.config/waybar"
+      ln -sfn "${nixConfig}/wofi" "$HOME/.config/wofi"
+      ln -sfn "${nixConfig}/yazi" "$HOME/.config/yazi"
+      ln -sfn "${nixConfig}/wallpapers" "$HOME/.config/wallpapers"
+      ln -sfn "${nixConfig}/zsh/.zshrc" "$HOME/.zshrc"
+      ln -sfn "${nixConfig}/gnupg/gpg-agent.conf" "$HOME/.gnupg/gpg-agent.conf"
+      ln -sfn "${nixConfig}/tmux/.tmux.conf" "$HOME/.tmux.conf"
+      ln -sfn "${nixConfig}/pcmanfm" "$HOME/.config/pcmanfm"
+      ln -sfm "${nixConfig}/herdr" "$HOME/.config/herdr"
+
+      for profile in "$HOME"/.config/mozilla/firefox/*.default; do
+        [ -d "$profile" ] || continue
+        mkdir -p "$profile/chrome"
+        ln -sfn "${nixConfig}/firefox/userChrome.css" "$profile/chrome/userChrome.css"
+      done
     '';
 }

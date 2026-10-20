@@ -271,6 +271,8 @@ hl.bind(mainMod .. " + F", function()
     set_fullscreen(not read_state("fullscreen", false))
 end)
 
+hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.fullscreen({ mode = "fullscreen" }))
+
 -- handle laptop monitor close and open
 
 local panel = "eDP-1" -- might not work on all system, have yet to find a better way
