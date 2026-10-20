@@ -130,19 +130,25 @@ hl.animation({ leaf = "workspaces", enabled = true, speed = 6, bezier = "default
 -- Focus
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+-- The window that was focused before the current one: the lowest focus_history_id
+-- left over once the window at id 0 (`exclude`) is skipped.
+local function last_focused_window(exclude)
+    local target = nil
+    for _, w in ipairs(hl.get_windows()) do
+        if (exclude == nil or w.address ~= exclude.address)
+            and (target == nil or w.focus_history_id < target.focus_history_id) then
+            target = w
+        end
+    end
+    return target
+end
+
 -- When the focused window goes away, follow the focus history to the last window
 hl.on("window.close", function(win)
     if not win.active then return end
 
-    -- the closing window is still listed here and still holds id 0,
-    -- so the previous window is the lowest id left over
-    local target = nil
-    for _, w in ipairs(hl.get_windows()) do
-        if w.address ~= win.address and (target == nil or w.focus_history_id < target.focus_history_id) then
-            target = w
-        end
-    end
-
+    -- the closing window is still listed here and still holds id 0
+    local target = last_focused_window(win)
     if target == nil then return end
 
     hl.dispatch(hl.dsp.focus({ window = target }))
@@ -173,6 +179,14 @@ hl.bind(mainMod .. " + Q", function()
 
     if active == nil then return end
     hl.dispatch(hl.dsp.window.close({ window = active }))
+end)
+
+-- jump back to the window focused before the current one
+hl.bind(mainMod .. " + U", function()
+    local target = last_focused_window(hl.get_active_window())
+
+    if target == nil then return end
+    hl.dispatch(hl.dsp.focus({ window = target }))
 end)
 
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock --grace 3"))
