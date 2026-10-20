@@ -48,7 +48,7 @@ in
       ln -sfn "${nixConfig}/gnupg/gpg-agent.conf" "$HOME/.gnupg/gpg-agent.conf"
       ln -sfn "${nixConfig}/tmux/.tmux.conf" "$HOME/.tmux.conf"
       ln -sfn "${nixConfig}/pcmanfm" "$HOME/.config/pcmanfm"
-      ln -sfm "${nixConfig}/herdr" "$HOME/.config/herdr"
+      ln -sfn "${nixConfig}/herdr/config.toml" "$HOME/.config/herdr/config.toml"
 
       for profile in "$HOME"/.config/mozilla/firefox/*.default; do
         [ -d "$profile" ] || continue

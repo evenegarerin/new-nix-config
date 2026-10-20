@@ -26,3 +26,4 @@ dentritic nixos config
 different app launcher ??? low priority
 
 navigation, super k in the last workspace creates a new workspace to the right, and only if i super k from an empty workspace then it loops
+
