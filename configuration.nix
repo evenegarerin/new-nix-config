@@ -129,6 +129,11 @@
     };
   };
 
+  programs.zoxide = {
+    enable = true;
+    enableZshIntegration = true;
+  };
+
   environment.systemPackages = with pkgs; [
     kitty
     file
@@ -224,6 +229,7 @@
     # wlr-randr
     # usbutils
     grim
+    lazygit
   ];
 
   programs.dconf = {
