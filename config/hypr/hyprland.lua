@@ -1,5 +1,6 @@
 -- Hyprland configuration
 
+local standard_workspaces = 10
 
 ---------------------------------------------------------------------
 -- generic state storage (survives config reloads, cleared on logout)
@@ -197,7 +198,29 @@ hl.bind("XF86HangupPhone", hl.dsp.exec_cmd("playerctl -a pause"))
 hl.bind("F1", hl.dsp.exec_cmd("playerctl --player=playerctld play-pause"))
 
 hl.bind(mainMod .. " + J", hl.dsp.focus({ workspace = "m-1" }))
-hl.bind(mainMod .. " + K", hl.dsp.focus({ workspace = "m+1" }))
+hl.bind(mainMod .. " + K", function()
+    local current = hl.get_active_workspace()
+
+    if current ~= nil and not current.special and current.windows > 0 and current.id
+ < standard_workspaces then
+        local is_last = true
+
+        for _, w in ipairs(hl.get_workspaces()) do
+            if not w.special and w.monitor == current.monitor and w.id > current.id
+then
+                is_last = false
+                break
+            end
+        end
+
+        if is_last then
+            hl.dispatch(hl.dsp.focus({ workspace = current.id + 1 }))
+            return
+        end
+    end
+
+    hl.dispatch(hl.dsp.focus({ workspace = "m+1" }))
+end)
 
 hl.bind(mainMod .. " + H", hl.dsp.focus({ monitor = "-1" }))
 hl.bind(mainMod .. " + L", hl.dsp.focus({ monitor = "+1" }))
@@ -226,8 +249,8 @@ hl.bind(mainMod .. " + SHIFT + N", function()
   if active then hl.dispatch(hl.dsp.focus({ window = active })) end
 end)
 
-for i = 1, 10 do
-    local key = i % 10 -- 10 maps to key 0
+for i = 1, standard_workspaces do
+    local key = i % standard_workspaces -- 10 maps to key 0
     hl.bind(mainMod .. " + " .. key, hl.dsp.focus({ workspace = i }))
     hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i, follow = false }))
 end
