@@ -178,7 +178,7 @@ hl.bind(mainMod .. " + Q", function()
     local active = hl.get_active_window()
 
     if active == nil then return end
-    hl.dispatch(hl.dsp.window.close({ window = active }))
+    hl.dispatch(hl.dsp.window.close())
 end)
 
 -- jump back to the window focused before the current one

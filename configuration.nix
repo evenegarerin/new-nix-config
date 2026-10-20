@@ -181,6 +181,7 @@ in
         numpy
         python-lsp-server
         python-lsp-ruff
+        pynvim
       ]
     ))
     nixfmt
@@ -202,7 +203,8 @@ in
     polkit
     polkit_gnome
     postman
-    qalculate-gtk
+    gnome-calculator
+    # qalculate-gtk
     yazi
     wofi
     qutebrowser
@@ -234,6 +236,7 @@ in
     grim
     lazygit
     herdr
+    secretspec
   ];
 
   programs.dconf = {

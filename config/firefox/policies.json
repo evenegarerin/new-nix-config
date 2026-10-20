@@ -75,6 +75,10 @@
       "sidebar.verticalTabs": {
         "Value": true,
         "Status": "locked"
+      },
+      "sidebar.visibility": {
+        "Value": "expand-on-hover",
+        "Status": "locked"
       }
     }
   }

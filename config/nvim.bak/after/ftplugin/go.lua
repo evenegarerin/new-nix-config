@@ -1,0 +1,32 @@
+local opt = vim.opt
+
+-- General tab settings
+opt.tabstop = 4 -- Number of visual spaces per TAB
+opt.softtabstop = 4 -- Number of spaces in tab when editing
+opt.shiftwidth = 4 -- Number of spaces to use for autoindent
+opt.expandtab = false -- Expand tab to spaces so that tabs are spaces
+
+-- gofumpt adds more rule to gofmt, and is compatible with gofmt,
+-- so also https://github.com/mvdan/gofumpt
+vim.keymap.set("n", "<Space>f", function()
+  vim.lsp.buf.format {
+    async = false,
+  }
+  -- The following code action requires gopls to be installed.
+  -- Install gopls with: go install golang.org/x/tools/gopls@latest
+  vim.lsp.buf.code_action {
+    context = { only = { "source.organizeImports" } },
+    apply = true,
+  }
+end, {
+  desc = "format file",
+  buffer = true,
+  silent = true,
+})
+
+vim.keymap.set("n", "<F9>", function()
+  vim.cmd([[!go run %]])
+end, {
+  buffer = true,
+  silent = true,
+})

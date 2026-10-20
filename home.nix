@@ -49,6 +49,7 @@ in
       ln -sfn "${nixConfig}/tmux/.tmux.conf" "$HOME/.tmux.conf"
       ln -sfn "${nixConfig}/pcmanfm" "$HOME/.config/pcmanfm"
       ln -sfn "${nixConfig}/herdr/config.toml" "$HOME/.config/herdr/config.toml"
+      ln -sfn "${nixConfig}/claude/keybindings.json" "$HOME/.claude/keybindings.json"
 
       for profile in "$HOME"/.config/mozilla/firefox/*.default; do
         [ -d "$profile" ] || continue

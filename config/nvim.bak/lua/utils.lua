@@ -1,0 +1,286 @@
+local fn = vim.fn
+local version = vim.version
+
+local M = {}
+
+--- Check if an executable exists
+--- @param name string An executable name/path
+--- @return boolean
+function M.executable(name)
+  return fn.executable(name) > 0
+end
+
+--- check whether a feature exists in Nvim
+--- @param feat string the feature name, like `nvim-0.7` or `unix`.
+--- @return boolean
+function M.has(feat)
+  if fn.has(feat) == 1 then
+    return true
+  end
+
+  return false
+end
+
+--- Create a dir if it does not exist
+function M.may_create_dir(dir)
+  local res = fn.isdirectory(dir)
+
+  if res == 0 then
+    fn.mkdir(dir, "p")
+  end
+end
+
+--- Generate random integers in the range [Low, High], inclusive,
+--- adapted from https://stackoverflow.com/a/12739441/6064933
+--- @param low integer the lower value for this range
+--- @param high integer the upper value for this range
+--- @return integer
+function M.rand_int(low, high)
+  -- Use lua to generate random int, see also: https://stackoverflow.com/a/20157671/6064933
+  math.randomseed(os.time())
+
+  return math.random(low, high)
+end
+
+--- Select a random element from a sequence/list.
+--- @param seq any[] the sequence to choose an element
+function M.rand_element(seq)
+  local idx = M.rand_int(1, #seq)
+
+  return seq[idx]
+end
+
+--- check if the current nvim version is compatible with the allowed version
+--- @param expected_version string
+--- @return boolean
+function M.is_compatible_version(expected_version)
+  -- check if we have the latest stable version of nvim
+  local expect_ver = version.parse(expected_version)
+  local actual_ver = vim.version()
+
+  if expect_ver == nil then
+    local msg = string.format("Unsupported version string: %s", expected_version)
+    vim.api.nvim_echo({ { msg } }, true, { err = true })
+    return false
+  end
+
+  local result = version.cmp(expect_ver, actual_ver)
+  if result ~= 0 then
+    local _ver = string.format("%s.%s.%s", actual_ver.major, actual_ver.minor, actual_ver.patch)
+    local msg = string.format(
+      "Expect nvim version %s, but your current nvim version is %s. Use at your own risk!",
+      expected_version,
+      _ver
+    )
+    vim.api.nvim_echo({ { msg } }, true, { err = true })
+  end
+
+  return true
+end
+
+--- check if we are inside a git repo
+--- @return boolean
+function M.inside_git_repo()
+  local result = vim.system({ "git", "rev-parse", "--is-inside-work-tree" }, { text = true }):wait()
+  if result.code ~= 0 then
+    return false
+  end
+
+  -- Manually trigger a special user autocmd InGitRepo (used lazyloading.
+  vim.cmd([[doautocmd User InGitRepo]])
+
+  return true
+end
+
+--- Get custom title string for the window title.
+--- Shows hostname (on Linux), buffer path, and last modified time.
+--- @return string
+function M.get_titlestr()
+  local title_str = ""
+  if vim.g.is_linux then
+    title_str = vim.fn.hostname() .. "  "
+  end
+
+  local buf_path = vim.fn.expand("%:p:~")
+  title_str = title_str .. buf_path .. "  "
+  if vim.bo.buflisted and buf_path ~= "" then
+    local mod_time = vim.fn.strftime("%Y-%m-%d %H:%M:%S%z", vim.fn.getftime(vim.fn.expand("%")))
+    title_str = title_str .. mod_time
+  end
+
+  return title_str
+end
+
+--- Get the current virtual env
+--- @return string
+function M.get_virtual_env()
+  local conda_env = os.getenv("CONDA_DEFAULT_ENV")
+  -- venv_path is the complete path to the virtual env
+  local venv_path = os.getenv("VIRTUAL_ENV")
+
+  local venv_name = ""
+
+  if venv_path == nil then
+    if conda_env ~= nil then
+      venv_name = conda_env
+    end
+  else
+    venv_name = vim.fn.fnamemodify(venv_path, ":t")
+  end
+
+  return venv_name
+end
+
+--- Get the current project root directory
+--- @return string | nil
+function M.get_proj_root()
+  local project_marker = { ".git", "pyproject.toml" }
+  local project_root = vim.fs.root(0, project_marker)
+
+  return project_root
+end
+
+--- Get python virtual env
+--- @return string | nil
+function M.get_py_env()
+  local project_root = M.get_proj_root()
+  if project_root == nil then
+    vim.print("Can not find project root!")
+    return
+  end
+
+  local venv_name = M.get_virtual_env()
+
+  if venv_name ~= "" then
+    return "plain_venv"
+  end
+
+  -- check if this is uv-managed project
+  local uv_lock_path = vim.fs.joinpath(project_root, "uv.lock")
+  if vim.uv.fs_stat(uv_lock_path) then
+    return "uv"
+  end
+
+  return ""
+end
+
+--- Get python command to run
+--- @return string | nil
+function M.get_py_cmd()
+  local py_cmd = nil
+
+  local py_env = M.get_py_env()
+  if py_env == "uv" then
+    py_cmd = "uv run python"
+  elseif M.executable("python") then
+    py_cmd = "python"
+  elseif M.executable("python3") then
+    py_cmd = "python3"
+  end
+
+  return py_cmd
+end
+
+---@param buf integer buf number
+---@return boolean
+function M.buf_writable(buf)
+  local is_readonly = vim.api.nvim_get_option_value("readonly", { buf = buf })
+  local is_modifiable = vim.api.nvim_get_option_value("modifiable", { buf = buf })
+  local buftype = vim.api.nvim_get_option_value("buftype", { buf = buf })
+
+  return not is_readonly and is_modifiable and buftype == ""
+end
+
+---Put element to the front of a list it exists in this list (This assumes that the list has
+---items)
+---
+---@param items string[] the list to reorder
+---@param ele string the element to put to the front
+---@return string[]
+function M.reorder_list_element(items, ele)
+  if not vim.list_contains(items, ele) then
+    return items
+  end
+
+  local new_items = {}
+  table.insert(new_items, ele)
+  for _, v in ipairs(items) do
+    if v ~= ele then
+      table.insert(new_items, v)
+    end
+  end
+
+  return new_items
+end
+
+---@class BranchInfo
+---@field local string[]
+---@field remote string[]
+
+---@param is_local boolean
+---@return string[]
+function M._get_branch(is_local)
+  local git_cmd = {}
+  if is_local then
+    git_cmd = { "git", "branch", "--list", "--format=%(refname:short)" }
+  else
+    git_cmd = {
+      "git",
+      "for-each-ref",
+      "--exclude=refs/remotes/*/HEAD",
+      "--format=%(refname:short)",
+      "refs/remotes/",
+    }
+  end
+
+  local result = vim.system(git_cmd, { text = true }):wait()
+  if result.code ~= 0 then
+    vim._log("error fetching git branch")
+  end
+
+  local branches = vim.split(result.stdout, "\n", { trimempty = true })
+  return branches
+end
+
+--- Get a list of local and remote branches
+---@return BranchInfo
+function M.get_git_branches()
+  return {
+    ["local"] = M._get_branch(true),
+    remote = M._get_branch(false),
+  }
+end
+
+--- Throttle a function run
+--- @param callback function
+--- @param delay_ms integer delay in milliseconds
+function M.throttle(callback, delay_ms)
+  --- @type integer
+  local start
+
+  return function(...)
+    local now = vim.uv.hrtime()
+
+    if start and (now - start) / 1e6 < delay_ms then
+      return
+    end
+
+    callback(...)
+    start = now
+  end
+end
+
+--- Get the file size in bytes
+--- @param fpath string the file path
+--- @return integer|nil # The file size in bytes, or nil if error happens or file does not exist
+function M.filesize(fpath)
+  local stat, _, _ = vim.uv.fs_stat(fpath)
+
+  if stat then
+    return stat.size
+  end
+
+  return nil
+end
+
+return M

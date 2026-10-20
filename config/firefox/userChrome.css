@@ -1,5 +1,11 @@
 #tabs-newtab-button,
-#vertical-tabs-newtab-button,
-.buttons-wrapper:has(.tools-and-extensions) {
+#vertical-tabs-newtab-button {
     display: none !important;
+}
+
+.buttons-wrapper:has(.tools-and-extensions) {
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
 }
