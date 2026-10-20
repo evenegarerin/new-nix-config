@@ -20,3 +20,6 @@ dentritic nixos config
 different app launcher ??? low priority
 
 special workspace for qualculate, and other utility apps
+
+
+herdr toggle leader instead of having to do leader for every bindK

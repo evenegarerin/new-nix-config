@@ -237,6 +237,7 @@ in
     lazygit
     herdr
     secretspec
+    docker
   ];
 
   programs.dconf = {
