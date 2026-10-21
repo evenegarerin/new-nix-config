@@ -1,0 +1,3 @@
+# pacman/dnf don't exist on NixOS; these providers only log errors on every start
+# and archlinuxpkgs downloads a ~79 MB package index into ~/.local/share/elephant.
+ignored_providers = ["archlinuxpkgs", "dnfpackages"]

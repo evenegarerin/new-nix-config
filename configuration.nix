@@ -75,7 +75,7 @@ in
     enable = true;
     settings = {
       default_session = {
-        command = "start-hyprland";
+        command = "uwsm start hyprland-uwsm.desktop";
         user = "castle";
       };
     };
@@ -95,6 +95,7 @@ in
   };
 
   programs.hyprland.enable = true;
+  programs.hyprland.withUWSM = true;
   services.udisks2.enable = true;
   services.gvfs.enable = true;
   services.dbus.enable = true;
@@ -136,6 +137,10 @@ in
     enable = true;
     enableZshIntegration = true;
   };
+
+  services.elephant.enable = true;
+
+  systemd.user.services.elephant.enableDefaultPath = false;
 
   environment.systemPackages = with pkgs; [
     kitty
@@ -207,6 +212,8 @@ in
     # qalculate-gtk
     yazi
     wofi
+    ulauncher
+    walker
     qutebrowser
     hyprlock
     hypridle

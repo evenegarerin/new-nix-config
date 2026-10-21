@@ -15,9 +15,8 @@ app selector with preview for all open apps for faster navigation
 
 lazy git                                        -- custom config
 neovim config
-quick shell (bar)
+quick shell (bar)                               -- no
 dentritic nixos config
-different app launcher ??? low priority
 
 special workspace for qualculate, and other utility apps
 

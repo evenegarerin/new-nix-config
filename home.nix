@@ -32,6 +32,11 @@ in
       mkdir -p "$HOME/.config/VSCodium/User"
       mkdir -p "$HOME/.gnupg"
 
+      # real dirs on purpose: ulauncher writes extensions.json/shortcuts.json next to
+      # settings.json, and generates generated.css inside a user theme dir
+      mkdir -p "$HOME/.config/ulauncher/user-themes/gruvbox"
+
+      ln -sfn "${nixConfig}/elephant" "$HOME/.config/elephant"
       ln -sfn "${nixConfig}/gtk-3.0" "$HOME/.config/gtk-3.0"
       ln -sfn "${nixConfig}/gtk-4.0" "$HOME/.config/gtk-4.0"
       ln -sfn "${nixConfig}/hypr" "$HOME/.config/hypr"
@@ -39,6 +44,10 @@ in
       ln -sfn "${nixConfig}/nvim" "$HOME/.config/nvim"
       ln -sfn "${nixConfig}/qutebrowser" "$HOME/.config/qutebrowser"
       ln -sfn "${nixConfig}/swaync" "$HOME/.config/swaync"
+      ln -sfn "${nixConfig}/ulauncher/settings.json" "$HOME/.config/ulauncher/settings.json"
+      ln -sfn "${nixConfig}/ulauncher/user-themes/gruvbox/manifest.json" "$HOME/.config/ulauncher/user-themes/gruvbox/manifest.json"
+      ln -sfn "${nixConfig}/ulauncher/user-themes/gruvbox/theme.css" "$HOME/.config/ulauncher/user-themes/gruvbox/theme.css"
+      ln -sfn "${nixConfig}/ulauncher/user-themes/gruvbox/theme-gtk-3.20.css" "$HOME/.config/ulauncher/user-themes/gruvbox/theme-gtk-3.20.css"
       ln -sfn "${nixConfig}/vscodium/settings.json" "$HOME/.config/VSCodium/User/settings.json"
       ln -sfn "${nixConfig}/waybar" "$HOME/.config/waybar"
       ln -sfn "${nixConfig}/wofi" "$HOME/.config/wofi"

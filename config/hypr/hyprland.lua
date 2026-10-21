@@ -1,37 +1,19 @@
 -- Hyprland configuration
 
-local standard_workspaces = 10
+-- `require` turns dots into slashes, so hyprland.d is not reachable as a module name;
+-- put the directory itself on the search path instead
+local config_dir = (os.getenv("XDG_CONFIG_HOME") or (os.getenv("HOME") .. "/.config")) .. "/hypr"
+package.path = package.path .. ";" .. config_dir .. "/hyprland.d/?.lua"
 
----------------------------------------------------------------------
--- generic state storage (survives config reloads, cleared on logout)
----------------------------------------------------------------------
+local common = require("common")
 
-local state_prefix = (os.getenv("XDG_RUNTIME_DIR") or "/tmp") .. "/hypr_state_"
+local mainMod             = common.mainMod
+local standard_workspaces = common.standard_workspaces
+local read_state          = common.read_state
+local write_state         = common.write_state
+local last_focused_window = common.last_focused_window
 
--- returns the stored value, converted to the type of `default`
-local function read_state(name, default)
-    local f = io.open(state_prefix .. name, "r")
-    if not f then return default end
-    local content = f:read("*l")
-    f:close()
-    if content == nil then return default end
-
-    local t = type(default)
-    if t == "boolean" then
-        return content == "true"
-    elseif t == "number" then
-        return tonumber(content) or default
-    else
-        return content
-    end
-end
-
-local function write_state(name, value)
-    local f = io.open(state_prefix .. name, "w")
-    if not f then return end
-    f:write(tostring(value))
-    f:close()
-end
+require("launcher")
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Environment
@@ -85,6 +67,28 @@ hl.window_rule({
     fullscreen_state = "0 0",
 })
 
+-- Utility apps toggle over the current workspace on one shared special workspace
+-- instead of getting a workspace of their own (see hyprland.d/launcher.lua).
+local special_ws = "utils"
+
+-- add utility apps here:
+--   exec  label for the generated window rule, no matching happens on it
+--   class hyprland regex, matched against the window class (see `hyprctl clients`)
+local utility_apps = {
+    { exec = "gnome%-calculator", class = [[^org\.gnome\.Calculator$]] },
+}
+
+-- utility windows are overlays wherever they end up
+for _, app in ipairs(utility_apps) do
+    hl.window_rule({
+        name   = "utility-" .. app.exec,
+        match  = { class = app.class },
+        float  = true,
+        size   = "50% 50%",
+        center = true,
+    })
+end
+
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Look & feel
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -130,19 +134,6 @@ hl.animation({ leaf = "workspaces", enabled = true, speed = 6, bezier = "default
 -- Focus
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
--- The window that was focused before the current one: the lowest focus_history_id
--- left over once the window at id 0 (`exclude`) is skipped.
-local function last_focused_window(exclude)
-    local target = nil
-    for _, w in ipairs(hl.get_windows()) do
-        if (exclude == nil or w.address ~= exclude.address)
-            and (target == nil or w.focus_history_id < target.focus_history_id) then
-            target = w
-        end
-    end
-    return target
-end
-
 -- When the focused window goes away, follow the focus history to the last window
 hl.on("window.close", function(win)
     if not win.active then return end
@@ -162,21 +153,7 @@ end)
 -- Keybindings
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-local mainMod = "SUPER"
-
 hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd("kitty"))
-
--- opens an app selected via wofi into its own workspace
-hl.bind(mainMod .. " + D", hl.dsp.exec_cmd([==[bash -c '
-selected_app=$(wofi --show drun -a -i -D drun-print_command=true)
-
-if [[ -n "$selected_app" ]]; then
-    hyprctl dispatch "hl.dsp.focus({ workspace = \"emptym\" })"
-    hyprctl dispatch "hl.dsp.exec_cmd(\"$selected_app\")"
-fi
-']==]))
-
-hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("bash -c 'wofi --show drun -a -i'"))
 
 hl.bind(mainMod .. " + Q", function()
     local active = hl.get_active_window()

@@ -1,0 +1,36 @@
+/* Gruvbox dark, ported from the old config/wofi/style.css palette. */
+
+/**
+ * App Window
+ */
+@define-color bg_color              #282828;
+@define-color window_bg             @bg_color;
+@define-color window_border_color   #928374;
+@define-color prefs_backgroud       #3c3836;
+
+/**
+ * Input
+ */
+@define-color selected_bg_color     #1d2021;
+@define-color selected_fg_color     #ebdbb2;
+@define-color input_color           #ebdbb2;
+@define-color caret_color           #ebdbb2;
+
+/**
+ * Result items
+ */
+@define-color item_name                 #ebdbb2;
+@define-color item_text                 #a89984;
+@define-color item_box_selected         #1d2021;
+@define-color item_text_selected        #ebdbb2;
+@define-color item_name_selected        #fbf1c7;
+@define-color item_shortcut_color       #928374;
+@define-color item_shortcut_shadow      #1d2021;
+@define-color item_shortcut_color_sel   #ebdbb2;
+@define-color item_shortcut_shadow_sel  #282828;
+
+/* square corners to match decoration.rounding = 0 in hyprland.lua */
+.app {
+    border: 1px solid @window_border_color;
+    border-radius: 0;
+}
