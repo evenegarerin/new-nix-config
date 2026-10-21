@@ -6,6 +6,12 @@
             "bindings": {
                 "ctrl+e": "autocomplete:accept"
             }
+        },
+        {
+            "context": "Chat",
+            "bindings": {
+                "ctrl+e": "autocomplete:accept"
+            }
         }
     ]
 }

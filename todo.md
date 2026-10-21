@@ -20,7 +20,8 @@ dentritic nixos config
 
 special workspace for qualculate, and other utility apps
 
-
 herdr toggle leader instead of having to do leader for every bindK
 
-the focus switch on window close should only happen if the closed window was the only one on the workspace
+super enter & super shift d sometimes open in new workspace, doing super d once fixes it, difficult to reproduce
+
+special workspace utils should disapear instand not swipe out

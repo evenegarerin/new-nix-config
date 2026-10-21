@@ -14,6 +14,7 @@ local write_state         = common.write_state
 local last_focused_window = common.last_focused_window
 
 require("launcher")
+require("special")
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Environment
@@ -67,28 +68,6 @@ hl.window_rule({
     },
     fullscreen_state = "0 0",
 })
-
--- Utility apps toggle over the current workspace on one shared special workspace
--- instead of getting a workspace of their own (see hyprland.d/launcher.lua).
-local special_ws = "utils"
-
--- add utility apps here:
---   exec  label for the generated window rule, no matching happens on it
---   class hyprland regex, matched against the window class (see `hyprctl clients`)
-local utility_apps = {
-    { exec = "gnome%-calculator", class = [[^org\.gnome\.Calculator$]] },
-}
-
--- utility windows are overlays wherever they end up
-for _, app in ipairs(utility_apps) do
-    hl.window_rule({
-        name   = "utility-" .. app.exec,
-        match  = { class = app.class },
-        float  = true,
-        size   = "50% 50%",
-        center = true,
-    })
-end
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Look & feel

@@ -28,7 +28,7 @@ hl.on("window.open", function(win)
 
     -- already alone on its workspace, nothing to hand out
     local ws = win.workspace
-    if ws ~= nil and not ws.special and ws.windows <= 1 then return end
+    if ws ~= nil and ws.special and ws.windows <= 1 then return end
 
     hl.dispatch(hl.dsp.window.move({ window = win, workspace = "emptym", follow = true }))
 end)
