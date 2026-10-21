@@ -23,3 +23,5 @@ special workspace for qualculate, and other utility apps
 
 
 herdr toggle leader instead of having to do leader for every bindK
+
+the focus switch on window close should only happen if the closed window was the only one on the workspace

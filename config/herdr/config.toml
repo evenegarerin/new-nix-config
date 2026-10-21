@@ -4,33 +4,92 @@ onboarding = false
 prefix = ["ctrl+space", "ctrl+b"]
 
 # Tabs
-new_tab      = "prefix+shift+n"
-previous_tab = "prefix+shift+h"
-next_tab     = "prefix+shift+l"
+new_tab      = "prefix+shift+l"
+previous_tab = "prefix+h"
+next_tab     = "prefix+l"
 close_tab    = "prefix+shift+q"
+rename_tab   = "prefix+shift+t"
+switch_tab   = "prefix+1..9"
 
 # Panes
-split_vertical   = "prefix+v"   # side by side
-split_horizontal = "prefix+n"   # stacked
-focus_pane_left  = "prefix+h"
-focus_pane_down  = "prefix+j"
-focus_pane_up    = "prefix+k"
-focus_pane_right = "prefix+l"
+split_vertical   = "prefix+v"
+split_horizontal = "prefix+c"
+cycle_pane_next  = "prefix+n"
 close_pane       = "prefix+q"
+swap_pane_left   = "prefix+shift+v"
+swap_pane_down   = "prefix+shift+c"
+# swap_pane_up     = "prefix+shift+c"
+# swap_pane_right  = "prefix+shift+v"
 
 # Workspaces
-new_workspace      = "prefix+shift+c"        # was prefix+shift+n
-previous_workspace = "prefix+shift+k"   # up
-next_workspace     = "prefix+shift+j"   # down
+new_workspace      = "prefix+shift+k"
+previous_workspace = "prefix+k"
+next_workspace     = "prefix+j"
+
+# Agents
+previous_agent = ""
+next_agent     = ""
+focus_agent    = ""
 
 # herdr
-detach = "prefix+shift+e"
+detach        = "prefix+shift+e"
+help          = "prefix+?"
+reload_config = "prefix+shift+r"
+goto          = ""                  # was prefix+g
 
-# Defaults that collided with the keys above, moved elsewhere
-swap_pane_left   = "prefix+alt+h"    # was prefix+shift+h
-swap_pane_down   = "prefix+alt+j"    # was prefix+shift+j
-swap_pane_up     = "prefix+alt+k"    # was prefix+shift+k
-swap_pane_right  = "prefix+alt+l"    # was prefix+shift+l
+# Navigate-mode movement            (only reachable via `goto`)
+navigate_workspace_up   = ""        # was up
+navigate_workspace_down = ""        # was down
+navigate_pane_left      = ""        # was h
+navigate_pane_down      = ""        # was j
+navigate_pane_up        = ""        # was k
+navigate_pane_right     = ""        # was l
+
+
+# ---------------------------------------------------------------------------
+# Everything below is a herdr default, explicitly unbound.
+# herdr has no "unbind all" switch, so each action has to be set to "".
+# Cross-check against `herdr --default-config` after a version bump.
+# ---------------------------------------------------------------------------
+
+# herdr / UI
+settings                 = ""   # was prefix+s
+open_notification_target = ""   # was prefix+o
+toggle_sidebar           = ""   # was prefix+b
+workspace_picker         = ""   # was prefix+w
+remote_image_paste       = ""   # was ctrl+v (only active in herdr --remote)
+
+# Workspaces / worktrees
+new_worktree     = ""   # was prefix+shift+g
+rename_workspace = ""   # was prefix+shift+w
+close_workspace  = ""   # was prefix+shift+d
+switch_workspace = ""
+open_worktree    = ""
+remove_worktree  = ""
+
+# Tabs
+move_tab_previous = ""
+move_tab_next     = ""
+
+# Panes
+rename_pane         = ""   # was prefix+shift+p
+edit_scrollback     = ""   # was prefix+e
+copy_mode           = ""   # was prefix+[
+cycle_pane_previous = ""   # was prefix+shift+tab
+zoom                = ""   # was prefix+z
+resize_mode         = ""   # was prefix+r
+clear_pane          = ""
+last_pane           = ""
+resize_pane_left    = ""
+resize_pane_down    = ""
+resize_pane_up      = ""
+resize_pane_right   = ""
+
+
+[keys.indexed]
+tabs       = ""
+workspaces = ""
+agents     = ""
 
 [ui.sound]
 enabled = false

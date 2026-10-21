@@ -147,6 +147,10 @@ end
 hl.on("window.close", function(win)
     if not win.active then return end
 
+    local ws = hl.get_active_workspace()
+
+    if ws.windows > 1 then return end
+
     -- the closing window is still listed here and still holds id 0
     local target = last_focused_window(win)
     if target == nil then return end
@@ -316,7 +320,7 @@ local panel = "eDP-1" -- might not work on all system, have yet to find a better
 
 hl.bind("switch:on:Lid Switch", function()
   if #(hl.get_monitors()) <= 1 then
-    hl.exec_cmd("hyprlock --immediate-render --no-fade-in")
+    hl.exec_cmd("hyprlock --immediate-render")
 
     return
   end
