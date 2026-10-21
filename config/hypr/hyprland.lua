@@ -43,6 +43,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("blueman-applet")
     hl.exec_cmd("wl-clip-persist")
     hl.exec_cmd("env -u HL_INITIAL_WORKSPACE_TOKEN pcmanfm --daemon-mode")
+    hl.exec_cmd("walker --gapplication-service")
 end)
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------

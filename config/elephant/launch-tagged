@@ -1,0 +1,9 @@
+#!/bin/sh
+
+mode=$(cat "$XDG_RUNTIME_DIR/launcher-mode" 2>/dev/null || echo normal)
+
+if [ "$mode" = new-workspace ]; then
+    exec hyprctl eval "hl.dispatch(hl.dsp.exec_cmd([[$*]], { tag = 'launch-into-new-workspace' }))"
+else
+    exec hyprctl eval "hl.dispatch(hl.dsp.exec_cmd([[$*]]))"
+fi
