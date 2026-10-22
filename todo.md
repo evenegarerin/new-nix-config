@@ -27,3 +27,8 @@ super enter & super shift d sometimes open in new workspace, doing super d once 
 special workspace utils should disapear instand not swipe out
 
 walker config
+
+move window to utils workspace, and extract window from utils workspace keybind (one bind)
+
+marquee in waybar in white text, and behind everything else
+warbar text shadow/ text outline for the subset label (might not be possible, if give it a grey background) 
