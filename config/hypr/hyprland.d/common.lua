@@ -3,6 +3,12 @@
 local M = {
     mainMod             = "SUPER",
     standard_workspaces = 10,
+
+    monitor_defaults    = {
+        mode     = "preferred",
+        position = "auto",
+        scale    = 1,
+    },
 }
 
 ---------------------------------------------------------------------
@@ -51,6 +57,18 @@ function M.last_focused_window(exclude)
         end
     end
     return target
+end
+
+-- Merges two tables into one table containing the key value pairs of both
+-- in case of a key confict (both have the same key) the later on wins
+function M.merge(...)
+  local result = {}
+  for _, t in ipairs({...}) do
+    for k, v in pairs(t) do
+      result[k] = v
+    end
+  end
+  return result
 end
 
 return M

@@ -20,8 +20,12 @@ dentritic nixos config
 
 special workspace for qualculate, and other utility apps
 
-herdr toggle leader instead of having to do leader for every bindK
+herdr toggle leader instead of having to do leader for every bindK              -- dont think possible
 
 super enter & super shift d sometimes open in new workspace, doing super d once fixes it, difficult to reproduce
 
 special workspace utils should disapear instand not swipe out
+
+refreshing my hyprlock configuration starts my main monitor again
+
+walker config

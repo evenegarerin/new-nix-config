@@ -12,6 +12,8 @@ local standard_workspaces = common.standard_workspaces
 local read_state          = common.read_state
 local write_state         = common.write_state
 local last_focused_window = common.last_focused_window
+local monitor_defaults    = common.monitor_defaults
+local merge               = common.merge
 
 require("launcher")
 require("special")
@@ -51,12 +53,7 @@ end)
 -- Monitors
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-hl.monitor({
-    output   = "",
-    mode     = "preferred",
-    position = "auto",
-    scale    = 1,
-})
+hl.monitor(merge(monitor_defaults, { output = "" }))
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Window rules
@@ -282,13 +279,13 @@ hl.bind("switch:on:Lid Switch", function()
     return
   end
 
-  hl.monitor({ output = panel, disabled = true })
+  hl.monitor(merge(monitor_defaults, { output = panel, disabled = true }))
 end)
 
 hl.bind("switch:off:Lid Switch", function()
   set_fullscreen(true)
 
-  hl.monitor({ output = panel, disabled = false, mode = "preferred", position = "auto", scale = 1 })
+  hl.monitor(merge(monitor_defaults, { output = panel, disabled = false }))
 end)
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
