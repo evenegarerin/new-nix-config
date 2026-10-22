@@ -13,6 +13,8 @@ local read_state          = common.read_state
 local write_state         = common.write_state
 local last_focused_window = common.last_focused_window
 local monitor_defaults    = common.monitor_defaults
+local panel               = common.panel
+local lid_closed          = common.lid_closed
 local merge               = common.merge
 
 require("launcher")
@@ -53,7 +55,22 @@ end)
 -- Monitors
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-hl.monitor(merge(monitor_defaults, { output = "" }))
+local monitors = hl.get_monitors()
+
+for _, monitor in ipairs(monitors) do
+    hl.monitor(merge(monitor_defaults, { output = monitor.name }))
+end
+
+local function other_monitor_present()
+    for _, m in ipairs(monitors) do
+        if m.name ~= panel then return true end
+    end
+    return false
+end
+
+if lid_closed() and other_monitor_present() then
+    hl.monitor(merge(monitor_defaults, { output = panel, disabled = true }))
+end
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Window rules
@@ -79,7 +96,6 @@ hl.config({
     decoration = {
         rounding = 0
     },
-
     misc = {
         focus_on_activate = true,
         vrr = 0,
@@ -260,6 +276,7 @@ end
 
 hl.on("hyprland.start", function()
     write_state("fullscreen", true)
+    apply_layout(false)
 end)
 
 hl.bind(mainMod .. " + F", function()
@@ -269,8 +286,7 @@ end)
 hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.fullscreen({ mode = "fullscreen" }))
 
 -- handle laptop monitor close and open
-
-local panel = "eDP-1" -- might not work on all system, have yet to find a better way
+-- (the matching rule for a reload while the lid is shut lives in the Monitors section)
 
 hl.bind("switch:on:Lid Switch", function()
   if #(hl.get_monitors()) <= 1 then

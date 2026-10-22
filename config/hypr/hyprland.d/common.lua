@@ -4,12 +4,34 @@ local M = {
     mainMod             = "SUPER",
     standard_workspaces = 10,
 
+    -- the built in laptop display
+    -- might not work on all systems, have yet to find a better way
+    panel               = "eDP-1",
+
     monitor_defaults    = {
         mode     = "preferred",
         position = "auto",
         scale    = 1,
     },
 }
+
+---------------------------------------------------------------------
+-- lid
+---------------------------------------------------------------------
+
+-- The kernel knows whether the lid is shut; unlike a monitor rule that
+-- knowledge survives both a config reload and a restart.
+-- LID0 is the usual name, see the caveat on `panel` above.
+local lid_state_path = "/proc/acpi/button/lid/LID0/state"
+
+function M.lid_closed()
+    local f = io.open(lid_state_path, "r")
+    if not f then return false end
+    local line = f:read("*l")
+    f:close()
+
+    return line ~= nil and line:match("closed") ~= nil
+end
 
 ---------------------------------------------------------------------
 -- generic state storage (survives config reloads, cleared on logout)
