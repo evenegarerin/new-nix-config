@@ -94,7 +94,11 @@ hl.config({
     },
 
     decoration = {
-        rounding = 0
+        rounding = 0,
+        dim_special = 0,
+        -- blur {
+        --     special = false
+        -- }
     },
     misc = {
         focus_on_activate = true,
@@ -121,6 +125,7 @@ hl.config({
 hl.animation({ leaf = "windows", enabled = true, speed = 6, bezier = "default" })
 hl.animation({ leaf = "fade", enabled = true, speed = 6, bezier = "default" })
 hl.animation({ leaf = "workspaces", enabled = true, speed = 6, bezier = "default" })
+hl.animation({ leaf = "specialWorkspace", enabled = false })
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -276,8 +281,9 @@ end
 
 hl.on("hyprland.start", function()
     write_state("fullscreen", true)
-    apply_layout(false)
 end)
+
+apply_layout(read_state("fullscreen", true))
 
 hl.bind(mainMod .. " + F", function()
     set_fullscreen(not read_state("fullscreen", false))

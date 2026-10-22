@@ -247,6 +247,8 @@ in
     herdr
     secretspec
     docker
+    jdk25
+    gradle_9
   ];
 
   programs.dconf = {

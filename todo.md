@@ -26,6 +26,4 @@ super enter & super shift d sometimes open in new workspace, doing super d once 
 
 special workspace utils should disapear instand not swipe out
 
-refreshing my hyprlock configuration starts my main monitor again
-
 walker config
