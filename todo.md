@@ -1,36 +1,29 @@
-screen ruler
-
 pdf arranger
 eloquent
 skanlite
-
-when i open a new tab in firefox the focus is on the url bar instead of the vimium input
 
 how to properly escape submap since catchall does not seem to work anymore
 bug in the current hyprland version; wait for fix
 
 take a look at this: -> https://github.com/jdhao/nvim-config
 
-app selector with preview for all open apps for faster navigation
-
 lazy git                                        -- custom config
 neovim config
 quick shell (bar)                               -- no
 dentritic nixos config
 
-special workspace for qualculate, and other utility apps
-
-herdr toggle leader instead of having to do leader for every bindK              -- dont think possible
-
-walker config
-
-move window to utils workspace, and extract window from utils workspace keybind (one bind)
+walker theme config
 
 marquee in waybar in white text, and behind everything else
-warbar text shadow/ text outline for the subset label (might not be possible, if give it a grey background)
-
-when in the special workspace and its empty then exit it
+maybe yes quick shell ???
 
 in the special workspace make windows that are not focuses transparent (invisible, dont render them)
 
-resize chromium in the special workspace
+walker opens slow, observe more, might be because of fuckery of me
+
+change default time for hyprland notification, or make it so that they stay present if my mouse is over them
+
+make it so that elephant does not open a new workspace but changes the content of the new-workspace file and hyprland react on that on a hl.on("window.open_early", ...)
+super d should get a time out where it deletes the new-workspace file
+
+can my elephant launch prefix react on what provider was used in walker??
