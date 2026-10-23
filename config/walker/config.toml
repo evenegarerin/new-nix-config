@@ -46,7 +46,6 @@ page_up = ["Page_Up"]
 [providers]
 default = [
   "desktopapplications",
-  # "runner",
   "calc",
   "websearch",
 ]
@@ -55,12 +54,8 @@ ignore_preview = []
 max_results = 50
 
 [[providers.prefixes]]
-prefix = ">"
+prefix = ":"
 provider = "runner"
-
-[[providers.prefixes]]
-prefix = "@"
-provider = "websearch"
 
 [providers.actions] # This will be MERGED/OVERWRITTEN with what the user specifies
 fallback = [
@@ -68,12 +63,6 @@ fallback = [
   { action = "menus:default", label = "run", after = "Close" },
   { action = "menus:parent", label = "back", bind = "Escape", after = "Nothing" },
   { action = "erase_history", label = "clear hist", bind = "ctrl h", after = "AsyncReload" },
-]
-
-dmenu = [{ action = "select", default = true, bind = "Return" }]
-
-providerlist = [
-  { action = "activate", default = true, bind = "Return", after = "ClearReload" },
 ]
 
 calc = [

@@ -31,6 +31,8 @@ in
       mkdir -p "$HOME/.config"
       mkdir -p "$HOME/.config/VSCodium/User"
       mkdir -p "$HOME/.gnupg"
+      mkdir -p "$HOME/.config/herdr"
+      mkdir -p "$HOME/.claude"
 
       ln -sfn "${nixConfig}/elephant" "$HOME/.config/elephant"
       ln -sfn "${nixConfig}/gtk-3.0" "$HOME/.config/gtk-3.0"

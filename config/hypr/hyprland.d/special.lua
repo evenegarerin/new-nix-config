@@ -8,7 +8,9 @@ local special_ws = "utils"
 --   exec  label for the generated window rule, no matching happens on it
 --   class hyprland regex, matched against the window class (see `hyprctl clients`)
 local utility_apps = {
-    { exec = "gnome%-calculator", class = [[^org\.gnome\.Calculator$]] },
+    { exec = "gnome-calculator", class = [[^org\.gnome\.Calculator$]] },
+    { exec = "devtoolbox", class = [[^me\.iepure\.devtoolbox]]},
+    { exec = "chromium", class = [[^chromium\-browser]]},
 }
 
 -- utility windows are overlays wherever they end up
@@ -23,4 +25,7 @@ for _, app in ipairs(utility_apps) do
     })
 end
 
-hl.bind(mainMod .. " + Z", hl.dsp.workspace.toggle_special(special_ws))
+hl.bind(mainMod .. " + Z", function()
+    hl.dispatch(hl.dsp.workspace.toggle_special(special_ws))
+    hl.dispatch(hl.dsp.window.cycle_next())
+end)

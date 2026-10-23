@@ -95,10 +95,7 @@ hl.config({
 
     decoration = {
         rounding = 0,
-        dim_special = 0,
-        -- blur {
-        --     special = false
-        -- }
+        dim_special = 0
     },
     misc = {
         focus_on_activate = true,
@@ -169,9 +166,6 @@ hl.bind(mainMod .. " + U", function()
 end)
 
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock --grace 3"))
-hl.bind(mainMod .. " + N",
-    hl.dsp.exec_cmd(
-        "sh -c 'out=$(hyprctl dispatch swapwindow r 2>&1); echo \"$out\" | grep -qx \"ok\" || hyprctl dispatch swapwindow l'"))
 
 -- screenshot (hyprshot)
 hl.bind("PRINT", hl.dsp.exec_cmd("hyprshot -m region"))
@@ -221,7 +215,10 @@ hl.bind(mainMod .. " + L", hl.dsp.focus({ monitor = "+1" }))
 hl.bind(mainMod .. " + SHIFT + H", hl.dsp.workspace.move({ monitor = "-1" }))
 hl.bind(mainMod .. " + SHIFT + L", hl.dsp.workspace.move({ monitor = "+1" }))
 
-hl.bind(mainMod .. " + N", hl.dsp.window.cycle_next())
+hl.bind(mainMod .. " + N", function()
+    hl.dispatch(hl.dsp.window.cycle_next())
+    hl.dispatch(hl.dsp.window.bring_to_top())
+end)
 hl.bind(mainMod .. " + SHIFT + N", function()
   local active = hl.get_active_window()
   if active == nil then return end
@@ -330,3 +327,14 @@ hl.define_submap("resize", function()
     -- hl.bind("catchall", hl.dsp.submap("reset"))
 end)
 
+hl.on("keybinds.submap", function(name)
+    local color;
+
+    if (name == "resize") then
+        color = 0xffff0000
+    else
+        color = 0xffffffff
+    end
+
+    hl.config({ general = { col = { active_border = color } } })
+end)

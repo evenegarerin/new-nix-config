@@ -22,13 +22,15 @@ special workspace for qualculate, and other utility apps
 
 herdr toggle leader instead of having to do leader for every bindK              -- dont think possible
 
-super enter & super shift d sometimes open in new workspace, doing super d once fixes it, difficult to reproduce
-
-special workspace utils should disapear instand not swipe out
-
 walker config
 
 move window to utils workspace, and extract window from utils workspace keybind (one bind)
 
 marquee in waybar in white text, and behind everything else
-warbar text shadow/ text outline for the subset label (might not be possible, if give it a grey background) 
+warbar text shadow/ text outline for the subset label (might not be possible, if give it a grey background)
+
+when in the special workspace and its empty then exit it
+
+in the special workspace make windows that are not focuses transparent (invisible, dont render them)
+
+resize chromium in the special workspace
