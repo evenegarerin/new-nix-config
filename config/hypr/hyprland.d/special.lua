@@ -9,8 +9,8 @@ local special_ws = "utils"
 --   class hyprland regex, matched against the window class (see `hyprctl clients`)
 local utility_apps = {
     { exec = "gnome-calculator", class = [[^org\.gnome\.Calculator$]] },
-    { exec = "devtoolbox", class = [[^me\.iepure\.devtoolbox]]},
-    { exec = "chromium", class = [[^chromium\-browser]]},
+    { exec = "devtoolbox", class = [[^me\.iepure\.devtoolbox$]]},
+    { exec = "chromium", class = [[^chromium\-browser$]]},
 }
 
 -- utility windows are overlays wherever they end up
@@ -24,6 +24,12 @@ for _, app in ipairs(utility_apps) do
         center    = true,
     })
 end
+
+hl.window_rule({
+  match = { class = [[^chromium\-browser$]] },
+  float = true,
+  size  = { "monitor_w * 0.8", "monitor_h * 0.8" },
+})
 
 hl.bind(mainMod .. " + Z", function()
     hl.dispatch(hl.dsp.workspace.toggle_special(special_ws))

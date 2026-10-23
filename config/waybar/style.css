@@ -32,14 +32,9 @@ window#waybar {
 }
 
 .modules-left {
-  padding: 0;
-  margin-top: 2px;
-  background: transparent;
-}
-
-#left {
   padding: 0 10px;
   border-radius: 0 15px 15px 0;
+  margin-top: 2px;
   background: @bg_color;
 }
 
@@ -68,7 +63,7 @@ window#waybar {
 
 #submap {
   color: whitesmoke;
-  padding: 0 0 0 10px;
+  padding: 0 5px;
   font-size: 110%;
 }
 

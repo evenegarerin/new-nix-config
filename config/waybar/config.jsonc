@@ -2,7 +2,12 @@
 {
   "start_hidden": true,
   "modules-left": [
-    "group/left",
+    "custom/logo",
+    "clock",
+    "disk",
+    "memory",
+    "cpu",
+    "temperature",
     "hyprland/submap"
   ],
   "modules-center": [
@@ -15,17 +20,6 @@
     "network",
     "battery"
   ],
-  "group/left": {
-    "orientation": "horizontal",
-    "modules": [
-      "custom/logo",
-      "clock",
-      "disk",
-      "memory",
-      "cpu",
-      "temperature"
-    ]
-  },
   "custom/logo": {
     "format": ">>",
     "tooltip": false
