@@ -50,6 +50,7 @@ in
       ln -sfn "${nixConfig}/pcmanfm" "$HOME/.config/pcmanfm"
       ln -sfn "${nixConfig}/herdr/config.toml" "$HOME/.config/herdr/config.toml"
       ln -sfn "${nixConfig}/claude/keybindings.json" "$HOME/.claude/keybindings.json"
+      ln -sfn "${nixConfig}/walker" "$HOME/.config/walker"
 
       for profile in "$HOME"/.config/mozilla/firefox/*.default; do
         [ -d "$profile" ] || continue
