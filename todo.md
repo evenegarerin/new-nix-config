@@ -19,11 +19,5 @@ maybe yes quick shell ???
 
 in the special workspace make windows that are not focuses transparent (invisible, dont render them)
 
-walker opens slow, observe more, might be because of fuckery of me
+change default time for hyprland notification, or make it so that they stay present if my mouse is over them                            -- maybe not possible
 
-change default time for hyprland notification, or make it so that they stay present if my mouse is over them
-
-make it so that elephant does not open a new workspace but changes the content of the new-workspace file and hyprland react on that on a hl.on("window.open_early", ...)
-super d should get a time out where it deletes the new-workspace file
-
-can my elephant launch prefix react on what provider was used in walker??

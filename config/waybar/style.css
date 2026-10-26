@@ -40,6 +40,7 @@ window#waybar {
 
 #battery,
 #bluetooth,
+#custom-herdr,
 #disk,
 #memory,
 #cpu,
@@ -104,6 +105,27 @@ window#waybar {
 
 #network {
   color: rgba(0, 183, 255, 0.6);
+}
+
+/* herdr agent status dot — full opacity so it reads as a deliberate indicator */
+#custom-herdr.blocked {
+  color: rgba(245, 60, 60, 0.6);
+}
+
+#custom-herdr.done {
+  color: rgba(21, 184, 13, 0.6);
+}
+
+#custom-herdr.working {
+  color: rgba(33, 255, 211, 0.6);
+}
+
+#custom-herdr.idle {
+  color: rgba(255, 190, 97, 0.6);
+}
+
+#custom-herdr.unknown {
+  color: rgba(72, 104, 98, 0.6);
 }
 
 #battery {

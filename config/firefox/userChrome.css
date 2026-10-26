@@ -9,3 +9,22 @@
     min-height: 0 !important;
     overflow: hidden !important;
 }
+
+#sidebar-main[sidebar-launcher-expanded] {
+    width: 56px !important;
+    min-width: 56px !important;
+    max-width: 56px !important;
+    overflow: hidden !important;
+}
+
+#tabbrowser-tabs[orient="vertical"][expanded] :is(.tab-label-container, .tab-close-button) {
+    display: none !important;
+}
+
+#tabbrowser-tabs[orient="vertical"][expanded] .tab-content {
+    justify-content: center !important;
+}
+
+#sidebar-launcher-splitter {
+    display: none !important;
+}

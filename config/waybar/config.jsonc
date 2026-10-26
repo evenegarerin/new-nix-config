@@ -14,6 +14,7 @@
     "hyprland/workspaces"
   ],
   "modules-right": [
+    "custom/herdr",
     "tray",
     "bluetooth",
     "pulseaudio",
@@ -23,6 +24,13 @@
   "custom/logo": {
     "format": ">>",
     "tooltip": false
+  },
+  "custom/herdr": {
+    "exec": "$HOME/.config/waybar/herdr-agents.sh status",
+    "return-type": "json",
+    "interval": 2,
+    "on-click": "$HOME/.config/waybar/herdr-agents.sh notify",
+    "tooltip": true
   },
   "hyprland/workspaces": {
     "all-outputs": true,

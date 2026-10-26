@@ -93,4 +93,12 @@ function M.merge(...)
   return result
 end
 
+function M.read_file(path)
+    local f = io.open(path, "r")
+    if not f then return nil end
+    local content = f:read("a")
+    f:close()
+    return content and content:match("^%s*(.-)%s*$") -- trim whitespace/newline
+end
+
 return M

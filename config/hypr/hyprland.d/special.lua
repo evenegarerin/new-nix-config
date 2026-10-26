@@ -1,5 +1,7 @@
 local mainMod = require("common").mainMod
 
+local M = {}
+
 -- Utility apps toggle over the current workspace on one shared special workspace
 -- instead of getting a workspace of their own (see hyprland.d/launcher.lua).
 local special_ws = "utils"
@@ -17,7 +19,7 @@ local function to_lua_pattern(re)
     return (re:gsub("\\(.)", "%%%1"))
 end
 
-local function matches_utility_app(str)
+function M.matches_utility_app(str)
     for _, app in ipairs(utility_apps) do
         if str:match(to_lua_pattern(app.class)) then
             return app  -- or return true
@@ -66,10 +68,12 @@ end)
 hl.on("window.open_early", function(w)
     if not w or not w.workspace or not w.class then return end
     if w.workspace.name ~= "special:" .. special_ws then return end
-    if matches_utility_app(w.class) then return end
+    if M.matches_utility_app(w.class) then return end
 
     local ws = hl.get_active_workspace()
     if ws then
         hl.dispatch(hl.dsp.window.move({ window = w, workspace = ws }))
     end
 end)
+
+return M

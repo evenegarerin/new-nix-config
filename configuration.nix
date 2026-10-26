@@ -213,8 +213,8 @@ in
     gnome-calculator
     # qalculate-gtk
     yazi
-    wofi
-    ulauncher
+    # wofi
+    # ulauncher
     walker
     qutebrowser
     hyprlock

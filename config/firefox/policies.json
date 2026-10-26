@@ -77,7 +77,7 @@
         "Status": "locked"
       },
       "sidebar.visibility": {
-        "Value": "expand-on-hover",
+        "Value": "always-show",
         "Status": "locked"
       }
     }
