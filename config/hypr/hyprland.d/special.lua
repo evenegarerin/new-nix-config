@@ -7,8 +7,6 @@ local M = {}
 local special_ws = "utils"
 
 -- add utility apps here:
---   exec  label for the generated window rule, no matching happens on it
---   class hyprland regex, matched against the window class (see `hyprctl clients`)
 local utility_apps = {
     { exec = "gnome-calculator", class = [[^org\.gnome\.Calculator$]] }, 
     { exec = "devtoolbox", class = [[^me\.iepure\.devtoolbox$]]},
@@ -39,6 +37,12 @@ for _, app in ipairs(utility_apps) do
         center    = true,
     })
 end
+
+hl.window_rule({
+    name    = "utility-dim-unfocused",
+    match   = { workspace = "special:" .. special_ws },
+    opacity = "1.0 0.0",
+})
 
 hl.window_rule({
   match = { class = [[^chromium\-browser$]] },

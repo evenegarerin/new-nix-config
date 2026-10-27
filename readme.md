@@ -53,6 +53,10 @@ super ? shows all hyprland keybinds
 
 ? or leader ? often shows keybind in other programs
 
+when someting brakes after nixos rebuild then you can just boot into the older build via grub and everything is on the state before the last rebuild
+
+when something breakes with the configs, specificaly with hyprland its not possible to undo this except for changing the error in the config, since the config is linked out it survices booting into an older version, two possible fixes that both require access to a terminal, git checkout an older commit (before the breaking change), or manually change the file using a tui editor e.g. nano. to get terminal access in a case where hyprland is fully frozen, use "strg + alt + f2" to switch to a different tty manually lot in and fix the config or rename the broken file, after rename it will not get linked to the live config anymore and hyprland should be usable again
+
 
 ### todo, future changes
 
@@ -72,8 +76,6 @@ dentritic nixos config
 
 marquee in waybar in white text, and behind everything else
 maybe yes quick shell ???
-
-in the special workspace make windows that are not focuses transparent (invisible, dont render them)
 
 change default time for hyprland notification, or make it so that they stay present if my mouse is over them                            -- maybe not possible
 
