@@ -16,6 +16,10 @@ hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("echo new-workspace > " .. mode_file 
 -- opens the selected app in the current workspace
 hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("echo normal > " .. mode_file .. "; walker"), { description = "App Launcher, launch into current ws" })
 
+-- clipboard history, served by elephant's clipboard provider. no mode_file here:
+-- that only steers app launches into a new workspace.
+hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("walker -m clipboard"), { description = "Clipboard history" })
+
 hl.layer_rule({
     match = { namespace = "walker" },
     blur = true,

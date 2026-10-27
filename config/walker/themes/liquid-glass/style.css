@@ -36,23 +36,23 @@
  * To dial the frost: the white gradient stops on .box-wrapper are the veil —
  * raise them for milkier, lower them for clearer. @glass_fill's alpha controls
  * how much of the blurred desktop shows through underneath it. */
-@define-color glass_fill        rgba(8, 8, 12, 0.40);
-@define-color glass_edge        rgba(255, 255, 255, 0.22);
-@define-color glass_rim         rgba(255, 255, 255, 0.30);
-@define-color glass_rim_under   rgba(0, 0, 0, 0.22);
+@define-color glass_fill rgba(8, 8, 12, 0.40);
+@define-color glass_edge rgba(255, 255, 255, 0.22);
+@define-color glass_rim rgba(255, 255, 255, 0.30);
+@define-color glass_rim_under rgba(0, 0, 0, 0.22);
 
-@define-color pane_fill         rgba(255, 255, 255, 0.10);
-@define-color pane_edge         rgba(255, 255, 255, 0.14);
-@define-color pane_fill_hover   rgba(255, 255, 255, 0.15);
+@define-color pane_fill rgba(255, 255, 255, 0.10);
+@define-color pane_edge rgba(255, 255, 255, 0.14);
+@define-color pane_fill_hover rgba(255, 255, 255, 0.15);
 
-@define-color fg                rgb(242, 242, 246);
-@define-color fg_dim            rgba(242, 242, 246, 0.58);
+@define-color fg rgb(242, 242, 246);
+@define-color fg_dim rgba(242, 242, 246, 0.58);
 
-@define-color accent            rgba(95, 209, 250, 0.60);
-@define-color accent_soft       rgba(95, 209, 250, 0.20);
+@define-color accent rgba(95, 209, 250, 0.60);
+@define-color accent_soft rgba(95, 209, 250, 0.20);
 
-@define-color error_bg          rgba(245, 60, 60, 0.75);
-@define-color error_fg          rgb(255, 244, 244);
+@define-color error_bg rgba(245, 60, 60, 0.75);
+@define-color error_fg rgb(255, 244, 244);
 
 /* -------------------------------------------------------------------- reset
  * Mirrors the default theme. Also what makes the window transparent: it resets
@@ -82,13 +82,13 @@ window {
         merely tinted window. */
   background-image:
     radial-gradient(circle at 16% -10%,
-        rgba(255, 255, 255, 0.18) 0%,
-        rgba(255, 255, 255, 0.06) 38%,
-        rgba(255, 255, 255, 0.00) 70%),
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(255, 255, 255, 0.06) 38%,
+      rgba(255, 255, 255, 0.00) 70%),
     linear-gradient(160deg,
-        rgba(255, 255, 255, 0.11) 0%,
-        rgba(255, 255, 255, 0.065) 45%,
-        rgba(255, 255, 255, 0.040) 100%);
+      rgba(255, 255, 255, 0.11) 0%,
+      rgba(255, 255, 255, 0.065) 45%,
+      rgba(255, 255, 255, 0.040) 100%);
 
   border: 1px solid @glass_edge;
   border-radius: 15px;
@@ -102,8 +102,7 @@ window {
     inset 0 -1px 0 0 @glass_rim_under;
 }
 
-.box {
-}
+.box {}
 
 /* ------------------------------------------------------------------- search */
 .search-container {
@@ -138,11 +137,9 @@ window {
 }
 
 /* -------------------------------------------------------------------- list */
-.content-container {
-}
+.content-container {}
 
-.scroll {
-}
+.scroll {}
 
 .list {
   color: @fg;
@@ -153,8 +150,7 @@ window {
   padding: 12px 10px;
 }
 
-child {
-}
+child {}
 
 .item-box {
   border-radius: 12px;
@@ -178,8 +174,7 @@ row:selected .item-box {
     inset 0 -1px 0 0 rgba(0, 0, 0, 0.16);
 }
 
-.item-text-box {
-}
+.item-text-box {}
 
 .item-text {
   color: @fg;
@@ -222,8 +217,7 @@ row:selected .item-box {
   color: @fg;
 }
 
-.preview-stack {
-}
+.preview-stack {}
 
 .preview .large-icons {
   -gtk-icon-size: 64px;
@@ -244,14 +238,11 @@ row:selected .item-box {
   color: @fg;
 }
 
-.global-keybinds {
-}
+.global-keybinds {}
 
-.item-keybinds {
-}
+.item-keybinds {}
 
-.keybind {
-}
+.keybind {}
 
 .keybind-button {
   opacity: 0.5;
@@ -291,8 +282,7 @@ row:selected .item-box {
   font-size: 24px;
 }
 
-.calc .item-subtext {
-}
+.calc .item-subtext {}
 
 .symbols .item-image {
   font-size: 24px;
@@ -328,11 +318,11 @@ popover {
   background-color: @glass_fill;
   background-image:
     radial-gradient(circle at 20% -10%,
-        rgba(255, 255, 255, 0.16) 0%,
-        rgba(255, 255, 255, 0.00) 65%),
+      rgba(255, 255, 255, 0.16) 0%,
+      rgba(255, 255, 255, 0.00) 65%),
     linear-gradient(160deg,
-        rgba(255, 255, 255, 0.10) 0%,
-        rgba(255, 255, 255, 0.045) 100%);
+      rgba(255, 255, 255, 0.10) 0%,
+      rgba(255, 255, 255, 0.045) 100%);
   border: 1px solid @glass_edge;
   border-radius: 14px;
   padding: 10px;

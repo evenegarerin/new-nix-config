@@ -2,7 +2,7 @@
 name: code-reviewer
 description: Independent read-only reviewer for code changes. Use after implementation and testing to review a diff against its spec for bugs, security issues, and convention drift before work is considered done.
 tools: Read, Grep, Glob, Bash
-model: opus
+model: inherit
 effort: high
 color: purple
 Omitclaudemd: true

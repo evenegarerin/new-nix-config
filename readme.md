@@ -79,5 +79,3 @@ maybe yes quick shell ???
 
 change default time for hyprland notification, or make it so that they stay present if my mouse is over them                            -- maybe not possible
 
-walker clipboard history
-

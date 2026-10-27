@@ -93,3 +93,10 @@ runner = [
   { action = "run", default = true, bind = "Return" },
   { action = "runterminal", label = "run in terminal", bind = "shift Return" },
 ]
+
+clipboard = [
+  { action = "copy", default = true, bind = "Return" },
+  { action = "remove", bind = "ctrl d", after = "AsyncReload" },
+  { action = "pin", bind = "ctrl p", after = "AsyncReload" },
+  { action = "edit", bind = "ctrl e" },
+]

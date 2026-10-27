@@ -1,0 +1,6 @@
+max_items = 250      # default 100
+pinned_on_top = true # default false
+
+# editor for the "edit" action. empty by default, which makes the action a no-op.
+# %FILE% is the placeholder for the temp file holding the entry.
+text_editor_cmd = "kitty nvim %FILE%"
