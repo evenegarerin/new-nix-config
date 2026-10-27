@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Wireframe – [Framed content]</title>
+    <style>
+        /* ---------- Tokens: grayscale only. --wf-accent is reserved for annotations. ---------- */
+        :root {
+            --g0: #ffffff;
+            --g1: #f4f4f4;
+            --g2: #e4e4e4;
+            --g3: #c8c8c8;
+            --g4: #9a9a9a;
+            --g5: #666666;
+            --g6: #333333;
+            --g7: #111111;
+            --wf-accent: #e6007a;
+            --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            --s1: 4px;
+            --s2: 8px;
+            --s3: 16px;
+            --s4: 24px;
+            --s5: 32px;
+            --s6: 48px;
+            --fs-xs: 12px;
+            --fs-s: 14px;
+            --fs-m: 16px;
+            --fs-l: 20px;
+            --fs-xl: 28px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--font);
+            font-size: var(--fs-m);
+            color: var(--g7);
+            background: var(--g1);
+        }
+
+        /* ---------- Wireframe chrome (header, controls, notes) ---------- */
+        .wf-meta {
+            background: var(--g0);
+            border-bottom: 1px solid var(--g3);
+            padding: var(--s3) var(--s4);
+        }
+
+        .wf-meta h1 {
+            margin: 0 0 var(--s1);
+            font-size: var(--fs-l);
+        }
+
+        .wf-meta dl {
+            display: grid;
+            grid-template-columns: max-content 1fr;
+            gap: var(--s1) var(--s3);
+            margin: var(--s2) 0 0;
+            font-size: var(--fs-s);
+        }
+
+        .wf-meta dt {
+            color: var(--g5);
+        }
+
+        .wf-meta dd {
+            margin: 0;
+        }
+
+        .wf-meta details {
+            margin-top: var(--s2);
+            font-size: var(--fs-s);
+        }
+
+        .wf-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--s3);
+            padding: var(--s2) var(--s4);
+            background: var(--g2);
+            font-size: var(--fs-s);
+            align-items: center;
+        }
+
+        .wf-controls button {
+            font: inherit;
+            padding: var(--s1) var(--s2);
+            border: 1px solid var(--g4);
+            background: var(--g0);
+            cursor: pointer;
+        }
+
+        .wf-controls button[aria-pressed="true"] {
+            background: var(--g6);
+            color: var(--g0);
+        }
+
+        .wf-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: var(--s4);
+            padding: var(--s4);
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .wf-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Viewport frame */
+        .wf-frame {
+            margin: 0 auto;
+            background: var(--g0);
+            border: 1px solid var(--g4);
+            width: 100%;
+            max-width: 1280px;
+            transition: max-width .2s;
+            overflow: hidden;
+        }
+
+        .wf-frame[data-viewport="mobile"] {
+            max-width: 375px;
+        }
+
+        .wf-frame[data-viewport="tablet"] {
+            max-width: 768px;
+        }
+
+        /* States: only the active state is shown */
+        [data-state] {
+            display: none;
+        }
+
+        [data-state].is-active {
+            display: block;
+        }
+
+        /* Annotations */
+        .wf-marker {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--wf-accent);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            vertical-align: middle;
+            margin: 0 var(--s1);
+        }
+
+        .wf-notes {
+            background: var(--g0);
+            border: 1px solid var(--wf-accent);
+            padding: var(--s3);
+            font-size: var(--fs-s);
+            position: sticky;
+            top: var(--s3);
+        }
+
+        .wf-notes h2 {
+            margin: 0 0 var(--s2);
+            font-size: var(--fs-m);
+            color: var(--wf-accent);
+        }
+
+        .wf-notes ol {
+            margin: 0;
+            padding-left: var(--s4);
+        }
+
+        .wf-notes li {
+            margin-bottom: var(--s2);
+        }
+
+        .wf-question::before {
+            content: "? Open question: ";
+            font-weight: 700;
+        }
+
+        /* ---------- Placeholder primitives for the wireframe itself ---------- */
+        .ph-img {
+            position: relative;
+            background: var(--g2);
+            border: 1px solid var(--g3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--g5);
+            font-size: var(--fs-xs);
+            aspect-ratio: 4 / 3;
+            overflow: hidden;
+        }
+
+        .ph-img::before,
+        .ph-img::after {
+            content: "";
+            position: absolute;
+            width: 141%;
+            height: 1px;
+            background: var(--g3);
+            transform: rotate(37deg);
+        }
+
+        .ph-img::after {
+            transform: rotate(-37deg);
+        }
+
+        .ph-img span {
+            position: relative;
+            background: var(--g2);
+            padding: 0 var(--s1);
+        }
+
+        .ph-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 1px solid var(--g4);
+            background: var(--g1);
+            vertical-align: middle;
+        }
+
+        .ph-text {
+            height: 10px;
+            background: var(--g2);
+            margin: var(--s1) 0;
+        }
+
+        .ph-chart {
+            border: 1px dashed var(--g4);
+            padding: var(--s4);
+            text-align: center;
+            color: var(--g5);
+            font-size: var(--fs-s);
+        }
+
+        .btn {
+            font: inherit;
+            min-height: 44px;
+            padding: 0 var(--s3);
+            border: 1px solid var(--g6);
+            background: var(--g0);
+            color: var(--g7);
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--g7);
+            color: var(--g0);
+        }
+
+        .btn:focus-visible,
+        input:focus-visible,
+        select:focus-visible {
+            outline: 3px solid var(--g6);
+            outline-offset: 2px;
+        }
+
+        input,
+        select,
+        textarea {
+            font: inherit;
+            min-height: 44px;
+            padding: 0 var(--s2);
+            border: 1px solid var(--g4);
+            width: 100%;
+        }
+
+        label {
+            display: block;
+            font-size: var(--fs-s);
+            margin-bottom: var(--s1);
+        }
+
+        .tbd {
+            background: var(--g2);
+            padding: 0 var(--s1);
+            font-style: italic;
+        }
+
+        /* ---------- Screen content styles go below ---------- */
+        .screen {
+            padding: var(--s4);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ===== Wireframe metadata ===== -->
+    <header class="wf-meta">
+        <h1>[Framed content]</h1>
+        <p>[One sentence: what this screen is for.]</p>
+        <dl>
+            <dt>Primary user</dt>
+            <dd>[Who]</dd>
+            <dt>Primary action</dt>
+            <dd>[The one thing they should do here]</dd>
+            <dt>Status</dt>
+            <dd>draft</dd>
+            <dt>Related</dt>
+            <dd><a href="./[related-screen].html">[related-screen]</a></dd>
+        </dl>
+        <details>
+            <summary>Changelog</summary>
+            <ul>
+                <li>[YYYY-MM-DD] Created.</li>
+            </ul>
+        </details>
+    </header>
+
+    <!-- ===== Controls: viewport + state switchers ===== -->
+    <div class="wf-controls" role="toolbar" aria-label="Wireframe controls">
+        <span>Viewport:</span>
+        <button data-viewport-btn="mobile">Mobile 375</button>
+        <button data-viewport-btn="tablet">Tablet 768</button>
+        <button data-viewport-btn="desktop" aria-pressed="true">Desktop 1280</button>
+        <span>State:</span>
+        <button data-state-btn="default" aria-pressed="true">Default</button>
+        <button data-state-btn="empty">Empty</button>
+        <button data-state-btn="loading">Loading</button>
+        <button data-state-btn="error">Error</button>
+    </div>
+
+    <div class="wf-layout">
+        <!-- ===== The wireframe ===== -->
+        <div class="wf-frame" data-viewport="desktop">
+
+            <section data-state="default" class="is-active">
+                <div class="screen">
+                    <!-- Default / populated state. Use realistic content, incl. one long and one empty value. -->
+                </div>
+            </section>
+
+            <section data-state="empty">
+                <div class="screen"><!-- First-use / no data state --></div>
+            </section>
+
+            <section data-state="loading">
+                <div class="screen"><!-- Skeleton using .ph-text blocks --></div>
+            </section>
+
+            <section data-state="error">
+                <div class="screen"><!-- Error message + recovery action --></div>
+            </section>
+
+        </div>
+
+        <!-- ===== Annotations ===== -->
+        <aside class="wf-notes" aria-label="Annotations">
+            <h2>Notes</h2>
+            <ol>
+                <li>[Behavior / data source / decision + reason]</li>
+                <li class="wf-question">[Something the user needs to decide]</li>
+            </ol>
+        </aside>
+    </div>
+
+    <script>
+        // Viewport switcher
+        document.querySelectorAll('[data-viewport-btn]').forEach(btn => btn.addEventListener('click', () => {
+            document.querySelector('.wf-frame').dataset.viewport = btn.dataset.viewportBtn;
+            document.querySelectorAll('[data-viewport-btn]').forEach(b => b.setAttribute('aria-pressed', b === btn));
+        }));
+        // State switcher (add/remove buttons to match the states this screen actually has)
+        document.querySelectorAll('[data-state-btn]').forEach(btn => btn.addEventListener('click', () => {
+            document.querySelectorAll('[data-state]').forEach(s => s.classList.toggle('is-active', s.dataset.state === btn.dataset.stateBtn));
+            document.querySelectorAll('[data-state-btn]').forEach(b => b.setAttribute('aria-pressed', b === btn));
+        }));
+    </script>
+</body>
+
+</html>

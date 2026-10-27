@@ -249,6 +249,7 @@ in
     docker
     jdk25
     gradle_9
+    rofi
   ];
 
   programs.dconf = {

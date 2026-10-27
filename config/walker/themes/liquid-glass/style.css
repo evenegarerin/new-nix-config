@@ -1,0 +1,353 @@
+/*
+ * Walker — "liquid glass"
+ *
+ * Walker does NOT merge this with its built-in stylesheet: the moment a theme
+ * directory exists on disk, `theme.css` is set unconditionally and this file
+ * REPLACES the default wholesale. Every selector the default theme touches is
+ * therefore repeated here — deleting a rule means that widget goes unstyled,
+ * not that it falls back.
+ *
+ * Activate with  theme = "liquid-glass"  in ../../config.toml,
+ * or try it without committing:  walker -t liquid-glass
+ * Edits to this file apply live; *.xml changes and NEW theme directories need
+ * the `walker --gapplication-service` daemon restarted.
+ *
+ * The blur itself is NOT produced here — it comes from the compositor, via
+ * hl.layer_rule in config/hypr/hyprland.d/launcher.lua, tuned globally in
+ * hyprland.lua (decoration.blur). What this file contributes to the frosted
+ * look is the milky veil layered over the blur: frosted glass is not merely
+ * transparent, it scatters light, so the fill stays fairly light and the
+ * white gradients do most of the work.
+ *
+ * The `backdrop-filter` on .box-wrapper below is inert on GTK 4.22 (current),
+ * but becomes REQUIRED on GTK >= 4.24 or Hyprland >= 0.56: from then on GTK
+ * hands the compositor a blur region derived from CSS, and Hyprland skips the
+ * layer rule entirely for any client that declares one. Without it, blur would
+ * silently vanish on upgrade. 20px keeps clear of the 10-sigma threshold.
+ *
+ * Note: `.window` can never match — walker clears the window's CSS classes at
+ * runtime. The bare `window` node selector is the only way to reach it.
+ */
+
+/* ------------------------------------------------------------------ palette
+ * One accent knob: swap @accent for any of the waybar hues (they are all at
+ * 0.6 alpha, e.g. 250,95,95 red / 95,250,147 green / 250,196,95 amber).
+ *
+ * To dial the frost: the white gradient stops on .box-wrapper are the veil —
+ * raise them for milkier, lower them for clearer. @glass_fill's alpha controls
+ * how much of the blurred desktop shows through underneath it. */
+@define-color glass_fill        rgba(8, 8, 12, 0.40);
+@define-color glass_edge        rgba(255, 255, 255, 0.22);
+@define-color glass_rim         rgba(255, 255, 255, 0.30);
+@define-color glass_rim_under   rgba(0, 0, 0, 0.22);
+
+@define-color pane_fill         rgba(255, 255, 255, 0.10);
+@define-color pane_edge         rgba(255, 255, 255, 0.14);
+@define-color pane_fill_hover   rgba(255, 255, 255, 0.15);
+
+@define-color fg                rgb(242, 242, 246);
+@define-color fg_dim            rgba(242, 242, 246, 0.58);
+
+@define-color accent            rgba(95, 209, 250, 0.60);
+@define-color accent_soft       rgba(95, 209, 250, 0.20);
+
+@define-color error_bg          rgba(245, 60, 60, 0.75);
+@define-color error_fg          rgb(255, 244, 244);
+
+/* -------------------------------------------------------------------- reset
+ * Mirrors the default theme. Also what makes the window transparent: it resets
+ * the window node's background to its initial (transparent) value. */
+* {
+  all: unset;
+  font-family: "JetBrainsMono Nerd Font", "JetBrainsMono NF", monospace;
+  font-size: 14px;
+}
+
+window {
+  background: transparent;
+  background-color: transparent;
+}
+
+/* ------------------------------------------------------------------- shell */
+.box-wrapper {
+  /* declares the compositor blur region on GTK >= 4.24 — see header */
+  backdrop-filter: blur(20px);
+
+  background-color: @glass_fill;
+
+  /* Two stacked layers, first one on top:
+     1. a bloom where the light enters, top-left
+     2. a milky veil carried across the WHOLE pane — this is the frost. It
+        never fully fades out, which is what separates frosted glass from a
+        merely tinted window. */
+  background-image:
+    radial-gradient(circle at 16% -10%,
+        rgba(255, 255, 255, 0.18) 0%,
+        rgba(255, 255, 255, 0.06) 38%,
+        rgba(255, 255, 255, 0.00) 70%),
+    linear-gradient(160deg,
+        rgba(255, 255, 255, 0.11) 0%,
+        rgba(255, 255, 255, 0.065) 45%,
+        rgba(255, 255, 255, 0.040) 100%);
+
+  border: 1px solid @glass_edge;
+  border-radius: 15px;
+  padding: 18px;
+
+  /* No drop shadow: the outer shadow's pixels sit above the layer rule's
+     ignore_alpha threshold, so Hyprland blurs them too and the panel gets a
+     dark halo. These insets are the pane's own thickness, not a cast shadow. */
+  box-shadow:
+    inset 0 1px 0 0 @glass_rim,
+    inset 0 -1px 0 0 @glass_rim_under;
+}
+
+.box {
+}
+
+/* ------------------------------------------------------------------- search */
+.search-container {
+  background-color: @pane_fill;
+  background-image: linear-gradient(180deg,
+      rgba(255, 255, 255, 0.09) 0%,
+      rgba(255, 255, 255, 0.02) 100%);
+  border: 1px solid @pane_edge;
+  border-radius: 12px;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
+}
+
+.input {
+  background: transparent;
+  padding: 12px 14px;
+  color: @fg;
+  caret-color: @accent;
+}
+
+.input:focus,
+.input:active {
+  background: transparent;
+}
+
+.input placeholder {
+  color: @fg_dim;
+}
+
+.input selection {
+  background: @accent_soft;
+  color: @fg;
+}
+
+/* -------------------------------------------------------------------- list */
+.content-container {
+}
+
+.scroll {
+}
+
+.list {
+  color: @fg;
+}
+
+/* GridView items get .grid added at runtime when a provider uses [columns] */
+.list.grid .item-box {
+  padding: 12px 10px;
+}
+
+child {
+}
+
+.item-box {
+  border-radius: 12px;
+  padding: 10px 12px;
+  transition: background-color 120ms ease, box-shadow 120ms ease;
+}
+
+child:hover .item-box,
+row:hover .item-box {
+  background-color: rgba(255, 255, 255, 0.07);
+}
+
+child:selected .item-box,
+row:selected .item-box {
+  background-color: @pane_fill_hover;
+  background-image: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(255, 255, 255, 0.07) 100%);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.26),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.16);
+}
+
+.item-text-box {
+}
+
+.item-text {
+  color: @fg;
+}
+
+.item-subtext {
+  font-size: 12px;
+  color: @fg_dim;
+}
+
+.item-image-text {
+  font-size: 28px;
+}
+
+.item-quick-activation {
+  background-color: @accent_soft;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  padding: 10px;
+  color: @fg;
+}
+
+.placeholder,
+.elephant-hint {
+  color: @fg_dim;
+}
+
+/* ----------------------------------------------------------------- preview */
+.preview {
+  background-color: rgba(255, 255, 255, 0.07);
+  background-image: linear-gradient(180deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid @pane_edge;
+  border-radius: 12px;
+  color: @fg;
+}
+
+.preview-box {
+  color: @fg;
+}
+
+.preview-stack {
+}
+
+.preview .large-icons {
+  -gtk-icon-size: 64px;
+}
+
+.preview-content.archlinuxpkgs,
+.preview-content.dnfpackages,
+.preview-content.aptpackages {
+  font-family: "JetBrainsMono Nerd Font", monospace;
+}
+
+/* ---------------------------------------------------------------- keybinds */
+.keybinds {
+  padding-top: 12px;
+  margin-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 12px;
+  color: @fg;
+}
+
+.global-keybinds {
+}
+
+.item-keybinds {
+}
+
+.keybind {
+}
+
+.keybind-button {
+  opacity: 0.5;
+  transition: opacity 120ms ease;
+}
+
+.keybind-button:hover {
+  opacity: 0.85;
+}
+
+.keybind-label {
+  padding: 2px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.07);
+}
+
+.keybind-bind {
+  text-transform: lowercase;
+  color: @fg_dim;
+  opacity: 0.6;
+}
+
+/* ------------------------------------------------------------------- error */
+.error {
+  padding: 10px 12px;
+  margin-top: 8px;
+  border-radius: 10px;
+  background-color: @error_bg;
+  color: @error_fg;
+}
+
+/* ------------------------------------------- provider-specific (runtime classes)
+ * Walker adds .<provider> to every .item-box, and Elephant supplies the state
+ * classes (.done, .urgent, .active, .disconnected). menus:foo becomes .menus-foo. */
+.calc .item-text {
+  font-size: 24px;
+}
+
+.calc .item-subtext {
+}
+
+.symbols .item-image {
+  font-size: 24px;
+}
+
+.providerlist .item-subtext {
+  font-size: unset;
+  opacity: 0.75;
+}
+
+.todo.done .item-text-box {
+  opacity: 0.25;
+}
+
+.todo.urgent {
+  font-size: 24px;
+}
+
+.todo.active {
+  font-weight: bold;
+}
+
+.bluetooth.disconnected {
+  opacity: 0.5;
+}
+
+:not(.calc).current {
+  font-style: italic;
+}
+
+/* -------------------------------------------------------------------- misc */
+popover {
+  background-color: @glass_fill;
+  background-image:
+    radial-gradient(circle at 20% -10%,
+        rgba(255, 255, 255, 0.16) 0%,
+        rgba(255, 255, 255, 0.00) 65%),
+    linear-gradient(160deg,
+        rgba(255, 255, 255, 0.10) 0%,
+        rgba(255, 255, 255, 0.045) 100%);
+  border: 1px solid @glass_edge;
+  border-radius: 14px;
+  padding: 10px;
+  color: @fg;
+  box-shadow: inset 0 1px 0 0 @glass_rim;
+}
+
+scrollbar {
+  opacity: 0;
+}
+
+.normal-icons {
+  -gtk-icon-size: 16px;
+}
+
+.large-icons {
+  -gtk-icon-size: 32px;
+}

@@ -11,10 +11,17 @@ local runtime_dir = os.getenv("XDG_RUNTIME_DIR")
 local mode_file = runtime_dir .. "/launcher-mode"
 
 -- opens the selected app in a workspace of its own
-hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("echo new-workspace > " .. mode_file .. "; walker"))
+hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("echo new-workspace > " .. mode_file .. "; walker"), { description = "App Launcher, launch into new ws" })
 
 -- opens the selected app in the current workspace
-hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("echo normal > " .. mode_file .. "; walker"))
+hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("echo normal > " .. mode_file .. "; walker"), { description = "App Launcher, launch into current ws" })
+
+hl.layer_rule({
+    match = { namespace = "walker" },
+    blur = true,
+    ignore_alpha = 0.1,
+    no_anim = true
+})
 
 local function reset_mode_file()
     local f = io.open(mode_file, "w")

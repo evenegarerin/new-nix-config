@@ -45,7 +45,7 @@ hl.window_rule({
   size  = { "monitor_w * 0.8", "monitor_h * 0.8" },
 })
 
-hl.bind(mainMod .. " + Z", hl.dsp.workspace.toggle_special(special_ws))
+hl.bind(mainMod .. " + Z", hl.dsp.workspace.toggle_special(special_ws), { description = "Toggle special ws" })
 
 hl.bind(mainMod .. " + SHIFT + Z", function()
     local w = hl.get_active_window()
@@ -63,7 +63,7 @@ hl.bind(mainMod .. " + SHIFT + Z", function()
         hl.dispatch(hl.dsp.window.center({ window = w }))
         hl.dispatch(hl.dsp.window.move({ window = w, workspace = "special:" .. special_ws }))
     end
-end)
+end, { description = "Moves current window into/out of special ws" })
 
 hl.on("window.open_early", function(w)
     if not w or not w.workspace or not w.class then return end

@@ -9,7 +9,7 @@ previous_tab = "prefix+h"
 next_tab     = "prefix+l"
 close_tab    = "prefix+shift+q"
 rename_tab   = "prefix+shift+t"
-switch_tab   = "prefix+1..9"
+switch_tab   = ""
 
 # Panes
 split_vertical   = "prefix+v"
@@ -29,7 +29,7 @@ next_workspace     = "prefix+j"
 # Agents
 previous_agent = ""
 next_agent     = ""
-focus_agent    = ""
+focus_agent = "prefix+1..9"
 
 # herdr
 detach        = "prefix+shift+e"
@@ -93,3 +93,8 @@ agents     = ""
 
 [ui.sound]
 enabled = false
+
+[update]
+
+version_check = false
+manifest_check = false

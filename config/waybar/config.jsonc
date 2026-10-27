@@ -14,8 +14,8 @@
     "hyprland/workspaces"
   ],
   "modules-right": [
-    "custom/herdr",
     "tray",
+    "custom/herdr",
     "bluetooth",
     "pulseaudio",
     "network",

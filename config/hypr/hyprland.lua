@@ -95,7 +95,20 @@ hl.config({
 
     decoration = {
         rounding = 0,
-        dim_special = 0
+        dim_special = 0,
+
+        blur = {
+            enabled = true,
+            size = 4,
+            passes = 2,
+            new_optimizations = true,
+            vibrancy = 0.35,
+            vibrancy_darkness = 0.35,
+            noise = 0.012,
+            brightness = 0.85,
+            contrast = 1.0,
+            xray = false
+        }
     },
     misc = {
         focus_on_activate = true,
@@ -148,14 +161,14 @@ end)
 -- Keybindings
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd("kitty"))
+hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd("kitty"), { description = "Launch kitty" })
 
 hl.bind(mainMod .. " + Q", function()
     local active = hl.get_active_window()
 
     if active == nil then return end
     hl.dispatch(hl.dsp.window.close())
-end)
+end, { description = "Close active window" })
 
 -- jump back to the window focused before the current one
 hl.bind(mainMod .. " + U", function()
@@ -163,28 +176,28 @@ hl.bind(mainMod .. " + U", function()
 
     if target == nil then return end
     hl.dispatch(hl.dsp.focus({ window = target }))
-end)
+end, { description = "Focus last active window" })
 
-hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock --grace 3"))
+hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock --grace 3"), { description = "Activate lockscreen" })
 
 -- screenshot (hyprshot)
-hl.bind("PRINT", hl.dsp.exec_cmd("hyprshot -m region"))
-hl.bind(mainMod .. " + PRINT", hl.dsp.exec_cmd("hyprshot -m output"))
+hl.bind("PRINT", hl.dsp.exec_cmd("hyprshot -m region"), { description = "Take a regioned screenshot" })
+hl.bind(mainMod .. " + PRINT", hl.dsp.exec_cmd("hyprshot -m output"), { description = "Take a fullscreen screenshot" })
 
 -- media / function keys
-hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("pactl -- set-sink-volume 0 -10%"))
-hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("pactl -- set-sink-volume 0 +10%"))
-hl.bind("XF86AudioMute", hl.dsp.exec_cmd("pactl -- set-sink-mute 0 toggle"))
-hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("pactl -- set-source-mute 0 toggle"))
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl s 10%-"))
-hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl s +10%"))
+hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("pactl -- set-sink-volume 0 -10%"), { description = "Decrease output volume" })
+hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("pactl -- set-sink-volume 0 +10%"), { description = "Increase output volume" })
+hl.bind("XF86AudioMute", hl.dsp.exec_cmd("pactl -- set-sink-mute 0 toggle"), { description = "Toggle output mute" })
+hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("pactl -- set-source-mute 0 toggle"), { description = "Toggle input mute" })
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl s 10%-"), { description = "Decrease monitor brightness" })
+hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl s +10%"), { description = "Increase monitor brightness" })
 
-hl.bind("XF86PickupPhone", hl.dsp.exec_cmd("playerctl play"))
-hl.bind("XF86HangupPhone", hl.dsp.exec_cmd("playerctl -a pause"))
+hl.bind("XF86PickupPhone", hl.dsp.exec_cmd("playerctl play"), { description = "Media Player play" })
+hl.bind("XF86HangupPhone", hl.dsp.exec_cmd("playerctl -a pause"), { description = "Media Player pause" })
 
-hl.bind("F1", hl.dsp.exec_cmd("playerctl --player=playerctld play-pause"))
+hl.bind("F1", hl.dsp.exec_cmd("playerctl --player=playerctld play-pause"), { description = "Media Player toggle play" })
 
-hl.bind(mainMod .. " + J", hl.dsp.focus({ workspace = "m-1" }))
+hl.bind(mainMod .. " + J", hl.dsp.focus({ workspace = "m-1" }), { description = "Focus ws down" })
 hl.bind(mainMod .. " + K", function()
     local current = hl.get_active_workspace()
 
@@ -207,18 +220,18 @@ then
     end
 
     hl.dispatch(hl.dsp.focus({ workspace = "m+1" }))
-end)
+end, { description = "Focus ws up" })
 
-hl.bind(mainMod .. " + H", hl.dsp.focus({ monitor = "-1" }))
-hl.bind(mainMod .. " + L", hl.dsp.focus({ monitor = "+1" }))
+hl.bind(mainMod .. " + H", hl.dsp.focus({ monitor = "-1" }), { description = "Focus monitor down" })
+hl.bind(mainMod .. " + L", hl.dsp.focus({ monitor = "+1" }), { description = "Focus monitor up" })
 
-hl.bind(mainMod .. " + SHIFT + H", hl.dsp.workspace.move({ monitor = "-1" }))
-hl.bind(mainMod .. " + SHIFT + L", hl.dsp.workspace.move({ monitor = "+1" }))
+hl.bind(mainMod .. " + SHIFT + H", hl.dsp.workspace.move({ monitor = "-1" }), { description = "Move focused window monitor down" })
+hl.bind(mainMod .. " + SHIFT + L", hl.dsp.workspace.move({ monitor = "+1" }), { description = "Move focused window monitor up" })
 
 hl.bind(mainMod .. " + N", function()
     hl.dispatch(hl.dsp.window.cycle_next())
     hl.dispatch(hl.dsp.window.bring_to_top())
-end)
+end, { description = "Focus next window in current ws" })
 hl.bind(mainMod .. " + SHIFT + N", function()
   local active = hl.get_active_window()
   if active == nil then return end
@@ -237,15 +250,15 @@ hl.bind(mainMod .. " + SHIFT + N", function()
   end
 
   if active then hl.dispatch(hl.dsp.focus({ window = active })) end
-end)
+end, { description = "Rearrange windows in current ws" })
 
 for i = 1, standard_workspaces do
     local key = i % standard_workspaces -- 10 maps to key 0
-    hl.bind(mainMod .. " + " .. key, hl.dsp.focus({ workspace = i }))
-    hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i, follow = false }))
+    hl.bind(mainMod .. " + " .. key, hl.dsp.focus({ workspace = i }), { description = "Move to ws " .. key })
+    hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i, follow = false }), { description = "Move focused window to ws " .. key })
 end
 
-hl.bind(mainMod .. " + R", hl.dsp.submap("resize"))
+hl.bind(mainMod .. " + R", hl.dsp.submap("resize"), { description = "Toggle resize submap" })
 
 local gaps_in_normal  = 2
 local gaps_out_normal = 4
@@ -284,9 +297,22 @@ apply_layout(read_state("fullscreen", true))
 
 hl.bind(mainMod .. " + F", function()
     set_fullscreen(not read_state("fullscreen", false))
-end)
+end, { description = "Toggle fake fullscreen for entire system" })
 
-hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.fullscreen({ mode = "fullscreen" }))
+hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.fullscreen({ mode = "fullscreen" }), { description = "Toggle true fullscreen for current window" })
+
+hl.bind(mainMod .. " + SHIFT + ssharp", hl.dsp.exec_cmd([[
+hyprctl binds -j |
+  jq -r 'def getbit($position; $n):
+    fmod($n/($position|exp2)|floor;2) | fabs;
+
+def mod($position; $name):
+    if getbit($position; .modmask) == 1 then $name + " + " else "" end;
+
+.[] | .description + "|" + mod(6; "SUPER") + mod(2; "Ctrl") + mod(3; "Alt") + mod(0; "Shift") + .key
+' | column -t -s "|" |
+  rofi -dmenu -i -sync -p "Bind" -format e -case-smart -l 40 -theme-str "window {width: 90%;} listview {columns: 4; scrollbar: false;}"
+]]), { description = "Show keybind cheatsheet" })
 
 -- handle laptop monitor close and open
 -- (the matching rule for a reload while the lid is shut lives in the Monitors section)
@@ -299,13 +325,13 @@ hl.bind("switch:on:Lid Switch", function()
   end
 
   hl.monitor(merge(monitor_defaults, { output = panel, disabled = true }))
-end)
+end, { description = "Turn of monitor on lid close" })
 
 hl.bind("switch:off:Lid Switch", function()
   set_fullscreen(true)
 
   hl.monitor(merge(monitor_defaults, { output = panel, disabled = false }))
-end)
+end, { description = "Turn on monitor on lid open" })
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Resize submap
@@ -314,14 +340,14 @@ end)
 
 hl.define_submap("resize", function()
     -- Set repeating binds for resizing the active window.
-    hl.bind("J", hl.dsp.window.resize({ x = -18, y = 0, relative = true }), { repeating = true })
-    hl.bind("K", hl.dsp.window.resize({ x = 18, y = 0, relative = true }), { repeating = true })
-    hl.bind("H", hl.dsp.window.resize({ x = 0, y = 10, relative = true }), { repeating = true })
-    hl.bind("L", hl.dsp.window.resize({ x = 0, y = -10, relative = true }), { repeating = true })
+    hl.bind("J", hl.dsp.window.resize({ x = 0, y = -10, relative = true }), { repeating = true, description = "Resize submap: move split up" })
+    hl.bind("K", hl.dsp.window.resize({ x = 0, y = 10, relative = true }), { repeating = true, description = "Resize submap: move split down" })
+    hl.bind("H", hl.dsp.window.resize({ x = -18, y = 0, relative = true }), { repeating = true, description = "Resize submap: move split left" })
+    hl.bind("L", hl.dsp.window.resize({ x = 18, y = 0, relative = true }), { repeating = true, description = "Resize submap: move split right" })
 
     -- Use `reset` to go back to the global submap
-    hl.bind("escape", hl.dsp.submap("reset"))
-    hl.bind("R", hl.dsp.submap("reset"))
+    hl.bind("escape", hl.dsp.submap("reset"), { description = "Active in resize submap, exit submap" })
+    hl.bind("R", hl.dsp.submap("reset"), { description = "Active in resize submap, exit submap" })
     
     -- broken in current hyprland version as catchall does also trigger on the resizing keys
     -- hl.bind("catchall", hl.dsp.submap("reset"))
