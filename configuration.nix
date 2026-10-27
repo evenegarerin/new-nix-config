@@ -240,6 +240,20 @@ in
     blender
     # ddcutil
     neovim
+    nixd
+    lua-language-server
+    stylua
+    typescript-language-server
+    bash-language-server
+    yaml-language-server
+    marksman
+    pyright
+    tree-sitter-grammars.tree-sitter-nix
+    tree-sitter-grammars.tree-sitter-json
+    tree-sitter-grammars.tree-sitter-toml
+    tree-sitter-grammars.tree-sitter-yaml
+    tree-sitter-grammars.tree-sitter-css
+    tree-sitter-grammars.tree-sitter-bash
     # wlr-randr
     # usbutils
     grim
@@ -250,6 +264,10 @@ in
     jdk25
     gradle_9
     rofi
+    unzip
+    # lazydocker
+    pandoc
+    texliveSmall
   ];
 
   programs.dconf = {

@@ -30,14 +30,15 @@ anchor_right = true
 [placeholders]
 "default" = { input = "Search", list = "No Results" }
 
+# [columns] symbols = 3 above.
 [keybinds]
 close = ["Escape"]
-next = ["Down"]
-previous = ["Up"]
+next = ["Down", "alt j"]
+previous = ["Up", "alt k"]
 left = ["Left"]
 right = ["Right"]
-down = ["Down"]
-up = ["Up"]
+down = ["Down", "alt j"]
+up = ["Up", "alt k"]
 toggle_exact = ["ctrl e"]
 resume_last_query = ["ctrl r"]
 page_down = ["Page_Down"]

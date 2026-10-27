@@ -202,7 +202,6 @@ row:selected .item-box {
   color: @fg_dim;
 }
 
-/* ----------------------------------------------------------------- preview */
 .preview {
   background-color: rgba(255, 255, 255, 0.07);
   background-image: linear-gradient(180deg,
@@ -210,6 +209,7 @@ row:selected .item-box {
       rgba(255, 255, 255, 0.01) 100%);
   border: 1px solid @pane_edge;
   border-radius: 12px;
+  padding: 12px 14px;
   color: @fg;
 }
 
