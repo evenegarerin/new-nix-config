@@ -25,7 +25,8 @@ A wireframe answers *structure* questions — what is on the screen, in which or
 
 1. **Understand the job of the screen.** Before drawing, state (to yourself, and in the wireframe's header) who uses this screen, what they are trying to get done, and what the single primary action is. If the codebase already has this screen or related data models/routes, read them first so the wireframe uses real fields, real entity names and real constraints.
 2. **Check `.wireframes/` for existing files.** Reuse naming conventions and the shared visual vocabulary of existing wireframes so the set stays consistent. If a wireframe for the same content exists, edit it instead of creating a duplicate.
-3. **Start from the template** in `assets/template.html` (relative to this skill). It contains the grayscale design tokens, placeholder primitives, annotation system and viewport switcher. Copy it, don't reinvent it.
+3. **Start from the template** in `assets/template.html` (relative to this skill). It contains the embedded sketch font, the grayscale design tokens, placeholder primitives, annotation system and viewport switcher.
+   Copy it with the shell — `cp <skill>/assets/template.html .wireframes/<framed content>.html` — then edit that copy. Never retype or re-read the template in full: the font is embedded as a ~70 KB base64 string near the top and it has no business in anyone's context window. Same for a second wireframe: `cp` an existing one.
 4. **Block out hierarchy first, details second.** Lay out regions (header, nav, main, aside, footer) → then sections → then individual elements. Make sure the visual weight order matches the importance order.
 5. **Annotate** (see below), cover the required states, and fill the header metadata.
 6. **Verify** with the checklist at the end before reporting back.
@@ -40,7 +41,9 @@ A wireframe answers *structure* questions — what is on the screen, in which or
 ## Visual language: low fidelity on purpose
 
 - **Grayscale only.** Use the gray tokens from the template. The one exception is the annotation accent color (used only for notes/markers, never for UI), so annotations are clearly "not part of the design".
-- **One system font stack**, a small type scale (e.g. 12 / 14 / 16 / 20 / 28px). Hierarchy comes from size, weight and spacing — not color.
+- **Hand-drawn font for the framed content.** The template embeds Excalifont (the Excalidraw sketch face, taken from the wireframe-kit) as `var(--font)` and applies it to everything inside the frame. A sketchy face is a feature, not decoration: it tells reviewers at a glance that nothing here is final, so they comment on structure instead of on type choices. Never swap it for a production typeface or load it from a CDN.
+- **System font for the wireframe chrome.** The header block, state/viewport controls and the notes panel use `var(--font-ui)`, so the scaffolding around the wireframe stays visibly separate from the wireframe itself — same reason the accent color is annotation-only.
+- **One type scale** (e.g. 12 / 14 / 16 / 20 / 28px). Hierarchy comes from size, weight and spacing — not color, and not a second font family.
 - **Placeholders, not assets.** Images = gray box with an X and a label (`[Product photo 4:3]`). Icons = small labelled squares or a plain glyph. Charts = a box labelled with chart type and what it plots. No real logos, photos, icon fonts or brand colors.
 - **Real-ish content, not lorem ipsum.** Use plausible labels, headings, button text and data (realistic names, prices, dates, long and short values). Copy is structure: a button that says "Save draft" vs "Publish" changes the design. Mark copy that still needs a writer with `[TBD]`.
 - **Stress the content.** Include at least one long value (long name, 3-line title, 6-digit number) and one short/empty value so the layout's limits are visible.
@@ -49,6 +52,7 @@ A wireframe answers *structure* questions — what is on the screen, in which or
 ## Technical requirements
 
 - Single self-contained file: inline `<style>` and `<script>`, no external CSS/JS/fonts/images, no build step, no framework. It must open correctly by double-clicking the file.
+- The font stays an embedded `data:font/woff2;base64,…` URI inside that `<style>`. Don't extract it to a `.woff2` next to the HTML and don't link Google Fonts — both break the "opens anywhere, no network" property. `assets/Excalifont-Regular.woff2` is kept beside the template only as the source for re-embedding if the template ever needs rebuilding.
 - Semantic HTML (`header`, `nav`, `main`, `section`, `aside`, `footer`, `button`, `form`, `label`, `table`). This doubles as documentation of the intended structure for whoever implements it.
 - Use real form controls (`<input>`, `<select>`, `<button>`) so it's clickable, but they should do nothing destructive. Minimal JS is fine for toggling states, tabs, modals and the viewport switcher — never for fake data fetching.
 - Layout with CSS grid/flexbox and relative units so it actually reflows; don't fake responsiveness with fixed pixel canvases.
@@ -87,6 +91,7 @@ Before telling the user you're done, verify:
 - [ ] File is at `[projectroot]/.wireframes/[framed content].html` with a kebab-case name describing the content
 - [ ] Opens standalone; no external requests (grep for `http` in `src`/`href` attributes)
 - [ ] Grayscale only; accent color used exclusively for annotations
+- [ ] Sketch font renders (framed content in Excalifont, chrome in the system font) and is still embedded as a data URI
 - [ ] Header block filled (purpose, user, primary action, status, changelog)
 - [ ] Primary action is visually the most prominent element
 - [ ] Empty, loading and error states present or explicitly scoped out

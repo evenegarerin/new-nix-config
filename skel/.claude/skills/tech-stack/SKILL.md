@@ -365,6 +365,7 @@ Frontend-Typen werden **nie** von Hand geschrieben. Drift wird in CI geprüft.
 - Ein zentrales MUI-Theme in `src/theme/`; wiederverwendbare Basis-Komponenten in `src/ui/`
 - TanStack Router, TanStack Query für Server State (kein Redux; Zustand nur für spezifischen Client State)
 - Hey-API-generierter Client, gekapselt in Data-Fetching-Hooks
+- PWA-Setup über `vite-plugin-pwa` (siehe nächster Abschnitt) — gehört zum Skeleton, nicht zur Kür
 
 ### Code-Sprache
 
@@ -406,6 +407,33 @@ Fake-Werte müssen als solche erkennbar sein (`dev-`/`fake-`-Präfix). Nach jede
 Änderung an `.envrc`: `direnv allow`. Welche OpenBao-Pfade für Staging/Production
 angelegt werden müssen, dem Benutzer sagen — nicht selbst in OpenBao schreiben.
 
+### PWA (Pflicht für jedes Frontend)
+
+Jedes Frontend ist eine Progressive Web App — ohne Ausnahme, auch bei internen
+Tools. Das Skeleton bringt das schon mit, es wird nicht nachträglich "ergänzt".
+
+- **Plugin:** `vite-plugin-pwa` mit `registerType: 'autoUpdate'`, Workbox für das
+  Precaching der Build-Assets.
+- **Manifest** (vom Plugin generiert, Felder vollständig ausfüllen): `name`,
+  `short_name` (≤ 12 Zeichen), `start_url`, `scope`, `display: "standalone"`,
+  `theme_color`, `background_color`, Icons in 192×192 und 512×512 plus ein
+  `maskable`-Icon. `theme_color` kommt aus dem MUI-Theme, nicht aus einem zweiten
+  Farbwert.
+- **Service Worker:** cacht die Core-Assets (App-Shell, Fonts, Icons) und liefert
+  bei fehlender Verbindung `offline.html` als Navigation-Fallback. API-Requests
+  **nicht** blind cachen — Server-State gehört TanStack Query; höchstens gezielte
+  `NetworkFirst`-Routen für unkritische GETs.
+- **Keine Caching-Fallen:** `index.html` nie dauerhaft cachen, Hey-API-Client-
+  Responses nie precachen, Service Worker im Dev-Modus aus (`devOptions.enabled`
+  nur zum Testen einschalten).
+- **Serving:** Entwicklung über HTTP auf `localhost` (gilt als Secure Context),
+  Produktion ausschließlich HTTPS. Bei Full-Stack muss Spring Boot
+  `manifest.webmanifest` und `sw.js` an der Scope-Wurzel ausliefern — die
+  SPA-Fallback-Route darf sie nicht verschlucken.
+- **Prüfen vor "fertig":** Lighthouse-PWA-Audit gegen den Production-Build
+  (`pnpm build && pnpm preview`); installierbar und Offline-Fallback müssen grün
+  sein. Das Ergebnis dem Benutzer melden.
+
 ### Infrastruktur
 
 - Docker Multi-Stage → Container-Registry, Image `{registry}/{project}/app`
@@ -416,13 +444,24 @@ angelegt werden müssen, dem Benutzer sagen — nicht selbst in OpenBao schreibe
 - Non-root (UID 1001), Healthcheck `/actuator/health`
 - JVM: `-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0`
 - 12-Factor: Konfiguration über Env-Variablen
-- Full-Stack: Spring Boot liefert das Frontend als Static Files aus
+- Full-Stack: Spring Boot liefert das Frontend als Static Files aus — inkl. `manifest.webmanifest` und Service Worker; Service Worker mit `Cache-Control: no-cache` ausliefern, damit Updates ankommen
 
-## Referenzen
+## Weiterführende Skills
 
-Bei Bedarf lesen:
-- `references/spring-boot-track.md` — Gradle-Multi-Modul, Frontend-Trennung, Hey-API, ArchUnit-Test, Event-Setup
-- `references/frontend-patterns.md` — Vite, Theme, Router, ESLint-Config-Paket
-- `references/infrastructure.md` — Dockerfile, CI mit `check`-Stage, justfile, secretspec-Templates
-- `references/rules.md` — Templates für `.claude/rules/`
-- `references/versions.md` — nur Fallback-Baseline
+Dieser Skill ist vollständig; er braucht keine zusätzlichen Dateien. Für die
+Detailarbeit *nach* dem Scaffolding die passenden Skills heranziehen:
+
+| Thema | Skill |
+|-------|-------|
+| Spring-Boot-Architektur, Web, Persistenz, Security, Testing | `spring-boot` |
+| Kotlin-Idiome, Coroutines, Testing | `kotlin` |
+| React-Komponenten, Effects, State, Performance | `react` |
+| MUI-Theme, `sx`, Grid-Versionen, Komponenten-Patterns | `mui` |
+| Dockerfile, Compose, CI-Images | `docker` |
+| justfile-Rezepte | `justfile` |
+| OpenBao, `.envrc`, Umgang mit Zugangsdaten | `secrets` |
+| Visuelle Gestaltung des Frontends | `frontend-design` |
+| Struktur neuer Screens vor der Umsetzung | `wireframes` |
+
+Versionsnummern und API-Details immer live prüfen, nicht aus diesem Dokument
+übernehmen.
