@@ -5,9 +5,6 @@ local fn = vim.fn
 
 local BRANCH_MAX_LEN = 30
 
--- `trailing_space` scans the whole buffer on every statusline refresh (1/sec).
--- Give up on buffers where that stops being cheap; Stage 1's large-file autocmd
--- (custom-autocmd.lua) is the proper home for a threshold like this.
 local TRAILING_SCAN_MAX_LINES = 10000
 
 local function show_fileformat()
@@ -44,9 +41,6 @@ local function trailing_space()
     return ""
   end
 
-  -- NOTE: the target loops `fn.getline`/`fn.match` per line, i.e. two vimscript
-  -- calls for every line of the buffer, every second. One buffer read plus a
-  -- Lua pattern is the same answer for a fraction of the cost.
   for i, line in ipairs(vim.api.nvim_buf_get_lines(0, 0, -1, false)) do
     if line:find("%s$") then
       return string.format("[%d]trailing", i)
@@ -97,8 +91,10 @@ local function mixed_indent()
   end
 end
 
---- Added/changed/removed counts, fed by gitsigns. Returns nil until Stage 9
---- installs it, which lualine renders as an empty component.
+local function virtual_env()
+  return utils.get_virtual_env()
+end
+
 local diff = function()
   local git_status = vim.b.gitsigns_status_dict
   if git_status == nil then
@@ -242,8 +238,6 @@ require("lualine").setup {
     },
   },
   sections = {
-    -- NOTE: the target puts `filename` here and has no mode component at all,
-    -- even though options.lua turns `showmode` off.
     lualine_a = { "mode" },
     lualine_b = {
       {
@@ -255,6 +249,10 @@ require("lualine").setup {
         end,
         color = { gui = "italic,bold" },
         on_click = show_branch_menu,
+      },
+      {
+        virtual_env,
+        icon = symbol_icon.python,
       },
       {
         "diff",
@@ -324,9 +322,3 @@ require("lualine").setup {
   tabline = {},
   extensions = { "quickfix", "fugitive", "nvim-tree" },
 }
-
--- Dropped from ../nvim.bak/lua/config/lualine.lua:
---   * ahead/behind counter (78-111) -- it ran `git fetch origin` every 3s for
---     the lifetime of the session
---   * `virtual_env` (227-235) -- python venv indicator, no python here
---   * `ime_state` (122-137) -- macOS-only Chinese IME indicator

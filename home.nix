@@ -15,6 +15,8 @@ in
     gtk.enable = true;
   };
 
+  environment.variables.EDITOR = "nvim";
+
   xdg.userDirs = {
     enable = true;
     createDirectories = true;

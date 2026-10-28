@@ -2,5 +2,5 @@ require("treesj").setup {
   use_default_keymaps = false,
 }
 
--- For default preset
+-- todo might want to change the keybind later
 vim.keymap.set("n", "gS", require("treesj").toggle, { desc = "Toggle split join" })

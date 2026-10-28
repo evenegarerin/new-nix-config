@@ -52,15 +52,6 @@ local plugin_specs = {
     end,
   },
 
-  -- Dim inactive windows
-  {
-    "tadaa/vimade",
-    event = "VeryLazy",
-    config = function()
-      require("config.vimade")
-    end,
-  },
-
   -- :Messages, :Scriptnames, :Verbose -- for when the config misbehaves
   { "tpope/vim-scriptease", cmd = { "Scriptnames", "Messages", "Verbose" } },
 
@@ -104,20 +95,6 @@ local plugin_specs = {
       ]])
     end,
     event = "VeryLazy",
-  },
-
-  -- Yank ring: [y / ]y cycle through previous yanks after a paste.
-  --
-  -- NOTE: the target uses `cmd = "YankyRingHistory"`. Its `config` is what
-  -- installs the p/P/[y/]y maps *and* the autocmd that records yanks, so none
-  -- of it existed until you ran that command by hand -- the plugin was inert.
-  -- VeryLazy means the ring records from the start of the session.
-  {
-    "gbprod/yanky.nvim",
-    event = "VeryLazy",
-    config = function()
-      require("config.yanky")
-    end,
   },
 
   -- Auto-close brackets and quotes
@@ -205,7 +182,7 @@ local plugin_specs = {
     end,
   },
 
-  -- Quickfix: bqf adds preview, quicker makes the list editable. They coexist.
+  -- Quickfix: preview pane for the list.
   {
     "kevinhwang91/nvim-bqf",
     ft = "qf",
@@ -213,14 +190,6 @@ local plugin_specs = {
       require("config.bqf")
     end,
   },
-  {
-    "stevearc/quicker.nvim",
-    event = "FileType qf",
-    config = function()
-      require("config.quicker")
-    end,
-  },
-
   -- Peek definitions/references in a float: <leader>gd / gr / gi
   {
     "dnlhc/glance.nvim",
@@ -311,38 +280,6 @@ local plugin_specs = {
     end,
   },
 
-  -- Better folding, backed by the LSP `foldingRange` capability that
-  -- lsp_utils.get_default_capabilities() advertises, falling back to treesitter.
-  {
-    "kevinhwang91/nvim-ufo",
-    dependencies = "kevinhwang91/promise-async",
-    event = "VeryLazy",
-    init = function()
-      -- Required: without a large foldlevel every fold starts closed.
-      --
-      -- NOTE: the target uses foldcolumn = "1", a permanent extra gutter column
-      -- on every window on top of signcolumn = "yes:1". "auto:1" shows it only
-      -- when the buffer actually has folds.
-      vim.o.foldcolumn = "auto:1"
-      vim.o.foldlevel = 99
-      vim.o.foldlevelstart = 99
-      vim.o.foldenable = true
-    end,
-    config = function()
-      require("config.nvim_ufo")
-    end,
-  },
-
-  -- Clickable number/sign/fold column. Depends on ufo so the fold column it
-  -- renders already exists and is ufo's.
-  {
-    "luukvbaal/statuscol.nvim",
-    dependencies = { "kevinhwang91/nvim-ufo" },
-    config = function()
-      require("config.nvim-statuscol")
-    end,
-  },
-
   -- Popup listing what follows a prefix. This is the payoff for every
   -- `desc = "..."` in the mappings, and its usefulness scales with `timeoutlen`
   -- (raised to 400 in options.lua for exactly this).
@@ -425,7 +362,7 @@ local plugin_specs = {
   -- Parsers and queries come from nix (see home.nix), so nothing is compiled at
   -- runtime and `build = ":TSUpdate"` is deliberately absent. The plugin is
   -- still needed for plugin/query_predicates.lua, which the bundled queries use,
-  -- and as the dependency the textobjects/treesj/iswap plugins expect.
+  -- and as the dependency the textobjects/treesj plugins expect.
   {
     "nvim-treesitter/nvim-treesitter",
     branch = "main",
@@ -456,15 +393,6 @@ local plugin_specs = {
     dependencies = { "nvim-treesitter/nvim-treesitter" },
     config = function()
       require("config.treesj")
-    end,
-  },
-
-  -- gs< / gs>: swap function arguments
-  {
-    "mizlan/iswap.nvim",
-    event = "VeryLazy",
-    config = function()
-      require("config.iswap")
     end,
   },
 

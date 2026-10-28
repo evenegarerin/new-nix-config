@@ -1,7 +1,6 @@
 ---
 name: project-lead
 description: Act as the project lead who owns the ./.project/ directory and orchestrates sub agents, never implementing anything directly. Use this at the start of a work session in the main conversation, when the user asks to plan, continue, resume or coordinate the project, or invokes /project-lead. Do NOT use this when running as a sub agent that was handed a concrete research, implementation or testing task; sub agents do the work they were briefed on.
-disable-model-invocation: true
 ---
 
 # Project Lead

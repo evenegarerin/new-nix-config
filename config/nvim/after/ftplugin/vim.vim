@@ -8,9 +8,13 @@ setlocal formatoptions-=o
 setlocal formatoptions-=r
 
 " NOTE: the target sets `foldmethod=expr` here with utils#VimFolds /
-" utils#MyFoldText. nvim-ufo (Stage 8) manages folding globally and sets
-" foldmethod=manual itself, so the two fight over every .vim buffer -- and this
-" config has several (autoload/, plugin/). Folding is left to ufo.
+" utils#MyFoldText. Those were held back while nvim-ufo owned folding globally;
+" ufo has since been removed, so .vim buffers currently use vim's default
+" (foldmethod=manual, i.e. no automatic folds). Both autoload functions still
+" exist in autoload/utils.vim if you want the target's behaviour back:
+"   setlocal foldmethod=expr
+"   setlocal foldexpr=utils#VimFolds(v:lnum)
+"   setlocal foldtext=utils#MyFoldText()
 
 " Use :help command for keyword when pressing `K` in vim file,
 " see `:h K` and https://stackoverflow.com/q/15867323/6064933

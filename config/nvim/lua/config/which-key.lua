@@ -3,4 +3,5 @@ require("which-key").setup {
   icons = {
     mappings = false,
   },
+  delay = 0,
 }

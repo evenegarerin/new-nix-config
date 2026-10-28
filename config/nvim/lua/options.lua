@@ -20,7 +20,13 @@ opt.splitkeep = "screen" -- [bak] avoid flicker when splitting horizontally
 ------------------------------------------------------------------------
 -- [old] 200ms. The target uses 500, which is friendlier once which-key is in
 -- (Stage 8) because it gives you time to read the popup.
-opt.timeoutlen = 400 -- enough to read the which-key popup (Stage 8); [bak] uses 500
+-- NOTE: this does NOT control when the which-key popup appears -- that is
+-- `delay` in lua/config/which-key.lua, and the two add together. What this does
+-- control is how long vim waits on a genuinely ambiguous mapping, i.e. one that
+-- is complete *and* a prefix of a longer one. There are exactly two in this
+-- config: `gc` vs `gcc` (vim-commentary) and `s` vs `sa`/`sd`/`sr`
+-- (vim-sandwich). [bak] uses 500.
+opt.timeoutlen = 200
 opt.updatetime = 500 -- [bak] drives CursorHold, used by diagnostics + auto-read
 
 ------------------------------------------------------------------------
@@ -121,7 +127,13 @@ opt.showcmdloc = "statusline" -- [bak]
 opt.wrap = false -- [bak]
 opt.linebreak = true -- [bak] break at word boundaries when wrap is on
 opt.showbreak = "|-> " -- [bak] marker for soft-wrapped lines
-opt.signcolumn = "yes:1" -- [bak] always reserve one sign column
+-- The gutter is drawn by lua/statuscolumn.lua, which gives gitsigns a cell of
+-- its own that nothing else can take -- blank when the line is unchanged.
+-- `signcolumn = "no"` because that module renders the signs itself; leaving it
+-- on would draw a second, native sign column beside the one we build.
+-- Special windows (nvim-tree, quickfix, help) keep their own `signcolumn`.
+opt.signcolumn = "no"
+opt.statuscolumn = "%{%v:lua.require'statuscolumn'.render()%}"
 opt.colorcolumn = "100" -- [bak]
 opt.synmaxcol = 250 -- [bak] stop highlighting very long lines
 

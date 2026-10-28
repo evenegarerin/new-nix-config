@@ -114,4 +114,26 @@ function M.get_git_branches()
   }
 end
 
+--- Name of the active python virtual environment, or "" if none.
+--- `VIRTUAL_ENV` holds a full path, so only its last component is returned;
+--- conda exports the bare name already. Taken from ../nvim.bak/lua/utils.lua.
+--- @return string
+function M.get_virtual_env()
+  local conda_env = os.getenv("CONDA_DEFAULT_ENV")
+  -- venv_path is the complete path to the virtual env
+  local venv_path = os.getenv("VIRTUAL_ENV")
+
+  local venv_name = ""
+
+  if venv_path == nil then
+    if conda_env ~= nil then
+      venv_name = conda_env
+    end
+  else
+    venv_name = vim.fn.fnamemodify(venv_path, ":t")
+  end
+
+  return venv_name
+end
+
 return M

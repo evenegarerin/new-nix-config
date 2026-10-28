@@ -10,6 +10,7 @@ gs.setup {
     changedelete = { text = symbol_icon.git.diff.changedelete },
   },
   word_diff = false,
+
   on_attach = function(bufnr)
     local function map(mode, l, r, opts)
       opts = opts or {}
@@ -44,9 +45,6 @@ gs.setup {
       gs.blame_line { full = true }
     end, { desc = "blame hunk" })
 
-    -- NOTE: the target stops here -- it has no staging maps at all, despite
-    -- staging being the main reason to run gitsigns. These fill the gap, under
-    -- the same <leader>h prefix.
     map("n", "<leader>hs", gs.stage_hunk, { desc = "stage hunk" })
     map("n", "<leader>hr", gs.reset_hunk, { desc = "reset hunk" })
 

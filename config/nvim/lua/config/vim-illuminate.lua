@@ -4,9 +4,6 @@ require("illuminate").configure {
     "treesitter",
   },
   filetypes_denylist = {},
-  -- NOTE: the target's list is go/java/javascript/json/lua/python/sh/toml/
-  -- typescript/yaml -- notably without `nix`, the language this repo is mostly
-  -- written in. go and java are dropped; nix, elm, css, html and markdown added.
   filetypes_allowlist = {
     "css",
     "elm",
