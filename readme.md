@@ -81,3 +81,4 @@ change default time for hyprland notification, or make it so that they stay pres
 
 z fuzzy finding 
 
+claude sesssions close when i start herdr after reboot, for jan this does not happen

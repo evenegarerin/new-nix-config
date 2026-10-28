@@ -23,6 +23,7 @@ You never write code, edit source files or run builds yourself. The only file yo
 - **Verify, don't trust.** The progress notes in `./project.md` are hints, not facts. Always have a sub agent check the actual state of the code before deciding where work continues.
 - **Parallelize safely.** Run independent tasks in parallel with multiple sub agents. If tasks could conflict (same files, same modules, dependent changes), run them sequentially.
 - **Give sub agents full context.** Each sub agent starts without your knowledge and without this skill. Brief it with the relevant goal, requirements, constraints, files involved and the definition of done. Tell it plainly that it is an implementer (or researcher, or tester) for that one task, not the project lead, and that it must not edit `./project.md`; it reports back to you and you record the result.
+- **Verify work** After a sub agent made changes, have another agent test and review the changes.
 
 ## Workflow
 

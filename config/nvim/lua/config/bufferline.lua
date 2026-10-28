@@ -1,0 +1,54 @@
+local symbol_icon = require("symbol_icon")
+
+require("bufferline").setup {
+  options = {
+    numbers = "none",
+    close_command = "bdelete! %d",
+    right_mouse_command = nil,
+    left_mouse_command = "buffer %d",
+    middle_mouse_command = nil,
+    indicator = {
+      icon = "▎", -- this should be omitted if indicator style is not 'icon'
+      style = "icon",
+    },
+    buffer_close_icon = symbol_icon.tabline.buffer_close,
+    modified_icon = symbol_icon.tabline.buffer_modified,
+    close_icon = symbol_icon.tabline.close,
+    left_trunc_marker = symbol_icon.tabline.left_trunc_marker,
+    right_trunc_marker = symbol_icon.tabline.right_trunc_marker,
+    max_name_length = 18,
+    max_prefix_length = 15,
+    tab_size = 10,
+    diagnostics = false,
+    custom_filter = function(bufnr)
+      -- if the result is false, this buffer will be shown, otherwise, this
+      -- buffer will be hidden.
+
+      -- filter out filetypes you don't want to see
+      local exclude_ft = { "qf", "fugitive", "git" }
+      local cur_ft = vim.bo[bufnr].filetype
+      local should_filter = vim.tbl_contains(exclude_ft, cur_ft)
+
+      if should_filter then
+        return false
+      end
+
+      return true
+    end,
+    show_buffer_icons = false,
+    show_buffer_close_icons = true,
+    show_close_icon = true,
+    show_tab_indicators = true,
+    persist_buffer_sort = true, -- whether or not custom sorted buffers should persist
+    separator_style = "bar",
+    enforce_regular_tabs = false,
+    always_show_bufferline = true,
+    sort_by = "id",
+  },
+}
+
+-- NOTE: the target binds a bare `<space>bp`, which collides with <Space> as
+-- leader. See README.md section 4.
+vim.keymap.set("n", "<leader>tb", "<cmd>BufferLinePick<CR>", {
+  desc = "pick a buffer",
+})

@@ -7,7 +7,20 @@ This directory is the **live** config (`~/.config/nvim` symlinks here via `home.
 breaks it into 14 stages. Each stage leaves you with a working editor, and each one
 is small enough to actually read and understand before moving on.
 
-**Right now Stage 0 is done.** Four files, no plugins.
+**All 14 stages are done.** 60 plugins, counting lazy.nvim itself. Nothing is
+parked or deferred — every mapping in `lua/mappings.lua` is live.
+
+> ⚠️ **One thing still outstanding:** `sudo nixos-rebuild switch --flake .#default`.
+> Stage 4 added eight language servers to `../../configuration.nix` and Stage 6
+> added the treesitter parser derivation to `../../home.nix`. Until that runs,
+> nvim warns once at startup that `nixd` and `lua_ls` are missing, and the
+> treesitter symlinks point at a store path built for testing.
+
+> ⚠️ **Stage 4 added packages to `../../configuration.nix` — run
+> `sudo nixos-rebuild switch --flake .#default` or nothing LSP-related works.**
+> Until then nvim warns once at startup that `nixd` and `lua_ls` are missing.
+
+The rebuild above is the only remaining step.
 
 > Terminology below: *[bak]* = file or setting lives in `../nvim.bak`.
 > Line references like `lua/mappings.lua:5` are into `../nvim.bak/`.
@@ -61,75 +74,75 @@ Everything in `../nvim.bak/`, what it does, and which stage introduces it.
 | `lua/utils.lua` | 286 | Shared helpers (see above) | 0, grown through 8 |
 | `lua/globals.lua` | 76 | Leader, platform flags, provider + builtin-plugin disables, python3 host prog | 0 |
 | `lua/options.lua` | 241 | All `vim.opt` settings | 0 |
-| `lua/symbol_icon.lua` | 81 | Central icon table | 1 |
-| `lua/mappings.lua` | 252 | ~50 plugin-independent keymaps | 1 |
-| `lua/custom-autocmd.lua` | 313 | 15 autocmd groups: yank highlight, auto-mkdir, auto-read, number toggle, large-file mode, highlight overrides, auto-save, git-repo detection | 1 |
+| `lua/symbol_icon.lua` | 81 | Central icon table | 1 ✅ |
+| `lua/mappings.lua` | 252 | ~50 plugin-independent keymaps | 1 ✅ |
+| `lua/custom-autocmd.lua` | 313 | 15 autocmd groups: yank highlight, auto-mkdir, auto-read, number toggle, large-file mode, highlight overrides, auto-save, git-repo detection | 1 ✅ (11 of 15) |
 | `lua/plugin_specs.lua` | 840 | lazy.nvim bootstrap + every plugin spec | 3 |
 | `lua/ui.lua` | 172 | 25 colorschemes, picks one at random per start; enables the experimental message UI | 3 |
-| `lua/lsp_utils.lua` | 95 | `get_default_capabilities()`, attached-LSP lookup, `:LspAttached` nui popup | 4 |
-| `lua/lsp_conf.lua` | 231 | `LspAttach` keymaps, server enable table, `:LspInfo`/`:LspLog`/`:LspInlayHints` | 4 |
-| `lua/diagnostic-conf.lua` | 70 | `vim.diagnostic.config`, diagnostics→quickfix, float-on-CursorHold | 4 |
+| `lua/lsp_utils.lua` | 95 | `get_default_capabilities()`, attached-LSP lookup, `:LspAttached` nui popup | 4 ✅ |
+| `lua/lsp_conf.lua` | 231 | `LspAttach` keymaps, server enable table, `:LspInfo`/`:LspLog`/`:LspInlayHints` | 4 ✅ |
+| `lua/diagnostic-conf.lua` | 70 | `vim.diagnostic.config`, diagnostics→quickfix, float-on-CursorHold | 4 ✅ |
 | `lua/dotenv.lua` | 29 | Reads `~/.config/.env` into a table. Nothing in the config requires it | skip |
 
 ### Vimscript layer
 
 | File | What it does | Stage |
 |---|---|:---:|
-| `autoload/utils.vim` | `Cabbrev` (cmdline abbreviations), `VimFolds`/`MyFoldText`, `ToggleCursorCol`, `SwitchLine`/`MoveSelection` (Alt-j/k line moving), `iso_time`, `CaptureCommandOutput`, `MultiEdit` | 2 |
-| `autoload/buf_utils.vim` | `GoToBuffer` — the `gb`/`gB` count-aware buffer jump | 2 |
-| `autoload/text_obj.vim` | `iu` (URL), `iB` (whole buffer), markdown code-block text objects | 2 |
-| `plugin/command.lua` | `:CopyPath`, `:JSONFormat`, `:TermHL` | 2 |
-| `plugin/command.vim` | `:Redir`, `:Edit` (multi-file glob), `:Datetime`, `:ToPDF` (pandoc→xelatex) | 2 |
-| `plugin/abbrev.vim` | Two typo abbreviations | 2 |
-| `plugin/log-autocmds.vim` | `:VerboseAutocmds` debug tool. Only useful when hunting an autocmd bug | optional |
-| `ftdetect/*.vim` | Filetypes for `.pdc` and `.snippets` | 12 |
+| `autoload/utils.vim` | `Cabbrev` (cmdline abbreviations), `VimFolds`/`MyFoldText`, `ToggleCursorCol`, `SwitchLine`/`MoveSelection` (Alt-j/k line moving), `iso_time`, `CaptureCommandOutput`, `MultiEdit` | 2 ✅ |
+| `autoload/buf_utils.vim` | `GoToBuffer` — the `gb`/`gB` count-aware buffer jump | 2 ✅ |
+| `autoload/text_obj.vim` | `iu` (URL), `iB` (whole buffer), markdown code-block text objects | 2 ✅ |
+| `plugin/command.lua` | `:CopyPath`, `:JSONFormat`, `:TermHL` | 2 ✅ |
+| `plugin/command.vim` | `:Redir`, `:Edit` (multi-file glob), `:Datetime`, `:ToPDF` (pandoc→xelatex) | 2 ✅ |
+| `plugin/abbrev.vim` | Two typo abbreviations | 2 ✅ |
+| `plugin/log-autocmds.vim` | `:LogAutocmds` debug tool (the command is **not** `:VerboseAutocmds`). Toggles logging of every autocmd to `/tmp/vim_log_autocommands`. Off until invoked | 2 ✅ |
+| `ftdetect/*.vim` | Filetypes for `.pdc` and `.snippets` | 12 ✅ (`pdc` only) |
 
 ### Plugin configs (`lua/config/`)
 
 | File | Lines | Plugin | Stage |
 |---|---:|---|:---:|
-| `lualine.lua` | 488 | Statusline. The single biggest config file | 8 |
+| `lualine.lua` | 488 | Statusline. The single biggest config file | 8 ✅ |
 | `nvim-cmp.lua` | 124 | nvim-cmp (disabled — `blink` is selected at `plugin_specs.lua:25`) | skip |
-| `blink-cmp.lua` | 115 | Completion engine | 5 |
-| `colorful_menu.lua` | 92 | Syntax-highlighted completion items | 5 |
-| `hlslens.lua` | 82 | Search match counter (`n`/`N`/`*`/`#`) | 10 |
-| `treesitter.lua` | 65 | On-demand parser install per filetype | 6 |
-| `gitsigns.lua` | 58 | Sign-column git diff + hunk maps | 9 |
-| `fzf-lua.lua` | 55 | Fuzzy finder + `<leader>f*` maps | 7 |
-| `bufferline.lua` | 52 | Buffer tabline | 8 |
-| `diffview.lua` | 51 | Full-window diff/history view | 9 |
-| `treesitter-textobjects.lua` | 50 | `af`/`if`/`ac`/`ic`/`as` text objects | 6 |
-| `nvim_ufo.lua` | 47 | Better folding, LSP/treesitter-backed | 8 |
-| `git-linker.lua` | 47 | Yank a permalink to the current line on the forge | 9 |
-| `nvim_hop.lua` | 28 | `f` → jump anywhere on screen | 10 |
-| `fugitive.lua` | 27 | `<leader>g*` git maps | 9 |
-| `nvim-statuscol.lua` | 23 | Clickable number/sign/fold column | 8 |
+| `blink-cmp.lua` | 115 | Completion engine | 5 ✅ |
+| `colorful_menu.lua` | 92 | Syntax-highlighted completion items | 5 ✅ |
+| `hlslens.lua` | 82 | Search match counter (`n`/`N`/`*`/`#`) || 10 ✅ |
+| `treesitter.lua` | 65 | On-demand parser install per filetype | 6 ✅ rewritten — parsers come from nix |
+| `gitsigns.lua` | 58 | Sign-column git diff + hunk maps || 9 ✅ |
+| `fzf-lua.lua` | 55 | Fuzzy finder + `<leader>f*` maps | 7 ✅ |
+| `bufferline.lua` | 52 | Buffer tabline | 8 ✅ |
+| `diffview.lua` | 51 | Full-window diff/history view || 9 ✅ |
+| `treesitter-textobjects.lua` | 50 | `af`/`if`/`ac`/`ic`/`as` text objects | 6 ✅ |
+| `nvim_ufo.lua` | 47 | Better folding, LSP/treesitter-backed | 8 ✅ |
+| `git-linker.lua` | 47 | Yank a permalink to the current line on the forge || 9 ✅ |
+| `nvim_hop.lua` | 28 | `f` → jump anywhere on screen || 10 ✅ |
+| `fugitive.lua` | 27 | `<leader>g*` git maps || 9 ✅ |
+| `nvim-statuscol.lua` | 23 | Clickable number/sign/fold column | 8 ✅ |
 | `gx.lua` | 21 | Open URL under cursor (mac/win only, `plugin_specs.lua:275`) | skip |
-| `vim-illuminate.lua` | 20 | Highlight other occurrences of word under cursor | 10 |
-| `lightbulb.lua` | 20 | Sign when a code action is available | 10 |
-| `aerial.lua` | 19 | Symbol outline sidebar | 10 |
-| `yanky.lua` | 17 | Yank ring, `[y`/`]y` to cycle past pastes | 11 |
-| `snacks.lua` | 12 | Prettier `vim.ui.input` and `vim.ui.select` | 7 |
-| `glance.lua` | 12 | Peek definitions/references in a float | 10 |
-| `nvim-notify.lua` | 10 | Notification popups | 8 |
+| `vim-illuminate.lua` | 20 | Highlight other occurrences of word under cursor || 10 ✅ |
+| `lightbulb.lua` | 20 | Sign when a code action is available || 10 ✅ |
+| `aerial.lua` | 19 | Symbol outline sidebar || 10 ✅ |
+| `yanky.lua` | 17 | Yank ring, `[y`/`]y` to cycle past pastes | 11 ✅ |
+| `snacks.lua` | 12 | Prettier `vim.ui.input` and `vim.ui.select` | 7 ✅ |
+| `glance.lua` | 12 | Peek definitions/references in a float || 10 ✅ |
+| `nvim-notify.lua` | 10 | Notification popups | 8 ✅ |
 | `nvim-colorizer.lua` | 9 | Render `#rrggbb` in its own colour | optional |
-| `live-command.lua` | 9 | Live preview for `:norm`/`:g`/`:s` | 11 |
-| `quicker.lua` | 8 | Editable quickfix | 10 |
-| `nvim-tree.lua` | 8 | File explorer | 10 |
+| `live-command.lua` | 9 | Live preview for `:norm`/`:g`/`:s` | 11 ✅ |
+| `quicker.lua` | 8 | Editable quickfix || 10 ✅ |
+| `nvim-tree.lua` | 8 | File explorer | 3 ✅ |
 | `vimade.lua` | 7 | Dim inactive windows | optional |
 | `iron.lua` | 7 | REPL integration (python) | skip |
-| `which-key.lua` | 6 | Keymap popup | 8 |
-| `treesj.lua` | 6 | `gS` split/join a node across lines | 6 |
-| `bqf.lua` | 6 | Quickfix preview | 10 |
-| `iswap.lua` | 5 | `gs<`/`gs>` swap function arguments | 6 |
-| `fidget-nvim.lua` | 1 | LSP progress spinner | 4 |
+| `which-key.lua` | 6 | Keymap popup | 8 ✅ |
+| `treesj.lua` | 6 | `gS` split/join a node across lines | 6 ✅ |
+| `bqf.lua` | 6 | Quickfix preview || 10 ✅ |
+| `iswap.lua` | 5 | `gs<`/`gs>` swap function arguments | 6 ✅ |
+| `fidget-nvim.lua` | 1 | LSP progress spinner | 4 ✅ |
 
 ### Filetype layer
 
 | Path | Contents |
 |---|---|
 | `after/lsp/*.lua` | Per-server overrides, merged on top of `vim.lsp.config("*")`. 10 files: clangd, emmylua_ls, golangci_lint_ls, gopls, lua_ls, pyrefly, pyright, ruff, ty, typos_lsp |
-| `after/ftplugin/*` | 18 files. Per-filetype options, `<F9>` run-this-file maps, formatters |
+| `after/ftplugin/*` | 18 files upstream; **11 taken** (12 ✅). Per-filetype options, `<F9>` run-this-file maps, formatters |
 | `my_snippets/*.snippets` | UltiSnips snippets for 8 filetypes |
 | `spell/en.utf-8.add` | Personal spellfile |
 | `_typos.toml`, `.stylua.toml`, `.emmyrc.json` | Tool configs for typos-lsp, stylua, emmylua_ls |
@@ -160,299 +173,512 @@ Deliberately changed from the target:
 
 ---
 
-### Stage 1 — Icons, mappings, autocommands
+### Stage 1 — Icons, mappings, autocommands ✅ done
 
-Still zero plugins. This is where the editor starts to *feel* like the target.
+**Files:** `lua/symbol_icon.lua`, `lua/mappings.lua`, `lua/custom-autocmd.lua`,
+plus `utils.filesize` and the `options.lua` char swap. Still zero plugins.
 
-**Copy:** `lua/symbol_icon.lua` (whole file), then in `options.lua` replace the
-ASCII `listchars` with `opt.fillchars = symbol_icon.fillchars`.
+> ⚠️ This section used to say *"replace the ASCII `listchars` with
+> `opt.fillchars = symbol_icon.fillchars`"*. Those are **two different options**.
+> The target sets them separately: `fillchars` from `symbol_icon` at
+> `options.lua:9`, and `listchars` as its own literal table at `options.lua:133-140`
+> that never touches `symbol_icon`. Both are now set; `trail = "°"` is kept from the
+> previous config, which the target does not set at all.
 
-**Copy:** `lua/mappings.lua`, **selectively**. Several entries change long-standing
-vim behaviour — adopt them on purpose, not by accident:
+**Mappings adopted in full**, including every behaviour-changing one:
 
-| Mapping | Line | Effect |
+| Mapping | Effect |
+|---|---|
+| `;` → `:` | No shift to reach the cmdline. `;` as repeat-`f` is gone — which pairs with hop.nvim taking `f` in Stage 10 |
+| `c`/`C`/`cc`/visual `p` → `"_` | Change and paste-over-selection no longer clobber the unnamed register |
+| `q` reminds, `Q` records | No more accidental macro recording |
+| `H`/`L` → `^`/`g_` | Line start/end. No more screen-top/bottom jumps |
+| `j`/`k` → `gj`/`gk` when `v:count == 0` | Screen lines, but `5j` and relativenumber jumps still move real lines |
+| arrows → `<C-w>hjkl` | Window switching |
+| `<Esc>` → `fclose!` | Closes floating windows |
+
+> **`q` in help and quickfix now does nothing but print the reminder.** Stock nvim
+> maps nothing to `q` there either (verified: `maparg("q", "n")` is empty in both),
+> so this is not a regression from vim behaviour — but if you had the habit, it is
+> gone. Use `\x` for quickfix/loclist, `<leader>q` for any window, `:helpclose` for
+> help. Plugins that set a buffer-local `q` still win; nvim-tree still closes on it.
+
+Changed from the target:
+
+| Change | Why |
+|---|---|
+| **`<Esc>` wraps `fclose!` in `pcall`** (`mappings.lua:248-252`) | The target calls it bare. With no floating window open `:fclose!` throws **E444**, so plain `<Esc>` in normal mode would error |
+
+**Nine mappings are parked**, commented out at the bottom of `lua/mappings.lua`
+with the stage that unblocks them. Stage 2 is a matter of uncommenting:
+`<leader>cl`, `<A-j>`/`<A-k>` (normal and visual), `gb`/`gB`, `iu`/`iB` need
+`autoload/`; `<leader><space>` needs whitespace.nvim from Stage 11.
+
+**11 of the 15 autocmd groups** landed. The four that did not are listed at the
+bottom of `lua/custom-autocmd.lua`:
+
+| Group | Lines | Why not |
 |---|---:|---|
-| `;` → `:` | 5 | No more shift to reach cmdline. Breaks `;` as repeat-`f`. |
-| `q` → prints a message, `Q` → record macro | 241-246 | Stops accidental macro recording. Retrains `q` for closing windows. |
-| `H` / `L` → `^` / `g_` | 71-72 | Loses screen-top/bottom jumps. |
-| `c`/`C`/`cc` → `"_c` | 104-107 | Change no longer clobbers the unnamed register. |
-| `p` in visual → `"_c<Esc>p` | 154 | Paste over a selection without losing the register. |
-| `<Esc>` → `fclose!` | 248 | Closes floating windows. Harmless until floats exist. |
-| arrows → `<C-w>hjkl` | 165-168 | Window switching. |
-| `j`/`k` → `gj`/`gk` when no count | 63-64 | Move by screen line. |
+| `auto_close_win` | 204-228 | Quits nvim when only `qf`/`NvimTree` windows remain. Deliberately not adopted |
+| `git_repo_check` | 230-237 | Needs `utils.inside_git_repo()` → **Stage 2** |
+| `format check` | 267-301 | Runs `stylua --check`/`black --check` on `BufWritePost`. **`stylua` is not on PATH**, so every Lua save would print `stylua not found!` |
+| `auto_save` | 303-313 | `silent! update` on `InsertLeave`/`TextChanged`. With Stage 4's format-on-save it reformats at nearly every typing pause |
 
-Safe and good from the start: `<leader>p`/`<leader>P` (paste on a new line),
-`\db`/`\dB` (delete buffer / other buffers), `\x` (close qf+loclist),
-`J`/`gJ` without cursor movement (177-194), the undo-break-on-punctuation loop
-(197-200), `<C-a>`/`<C-e>` in insert mode.
+Two blocks **moved here** from the temporary homes Stage 3 gave them:
 
-Mappings that need `autoload/` — defer to Stage 2 or copy both at once:
-`<leader>cl`, `<A-j>`/`<A-k>` line moving, `gb`/`gB`, `iu`/`iB`,
-`<leader><space>` (needs `:StripTrailingWhitespace` from whitespace.nvim, Stage 11).
+- `open_nvim_tree` (the `VimEnter` directory handler) came out of the nvim-tree
+  spec's `init` in `plugin_specs.lua`. This module is required before
+  `plugin_specs`, so the autocmd still exists before `VimEnter` fires.
+- the `custom_highlight` `ColorScheme` hook came out of `lua/ui.lua`, and the
+  transparency rules are now merged into the target's `YankColor`/`Cursor`/
+  `Cursor2`/`FloatBorder`/`NormalFloat`/`Pmenu`/`MatchParen`/`Illuminated*` block.
+  **It has to stay exactly one autocmd in that group** — a second one with
+  `clear = true` would wipe the first.
 
-**Copy:** `lua/custom-autocmd.lua`, minus three blocks:
+`Cursor`/`Cursor2` are not decoration: `options.lua` already points `guicursor` at
+them. `IlluminatedWord*` is for vim-illuminate in Stage 10 and is harmless early.
 
-- lines **92-110** — auto-open nvim-tree on a directory argument → Stage 10
-- lines **204-228** (`auto_close_win`) — references the `NvimTree` filetype → Stage 10
-- lines **230-237** (`git_repo_check`) — needs `utils.inside_git_repo()` → Stage 2/9
-
-Also decide on lines **303-313** (auto-save on `InsertLeave`/`TextChanged`).
-The previous config formatted via LSP on `BufWritePre`; combined with auto-save
-that reformats on nearly every typing pause. **Recommendation: drop the auto-save
-autocmd**, keep explicit `<leader>w` and format-on-save.
-
-Lines **170-202** are the `ColorScheme` hook that defines `YankColor`, `Cursor`,
-`Cursor2`, `FloatBorder`, `NormalFloat`, `Pmenu`, `MatchParen`. This is the proper
-home for the transparent-background highlights the previous config had in
-`lua/highlights.lua` (`Normal`/`NormalNC`/`SignColumn` → `bg = "none"`) — put them
-here rather than in a standalone module, so they survive a colorscheme change.
-
-`require("custom-autocmd")` and `require("mappings")` in `init.lua`.
-
-**Verify:** yank something — it should flash green. `:set rnu?` toggles off in
-insert mode and back on when you leave.
+**Verify:** yank something — it flashes green. `relativenumber` turns off in insert
+mode and back on when you leave. `:set fillchars?` and `:set listchars?` show the
+nerd-font glyphs. `:w` into a path whose directories do not exist creates them.
 
 ---
 
-### Stage 2 — Vimscript helpers and user commands
+### Stage 2 — Vimscript helpers and user commands ✅ done
 
-**Copy whole:** `autoload/utils.vim`, `autoload/buf_utils.vim`, `autoload/text_obj.vim`,
-`plugin/command.lua`, `plugin/command.vim`, `plugin/abbrev.vim`.
+**Copied whole:** `autoload/utils.vim`, `autoload/buf_utils.vim`,
+`autoload/text_obj.vim`, `plugin/command.lua`, `plugin/command.vim`,
+`plugin/abbrev.vim`, `plugin/log-autocmds.vim`, `resources/head.tex`.
 
 Files under `plugin/` are sourced automatically by nvim — no `require` needed.
-`autoload/` functions load lazily on first call.
+`autoload/` functions load lazily on first call, so `exists("*utils#Foo")` returns
+0 until something calls into that file. That is normal, not a missing function.
 
-Now enable the mappings deferred from Stage 1, and add `utils.inside_git_repo()`
-to `lua/utils.lua` plus the `git_repo_check` autocmd. That autocmd fires a custom
-`User InGitRepo` event, which is **what the git plugins in Stage 9 lazy-load on**.
-Without it they never load and nothing tells you why.
+**Unblocked from Stage 1:** the nine parked mappings are now live — `<leader>cl`,
+`<A-j>`/`<A-k>` (normal and visual), `gb`/`gB`, `iu`/`iB`. Only
+`<leader><space>` is still parked, waiting on whitespace.nvim in Stage 11.
 
-`:ToPDF` needs `pandoc` + `xelatex`; skip that function if you don't want them.
+**`utils.inside_git_repo()`** is in `lua/utils.lua` and the `git_repo_check`
+autocmd is in `lua/custom-autocmd.lua`. It fires a custom `User InGitRepo` event
+on `VimEnter` and `DirChanged` — **this is what the Stage 9 git plugins lazy-load
+on.** Without it they never load and nothing tells you why.
 
-**Verify:** `:Datetime`, `:CopyPath`, `gb`/`gB` between two buffers, `<A-j>` on a line.
+**`plugin_specs.lua`** picked up the `pi`/`pud`/`pc`/`ps` → `Lazy …` abbreviations
+it had been waiting on.
+
+Changed from the target:
+
+| Change | Why |
+|---|---|
+| **`:Edit` is `-nargs=*`**, and `utils#MultiEdit` falls back to a bare `:edit` when given no patterns | The target is `-nargs=+` and then aliases `edit` → `Edit`, so a bare `:edit` (reload the current file) dies with **E471: Argument required**. Confirmed by typing it, not by reading it — `vim.cmd("edit")` bypasses cmdline abbreviations entirely and will not reproduce this |
+| **`buf_utils#GoToBuffer` notifies at level 3, not 4** | `vim.notify` at `ERROR` level *raises* when called from vimscript, so an invalid count like `999gb` aborted the function and printed `function buf_utils#GoToBuffer, line 17: Invalid bufnr: 999` instead of a plain warning |
+| **`:TermHL` uses `vim.notify`, not `vim._log`** | `vim._log` is not an API function on 0.12.4. Same fix as `utils._get_branch` in Stage 8 |
+| **`:Run` added** to `plugin/command.lua` | Recovered from the pre-rebuild config (§6). Detached `jobstart`, so a GUI program you launch outlives the nvim session |
+
+`:ToPDF` is included along with `resources/head.tex`, but **`pandoc` and `xelatex`
+are not installed** — it exits with `pandoc not found` until you add them to
+`../../configuration.nix` (a xelatex-providing texlive is a 2–3 GB closure).
+
+**Verify:** `:Datetime` · `:CopyPath nameonly` · `:Run <something>` · `<A-j>` on a
+line · `gb`/`3gb` between buffers · `yiB` yanks the buffer · `:edit` alone reloads,
+`:edit some/glob/*.lua` opens every match.
 
 ---
 
-### Stage 3 — Plugin manager and colorscheme
+### Stage 3 — Plugin manager and colorscheme ✅ done
 
-**Create** `lua/plugin_specs.lua` with only the lazy.nvim bootstrap
-(`plugin_specs.lua:4-17`) and the `require("lazy").setup{}` call
-(`plugin_specs.lua:819-831`, rounded border, `concurrency = 5`, `rocks` disabled —
-hererocks pulls a whole Lua toolchain otherwise).
+**Files:** `lua/plugin_specs.lua`, `lua/ui.lua`, `lazy-lock.json`
 
-Plus the `Cabbrev` shortcuts at the bottom (`pi`, `pud`, `pc`, `ps` → `Lazy install`
-etc.) — those need `autoload/utils.vim` from Stage 2.
+`plugin_specs.lua` is the lazy.nvim bootstrap (`plugin_specs.lua:4-17` verbatim) plus
+`require("lazy").setup{}` (`plugin_specs.lua:820-832` — rounded border, `concurrency = 5`,
+`rocks` disabled, because hererocks pulls a whole Lua toolchain otherwise).
 
-**First plugins:**
+Plugins so far:
 
 ```lua
-{ "nvim-lua/plenary.nvim", lazy = true },
-{ "nvim-mini/mini.icons", version = false, lazy = true, config = function()
-    require("mini.icons").mock_nvim_web_devicons()  -- compat shim
-    require("mini.icons").tweak_lsp_kind()
-  end },
--- one colorscheme, e.g.:
 { "rebelot/kanagawa.nvim", priority = 1000 },
+{ "nvim-mini/mini.icons", version = false, lazy = true, config = ... },
+{ "nvim-tree/nvim-tree.lua", dependencies = { "nvim-mini/mini.icons" }, ... },
 ```
 
-`mini.icons` replaces `nvim-web-devicons` from the previous config; the mock call
-keeps plugins that only know devicons working.
+Deliberately changed from the target:
 
-**Create** `lua/ui.lua`, but take only the `use_theme` helper (`ui.lua:6-17`) and
-**one** entry from `colorscheme_conf`. The target ships 25 schemes and calls
-`M.rand_colorscheme()` to pick one at random every start — fun, but it makes every
-highlight problem irreproducible.
+- **One colorscheme, not 25.** `ui.lua` takes only the `use_theme` helper
+  (`ui.lua:6-17`) and `kanagawa-dragon` (`ui.lua:81-83`). `M.rand_colorscheme()`
+  picking a random scheme per start makes every highlight problem irreproducible.
+  Note `:colorscheme` reports `kanagawa`, not `kanagawa-dragon` — the variant file is
+  one line, `require("kanagawa").load "dragon"`, and it does not touch `g:colors_name`.
+- **`mini.icons` is declared as a dependency of nvim-tree**, not bare `lazy = true` as
+  at `plugin_specs.lua:190-198`. `mock_nvim_web_devicons()` is a compat shim, and
+  nvim-tree is a plugin that only knows nvim-web-devicons — the shim has to be installed
+  *before* nvim-tree loads. As a dependency, lazy.nvim guarantees that ordering; left
+  bare, nothing ever requires it and the tree renders without icons.
+- **`kanagawa` gets `priority = 1000`** where the target has `lazy = true`
+  (`plugin_specs.lua:172`). The target can defer it because `rand_colorscheme` requires
+  the module by name; with a fixed scheme it has to be loaded before `ui.lua` runs.
+- **`Cabbrev` shortcuts** (`pi`, `pud`, `pc`, `ps` → `Lazy install`/`update`/`clean`/`sync`)
+  were deferred until Stage 2 brought `utils#Cabbrev`; they are in `plugin_specs.lua` now.
+- **The transparency rules** from the previous config's `lua/highlights.lua`
+  (kitty runs at `background_opacity 0.8`, so an opaque `Normal` reads as a solid
+  box) lived at the top of `ui.lua` while Stage 1 was outstanding. They are now in
+  the `custom_highlight` hook in `lua/custom-autocmd.lua`, which loads earlier —
+  `ui.lua` is just the `use_theme` helper and one `colorscheme` call again.
 
-**Skip** `ui.lua:149-170` (`require("vim._core.ui2").enable{}`) — private API,
-and the target expects nvim 0.12.6 while 0.12.4 is installed. Wrap in `pcall` if
-you want to try it.
+  > `nvim_set_hl` **replaces** a group rather than patching it, so
+  > `nvim_set_hl(0, "Normal", { bg = "none" })` also throws away the scheme's
+  > foreground — which is what `highlights.lua` did. The hook reads the group back
+  > with `nvim_get_hl(0, { name = group, link = false })` and overrides only `bg`.
 
-Uncomment `require("plugin_specs")` and `require("ui")` in `init.lua`.
+- **Skipped** `ui.lua:149-170` (`require("vim._core.ui2").enable{}`) — private API,
+  and the target expects nvim 0.12.6 while 0.12.4 is installed.
 
-**Verify:** `:Lazy` opens; the colorscheme applies; your Stage 1 highlight
-overrides still win (that's the load-order rule paying off).
+`lazy-lock.json` is written by lazy.nvim and committed, same as
+`../nvim.bak/lazy-lock.json`. It is what makes the plugin set reproducible.
+
+> ⚠️ `~/.local/share/nvim/lazy/` still holds all 98 clones from the pre-rebuild setup,
+> so `:Lazy` lists ~95 plugins as removable and every later stage installs instantly
+> and offline. **Do not run `:Lazy clean` until the rebuild is finished.**
+
+**Verify:** `:Lazy` opens with a rounded "Plugin Manager" border, three plugins loaded,
+none failed; `:lua =vim.api.nvim_get_hl(0, {name="Normal"})` shows a foreground and no
+background.
 
 ---
 
-### Stage 4 — LSP
+### Stage 4 — LSP ✅ done
 
-The target uses the **native `vim.lsp.config` / `vim.lsp.enable` API** (nvim 0.11+),
-not `lspconfig.setup{}`. nvim-lspconfig is present only to supply the default
-`cmd`/`root_markers`/`filetypes` for each server.
+**Files:** `lua/lsp_conf.lua`, `lua/diagnostic-conf.lua`, the rest of
+`lua/lsp_utils.lua`, `lua/config/fidget-nvim.lua`, and five `after/lsp/` overrides.
+**Plugins:** `neovim/nvim-lspconfig`, `folke/lazydev.nvim`, `j-hui/fidget.nvim`.
 
-**Copy:** `lua/lsp_utils.lua` (drop `show_lsp_menu` until nui.nvim exists, or take
-it and add `{ "MunifTanjim/nui.nvim" }`), `lua/lsp_conf.lua`, `lua/diagnostic-conf.lua`.
+Uses the native **`vim.lsp.config` / `vim.lsp.enable` API** (nvim 0.11+), not
+`lspconfig.setup{}`. nvim-lspconfig only supplies each server's default `cmd`,
+`root_markers` and `filetypes`.
 
-**Plugins:** `neovim/nvim-lspconfig`, `folke/lazydev.nvim` (`plugin_specs.lua:716-726`),
-`j-hui/fidget.nvim`.
+#### ⚠️ Requires a rebuild
 
-`lazydev.nvim` replaces `neodev.nvim` from the previous config — neodev is deprecated.
-It also makes the manual `Lua.workspace.library = { vim.env.VIMRUNTIME }` setting
-unnecessary.
+Stage 4 added these to `../../configuration.nix`, just below `neovim`:
 
-**Rewrite** the server table at `lsp_conf.lua:104-132` for this machine's stack.
-The mechanism is: map server name → executable, enable only if the executable is on
-`PATH`, warn only for non-optional ones.
-
-```lua
-local enabled_lsp_servers = {
-  nixd   = { exe = "nixd",                 optional = false },
-  lua_ls = { exe = "lua-language-server",  optional = false },
-  elmls  = { exe = "elm-language-server",  optional = true  },
-  ts_ls  = { exe = "typescript-language-server", optional = true },
-  bashls = { exe = "bash-language-server", optional = true  },
-  yamlls = { exe = "yaml-language-server", optional = true  },
-}
+```
+nixd  lua-language-server  stylua  typescript-language-server
+bash-language-server  yaml-language-server  marksman  pyright
 ```
 
-> **Currently on PATH:** `elm-language-server`, `ruff`. Everything else
-> (`nixd`, `lua-language-server`, `typescript-language-server`, `bash-language-server`,
-> `stylua`) needs adding to `../../configuration.nix` — `neovim` is already there at
-> line 233.
+**None of them exist until you run `sudo nixos-rebuild switch --flake .#default`.**
+`elm-language-server`, `elm-format`, `ruff` and `nixfmt` were already there.
 
-**`after/lsp/` is the per-server override directory.** Each file returns a table
-merged over the lspconfig default and the `vim.lsp.config("*")` base. Take
-`after/lsp/lua_ls.lua` as-is. Create `after/lsp/nixd.lua` and move the previous
-config's inline nixd settings into it:
+#### Servers
 
-```lua
----@type vim.lsp.Config
-return {
-  settings = {
-    nixd = {
-      formatting = { command = { "nixfmt" } }, -- old config said nixpkgs-fmt, which is not installed
-      options = {
-        nixos = { expr = '(builtins.getFlake "/home/castle/nix-config").nixosConfigurations.default.options' },
-        home_manager = { expr = '(builtins.getFlake "/home/castle/nix-config").nixosConfigurations.default.options.home-manager.users.type.getSubOptions []' },
-      },
-    },
-  },
-}
+`lsp_conf.lua` maps server name → executable and enables a server only if the
+executable is on `PATH`. Missing **non-optional** servers warn; missing optional
+ones stay quiet.
+
+| Server | Executable | Optional | Override |
+|---|---|:-:|---|
+| `nixd` | `nixd` | no | `after/lsp/nixd.lua` |
+| `lua_ls` | `lua-language-server` | no | `after/lsp/lua_ls.lua` |
+| `elmls` | `elm-language-server` | yes | `after/lsp/elmls.lua` |
+| `ts_ls` | `typescript-language-server` | yes | — |
+| `bashls` | `bash-language-server` | yes | — |
+| `yamlls` | `yaml-language-server` | yes | — |
+| `marksman` | `marksman` | yes | — |
+| `pyright` | `pyright-langserver` | yes | `after/lsp/pyright.lua` |
+| `ruff` | `ruff` | yes | `after/lsp/ruff.lua` |
+
+`after/lsp/nixd.lua` carries the previous config's flake-options settings, with
+two corrections: it pointed at `/home/castle/nixos-config`, which does not exist
+(the repo is `/home/castle/nix-config`), and asked for `nixpkgs-fmt`, which is not
+installed — `nixfmt` is.
+
+Changed from the target:
+
+| Change | Why |
+|---|---|
+| **Missing-server warnings are batched into one `vim.schedule`d notification** | The target calls `vim.notify` once per server, inline during startup. Two or more overflow the message area and you get **"Press ENTER or type command to continue" on every single launch**. Verified against a real pty before and after |
+| **`:LspRestart` is actually implemented** | The target defines it as `lsp restart`, which is not a command. Nor does nvim provide one — nvim-lspconfig dropped `:LspRestart`/`:LspStart`/`:LspStop` when it moved to `vim.lsp.enable`, and `exists(":LspRestart")` is **0** on 0.12.4. It now stops the attached clients and reloads the buffer, which re-attaches them |
+| **`after/lsp/pyright.lua` drops `cmd`** | The target pins `delance-langserver`, a pyright fork that is not in nixpkgs. Without the line, lspconfig's default `pyright-langserver --stdio` applies |
+| **`show_lsp_menu` notifies when nothing is attached** | The target mounts an empty popup — a blank box you cannot distinguish from a broken one |
+| **Diagnostics are inline, not quiet** | The target sets `underline`/`virtual_text`/`virtual_lines` all false. The previous config's `virtual_text` + `underline` + `update_in_insert` is used instead. Set `virtual_text = false` in `diagnostic-conf.lua` for the target's behaviour |
+
+The statusline's LSP component is wired to `lsp_utils.show_lsp_menu` now, so
+clicking it gives the same popup as `:LspAttached` — that was deferred in Stage 8
+because `lsp_utils` did not exist yet.
+
+**Keymaps** (the target's bare `<space>` prefix rewritten per §4):
+
+```
+gd  definition (duplicates collapsed)   <C-]>  raw definition
+K   hover                               <C-k>  signature help
+<leader>lr  rename      <leader>la  code action    <leader>lf  format
+<leader>lwa / lwr / lwl   workspace folders
+<leader>dw  window diagnostics -> qf    <leader>db  buffer diagnostics -> qf
 ```
 
-> The old config pointed these at `/home/castle/nixos-config`, which does not exist —
-> the repo is `/home/castle/nix-config`. Fix it while moving it.
+Still **not** adopted: the `format check` autocmd (`custom-autocmd.lua:267-301`).
+`stylua` exists after the rebuild, so it is unblocked — it was declined in Stage 1,
+not blocked. `<leader>lf` covers formatting on demand.
 
-Skip `after/lsp/{gopls,golangci_lint_ls,clangd,pyright,ruff,ty,pyrefly}.lua`
-unless you pick up those languages. They are still worth reading as examples —
-`pyright.lua` shows how to strip duplicate diagnostics when two servers overlap,
-which is the same trick you'd need for `ts_ls` + a linter.
-
-**Keymaps** in `lsp_conf.lua:63-79` use a bare `<space>` prefix — must be rewritten,
-see §4.
-
-**`diagnostic-conf.lua` is opinionated:** `underline = false`, `virtual_text = false`,
-`virtual_lines = false` — signs in the gutter only, with the full message in a float
-on `CursorHold` (lines 51-69). Quiet, but if you expect inline errors you'll think
-the LSP is broken. Set `virtual_text = true` if you prefer the previous behaviour.
-
-**Verify:** open a `.nix` file, `:checkhealth vim.lsp`, confirm nixd attached;
-`:LspAttached` lists it.
+**Verify** (after the rebuild): open a `.nix` file → `:LspAttached` lists `nixd`,
+and `services.` completes with real NixOS options. `:checkhealth vim.lsp`.
+`:LspRestart`. On a Python file `ruff` already attaches today — that path is
+confirmed working, 5 diagnostics on a deliberately broken file.
 
 ---
 
-### Stage 5 — Completion
+### Stage 5 — Completion ✅ done
 
-**Plugins:** `saghen/blink.cmp` (v1.x) + `rafamadriz/friendly-snippets`,
-`xzbdmw/colorful-menu.nvim`.
-
-**Copy:** `lua/config/blink-cmp.lua`, `lua/config/colorful_menu.lua`.
+**Files:** `lua/config/blink-cmp.lua`, `lua/config/colorful_menu.lua`.
+**Plugins:** `saghen/blink.cmp` (1.x) + `rafamadriz/friendly-snippets`,
+`xzbdmw/colorful-menu.nvim`, `archie-judd/blink-cmp-words`.
 
 Replaces nvim-cmp + LuaSnip + cmp_luasnip + cmp-nvim-lsp from the previous config.
-blink has a built-in LSP source, a Rust fuzzy matcher, and its own snippet engine,
+blink has a built-in LSP source, a Rust fuzzy matcher and its own snippet engine,
 so four plugins collapse into one.
 
-**Trim from `blink-cmp.lua`:** the `ultisnips` provider (lines 44-48) and
-`"ultisnips"` in `sources.default` (line 42) — ultisnips needs the python3 provider, which
-Stage 0 disabled. `friendly-snippets` covers snippets without it.
+Changed from the target:
 
-Optional: the `thesaurus`/`dictionary` providers (`blink-cmp-words`, lines 49-95) wired to
-`text` and `markdown` filetypes via `per_filetype`.
+| Change | Why |
+|---|---|
+| **colorful-menu is wired into blink** via `completion.menu.draw.components.label` | The target only hooks it into `config/nvim-cmp.lua:64` — the **disabled** engine (`plugin_specs.lua:25` selects blink). Copied as the README said, the plugin loads and does nothing at all. The wiring is from colorful-menu's own README, using `blink_components_text`/`blink_components_highlight` (`init.lua:192`/`204`) |
+| **Documentation scrolling moved to `<C-b>`/`<C-f>`** | The target uses `<C-U>`/`<C-D>`, both already bound in insert mode by Stage 1 — `<C-u>` uppercases the word (`mappings.lua:8`), `<C-D>` is forward-delete. blink would shadow them whenever the menu is open |
+| **No `ultisnips` source** | Needs the python3 provider, which `globals.lua` disables. `snippets` (blink's own, fed by friendly-snippets) replaces it, so `blink.compat` is not needed either |
+| **`pyright` added to colorful-menu's `ls` table** | That table is keyed by LSP *client name*. The target lists `basedpyright` but not `pyright`, which is what `lsp_conf.lua` enables |
 
-Keymap preset is `"default"` (`<C-y>` accepts) with `<Tab>`/`<S-Tab>` to move and
-`<CR>` to accept — close to the nvim-cmp config you had.
+`<CR>` is left as the target has it — `select_and_accept`, so with the menu open
+Enter always completes (it picks the first item if none is selected) and is only a
+newline when the menu is closed. `<C-y>` also accepts, per the `default` preset.
 
-Capabilities: `lsp_utils.get_default_capabilities()` already advertises
-`foldingRange` for nvim-ufo (Stage 8). blink adds its own on top automatically.
+Thesaurus and dictionary completion (`blink-cmp-words`) are enabled for `text`
+and `markdown` via `sources.per_filetype`.
 
-**Verify:** completion menu in a `.nix` and a `.lua` file; `<C-space>`; docs popup.
+> **colorful-menu only colours LSP items.** `blink_highlights` starts with
+> `vim.lsp.get_client_by_id(ctx.item.client_id)` and returns nil when there is no
+> client, so buffer/path/snippet items get only match highlighting. Its effect is
+> therefore **not visible until the Stage 4 rebuild puts `lua_ls`/`nixd` on PATH** —
+> the wiring is verified, the colouring is not.
+
+**Verify:** typing in a buffer pops the menu — confirmed over RPC against a live
+instance: `blink.is_visible()` true with `alpha_beta_gamma`/`alpha_delta` offered
+from the buffer source, Rust fuzzy matcher loaded. After the rebuild, check a
+`.lua` and a `.nix` file for LSP items with coloured labels, `<C-space>`, and the
+docs popup with `<C-b>`/`<C-f>`.
 
 ---
 
-### Stage 6 — Treesitter
+### Stage 6 — Treesitter ✅ done
 
-**Plugins:** `nvim-treesitter/nvim-treesitter` on the **`main` branch**,
-`nvim-treesitter/nvim-treesitter-textobjects` (also `main`), `Wansmer/treesj`,
+**Plugins:** `nvim-treesitter/nvim-treesitter` (**`main`**),
+`nvim-treesitter/nvim-treesitter-textobjects` (**`main`**), `Wansmer/treesj`,
 `mizlan/iswap.nvim`, `andymass/vim-matchup`.
+**Files:** `lua/config/treesitter.lua` (rewritten), `treesitter-textobjects.lua`,
+`treesj.lua`, `iswap.lua`, plus a new block in `../../home.nix`.
 
 > The `main` branch is the rewritten API. `require("nvim-treesitter.configs").setup{}`
-> does **not** exist there — `config/treesitter.lua` installs parsers on a `FileType`
-> autocmd and calls `vim.treesitter.start()` manually. Do not mix `main`-branch docs
-> with `master`-branch tutorials.
+> does **not** exist there. Do not mix `main`-branch code with `master`-branch tutorials.
 
-**Copy:** `lua/config/treesitter.lua` and edit `ensure_installed` — drop `cpp`, `go`,
-`gomod`, `gosum`, `tex`, `python`; add `nix`, `elm`, `tsx`, `css`, `html`.
+#### Parsers come from nix, not from nvim-treesitter
 
-**Copy:** `lua/config/treesitter-textobjects.lua` (`af`/`if`/`ac`/`ic`/`as`),
-`treesj.lua` (`gS`), `iswap.lua` (`gs<` / `gs>`).
+This is the one stage that departs from the target structurally.
 
-Two gotchas:
+`main` installs a parser by shelling out to **`tree-sitter build`**
+(`install.lua:305`), which needs the tree-sitter CLI *and* a C compiler. On this
+machine `tree-sitter`, `cc`, `gcc`, `clang` and `make` are **all absent**, and
+nothing else wants them.
 
-- `vim.g.no_plugin_maps = true` is set in treesitter-textobjects' `init`
-  (`plugin_specs.lua:98`). It disables **all** builtin ftplugin mappings globally,
-  for every filetype. Deliberate, but very easy to miss when something stops working.
-- **Now** add `vim.g.loaded_matchit = 1` and `vim.g.loaded_matchparen = 1` to
-  `globals.lua` — vim-matchup takes over. Its `init` block (`plugin_specs.lua:564-578`)
-  sets deferred matching for performance; keep it.
+So `../../home.nix` builds parsers from nixpkgs' prebuilt grammars instead:
 
-Folding and treesitter-based indent are commented out in `treesitter.lua:58-62` —
-leave them until Stage 8 brings in nvim-ufo.
+```nix
+treesitterLangs = [ "nix" "json" "toml" "yaml" "css" "bash" ];
 
-**Verify:** `:InspectTree` on a `.nix` file; `daf` inside a function; `gS` on a table.
+treesitterParsers = pkgs.runCommand "nvim-treesitter-parsers" { } ''
+  … ln -s ${pkgs.vimPlugins.nvim-treesitter-parsers.${lang}}/parser/${lang}.so …
+    cp -r ${pkgs.vimPlugins.nvim-treesitter}/runtime/queries/${lang} …
+'';
+```
+
+and symlinks the result into `~/.local/share/nvim/site/{parser,queries}`.
+
+Three things make that the right target directory:
+
+- it is nvim-treesitter's **own default `install_dir`** (`config.lua:10`), so this
+  is where `install()` would have put the same files;
+- it is one of the few paths that **survives lazy.nvim's runtimepath rebuild** —
+  a plain `set rtp+=…` is silently dropped (verified: appended path gone, `site`
+  still present);
+- grammars *and* queries come from the same nixpkgs `nvim-treesitter` revision,
+  so they cannot drift apart.
+
+`lua/config/treesitter.lua` is therefore rewritten: it only calls
+`vim.treesitter.start()`, and never `nvim-treesitter.install()` or
+`get_available()`. `build = ":TSUpdate"` is deliberately absent from the spec.
+The plugin itself is still needed — for `plugin/query_predicates.lua`, which the
+bundled queries rely on, and as the dependency textobjects/treesj expect.
+
+> **To add a language:** add its grammar to `treesitterLangs` in `home.nix`, add the
+> *filetype* to `enabled_filetypes` in `lua/config/treesitter.lua`, and rebuild.
+> The two lists differ where filetype ≠ language — `sh` maps to the `bash` grammar.
+
+`lua`, `markdown`, `markdown_inline`, `query`, `vim` and `vimdoc` are **bundled with
+Neovim** and are deliberately not in `treesitterLangs`: overriding their queries
+from a different revision would risk a mismatch with the bundled parsers.
+
+Corrections to what this section used to say:
+
+| Claim | Reality |
+|---|---|
+| nixpkgs would force the old `master` API | **nixpkgs 26.05 ships `main` too** — `configs.lua` is absent, `get_available`/`install` are present. No rewrite of the API was needed, only of the install path |
+| the plugin ships no queries | It ships **323 languages** under `<plugin>/runtime/queries/`. They are not at `<plugin>/queries/`, which is what made them look absent. `install()` links them into `site/queries/<lang>`; since we never call it, nix supplies them instead |
+| `vimPlugins.nvim-treesitter.withAllGrammars` | Evaluates to the **same store path** as the plain plugin here — it contributes no parsers. The per-language `vimPlugins.nvim-treesitter-parsers.<lang>` derivations are what actually carry `parser/<lang>.so` |
+
+Other changes from the target:
+
+| Change | Why |
+|---|---|
+| **`vim.g.no_plugin_maps` left unset** | The target sets it in textobjects' `init` (`plugin_specs.lua:98`). Despite sitting in that spec it disables *every* builtin ftplugin mapping for *every* filetype — `gO` in help, `[[`/`]]` section motions. Nothing in `af`/`if`/`ac`/`ic`/`as` collides with those |
+| **A missing grammar is silent** | `language.add` returning false means "add it to `treesitterLangs` and rebuild", not a runtime error worth a message on every file open |
+
+`globals.lua` now sets `vim.g.loaded_matchit = 1` and `vim.g.loaded_matchparen = 1` —
+vim-matchup has taken over, and its `init` keeps the target's deferred-matching
+performance settings and offscreen-match popup.
+
+Folding and treesitter indent stay commented out in `treesitter.lua` until
+nvim-ufo arrives in Stage 8.
+
+**Verify:** confirmed working — `configuration.nix` parses as `nix` with the
+highlighter active and a real `source_code` root node; `yaml`/`json`/`toml`/`css`/
+`sh`→`bash`/`lua` all attach their parser; `daf` inside a Lua function deleted all
+four of its lines. `:InspectTree` on a `.nix` file; `gS` on a table.
+
+> ⚠️ The `site/{parser,queries}` symlinks currently point at a store path created
+> for testing. **`sudo nixos-rebuild switch --flake .#default` re-points them** from
+> `home.nix`. If nix garbage-collects first they dangle and treesitter quietly has
+> no parsers — rebuilding fixes it.
 
 ---
 
-### Stage 7 — Fuzzy finding
+### Stage 7 — Fuzzy finding ✅ done
 
 **Plugins:** `ibhagwan/fzf-lua`, `folke/snacks.nvim`.
+**Files:** `lua/config/fzf-lua.lua`, `lua/config/snacks.lua` — both taken as-is.
 
-**Copy:** `lua/config/fzf-lua.lua`, `lua/config/snacks.lua`.
+Replaces telescope + telescope-fzf-native. `fzf`, `rg` and `fd` were all already
+on PATH, so this stage needed nothing from `configuration.nix`.
 
-Replaces telescope + telescope-fzf-native. `fzf` is already on PATH.
+Maps, all under `<leader>f`:
 
-Maps, all under `<leader>f` — these work fine with `<Space>` as leader:
-`ff` files · `fg` live grep · `fh` helptags · `ft` document symbols ·
-`fb` buffers · `fr` oldfiles · `<leader>gbl` git branches.
+| Key | Picker |
+|---|---|
+| `<leader>ff` | files |
+| `<leader>fg` | live grep (`live_grep_native`) |
+| `<leader>fh` | helptags |
+| `<leader>ft` | LSP document symbols |
+| `<leader>fb` | buffers |
+| `<leader>fr` | oldfiles |
+| `<leader>gbl` | git branches |
 
-> `<leader>ff` and `<leader>fg` are the same keys the previous config used for
-> telescope, so muscle memory carries over.
+`<leader>ff` and `<leader>fg` are the same keys the pre-rebuild config used for
+telescope, so muscle memory carries over. No bare `<leader>f` exists, so none of
+them waits out `timeoutlen`.
 
-`snacks.nvim` is loaded only for `input` and `picker` — it upgrades `vim.ui.input`
-and `vim.ui.select`, so LSP rename and code-action pickers look right. The plugin
-has ~20 other modules, all off by default.
+`defaults.file_icons = "mini"` means fzf-lua renders icons through mini.icons,
+which Stage 3 already installed — hence the explicit dependency in the spec.
 
-The target keeps telescope installed too (`plugin_specs.lua:136-142`, `cmd = "Telescope"`)
-purely for `telescope-symbols`. Not worth it — skip both.
+`snacks.nvim` is loaded only for `input` and `picker`; its ~20 other modules stay
+off. That is what upgrades `vim.ui.input` and `vim.ui.select`, so `<leader>lr`
+(rename) and `<leader>la` (code action) get a proper picker instead of a
+cmdline prompt.
 
-**Verify:** `<leader>ff` and `<leader>fg`; `<leader>la` (code action, after §4 remap)
-should open a snacks picker.
+Changed from the target:
+
+| Change | Why |
+|---|---|
+| **telescope and telescope-symbols skipped** | The target keeps telescope installed alongside fzf-lua (`plugin_specs.lua:136-142`, `cmd = "Telescope"`) purely for `telescope-symbols`. Not worth carrying a second finder |
+| **`opts = {}` dropped from the snacks spec** | The target sets both `opts` and `config`. lazy.nvim passes `opts` to `config`, but `config/snacks.lua` ignores its arguments and calls `setup` itself, so `opts` did nothing |
+
+`files.previewer = false` is kept from the target — file search has no preview
+pane. Grep does. `bat` and `delta` are not installed; fzf-lua's builtin previewer
+does not need them.
+
+**Verify:** confirmed working — `<leader>ff` opens a floating fzf terminal
+(1 window → 2, a `term://` buffer in a float). `vim.ui.input` resolves to
+`snacks/input.lua` and `vim.ui.select` to `snacks/picker/init.lua`, so the
+overrides are genuinely in place. All seven maps present.
 
 ---
 
-### Stage 8 — Statusline and window chrome
-
-The most visible stage, and the one with the most moving parts.
+### Stage 8 — Statusline and window chrome ✅ done
 
 **Plugins:** `nvim-lualine/lualine.nvim`, `akinsho/bufferline.nvim`,
-`Bekaboo/dropbar.nvim`, `luukvbaal/statuscol.nvim`, `kevinhwang91/nvim-ufo`
-(+ `promise-async`), `nvim-mini/mini.indentscope`, `folke/which-key.nvim`,
-`rcarriga/nvim-notify`.
+`kevinhwang91/nvim-ufo` (+ `promise-async`), `luukvbaal/statuscol.nvim`,
+`folke/which-key.nvim`, `rcarriga/nvim-notify`, `Bekaboo/dropbar.nvim`,
+`nvim-mini/mini.indentscope`.
 
-**`lua/config/lualine.lua` is 488 lines — do not paste it blind.** It reads from
-`symbol_icon` and calls several `utils` functions you may not have copied yet:
-`get_virtual_env`, `get_py_env`, `get_git_branches`, `throttle`. **Delete the python
-venv component** — it's dead weight here. Build the statusline up section by section;
-it is the easiest place in the whole config to lose half an hour to a nil index.
+lualine landed early — see its own subsection below. The other seven came with
+this stage.
+
+| Piece | Keys / effect |
+|---|---|
+| bufferline | buffer tabline · `<leader>tb` pick |
+| nvim-ufo | `zR` open all · `zM` close all · `zr` one level · `<leader>K` peek |
+| statuscol | clickable number/sign/fold column, fold depth capped at 3 |
+| which-key | popup after any prefix |
+| nvim-notify | takes over `vim.notify` |
+| dropbar | breadcrumb winbar |
+| mini.indentscope | current-indent guide, animation off |
+
+Changed from the target:
+
+| Change | Why |
+|---|---|
+| **`foldcolumn = "auto:1"`**, not `"1"` | The target adds a permanent fold column to every window, on top of `signcolumn = "yes:1"`. `auto:1` shows it only when the buffer has folds |
+| **`timeoutlen` 200 → 400** | which-key is only as useful as the window you get to read it in. The target uses 500; 400 keeps two-key sequences snappy. This stage's own note suggested ~400 |
+| **`<space>bp` → `<leader>tb`** | Bare `<space>` collides with the leader. See §4 |
+| **nvim-notify `background_colour` `#2E3440` → `#181616`** | The target hardcodes a **Nord** colour, which clashes with kanagawa-dragon. A concrete value is needed at all because `custom-autocmd.lua` makes `Normal` transparent, so there is no background to inherit. `#181616` is kanagawa-dragon's own |
+| **dropbar is `lazy = false`**, not `event = "VeryLazy"` | dropbar self-initialises from a **`once` FileType autocmd in its own `plugin/dropbar.lua`**. Any lazy trigger firing after the first buffer's FileType leaves *that* buffer with no winbar until you switch away and back. Verified: with the target's setting the startup buffer's `winbar` is empty; eager loading sources the plugin file first and both buffers get it. `BufWinEnter` does **not** fix it — same race |
+| **statuscol declares nvim-ufo as a dependency** | Makes "statuscol after ufo" an ordering guarantee rather than a side effect of which one happens to be lazier |
+| **`cond = firenvim_not_active` dropped from bufferline**, `opts = {}` dropped from statuscol | firenvim is not installed; `opts` did nothing next to a custom `config` |
+
+Treesitter folding stays commented out in `lua/config/treesitter.lua` — ufo drives
+folding through its own provider chain (LSP `foldingRange` → treesitter → indent)
+and sets `foldmethod = manual` itself, so setting `foldexpr` there would be
+redundant. The `foldingRange` capability comes from Stage 4's
+`lsp_utils.get_default_capabilities()`.
+
+**Verify:** confirmed working — all 8 plugins load with 0 errors;
+`foldcolumn = auto:1`, `foldlevel = 99`, `timeoutlen = 400`; `statuscolumn` and
+`tabline` both set; `zR`/`zM`/`zr`/`<leader>K` mapped and **functional** (`zM`
+closed folds covering 290 of 332 lines, `zR` reopened all of them — so ufo's
+treesitter fallback works before the LSP rebuild); `<leader>tb` present and
+`<space>bp` gone; `winbar` set on both the startup buffer and later ones.
+
+> `vim.notify` becomes a **table**, not a function — nvim-notify's module is
+> callable via `__call`. Calling it works; `debug.getinfo(vim.notify)` does not.
+
+#### lualine (landed earlier)
+
+What changed from `../nvim.bak/lua/config/lualine.lua`:
+
+| Change | Why |
+|---|---|
+| **`lualine_a` is `mode`**, filename moved to `lualine_c` with `path = 1` | The target has no mode component anywhere, yet `options.lua` sets `showmode = false`. Taken verbatim you get no mode indicator at all. The comment on `options.lua:117` was wrong and is now fixed |
+| **Dropped the ahead/behind counter** (`lualine.lua:78-111`) | It ran `git fetch origin` in the background every 3s for the whole session. This also made `utils.throttle` unnecessary |
+| **Dropped `virtual_env`** (227-235) | No python here — the target README says to delete it |
+| **Dropped `ime_state`** (122-137) | macOS-only Chinese IME indicator; `vim.g.is_mac` is false |
+| **Dropped the LSP `on_click` menu** (363-380) | It needs `lsp_utils.show_lsp_menu`, which belongs with `:LspAttached` in Stage 4. The LSP *indicator* is there and shows 🚫 until Stage 4 attaches a server |
+| **`trailing_space` rewritten** (139-168) | The target calls `fn.getline` + `fn.match` for every line of the buffer, every second. Now one `nvim_buf_get_lines` and a Lua pattern, plus a 10k-line bail-out — same answer, far cheaper |
+| **`utils._get_branch` returns `{}` on failure** | The target calls `vim._log`, which is not an API function on 0.12.4 and would error inside the branch menu |
+| **Branch menu `on_submit` strips the label** (335-347) | The target passes `item.text` straight to `git checkout`, but that string is `"  <icon> <branch>"` — every checkout from the menu would fail. The branch name is now split out of the label |
+
+Components that are live but inert until a later stage: the `diff` counts read
+`vim.b.gitsigns_status_dict` and stay blank until gitsigns lands in Stage 9; the LSP
+name needs Stage 4.
+
+`nui.nvim` is spec'd `lazy = true` and is deliberately **not** in lualine's
+`dependencies` — lazy.nvim loads a plugin's dependencies eagerly along with it, and
+only the branch-menu click handler needs nui. Its `require("nui.menu")` trips lazy's
+module loader on demand. Stage 4's `:LspAttached` popup can reuse it.
+
+**Still to do in this stage:**
 
 `nvim-ufo` (`nvim_ufo.lua`): `zR` open all · `zM` close all · `zr` open one level ·
 `<leader>K` peek folded lines. Its `init` block (`plugin_specs.lua:242-247`) sets
@@ -470,142 +696,224 @@ raising it from 200 to ~400 in `options.lua` here.
 `dropbar.nvim` needs no config; it uses the LSP/treesitter from Stages 4 and 6
 for the breadcrumb bar.
 
-**Verify:** statusline shows mode/branch/diagnostics; `zR`/`zM` fold; `<leader>` alone
-pops up which-key.
+Stage 1 also wires `symbol_icon.fillchars` into `options.lua` and
+`symbol_icon.indent` / `.tabline` into mini.indentscope and bufferline — those keys
+are sitting in `lua/symbol_icon.lua` unused for now.
+
+**Verify:** statusline shows mode/branch/diagnostics; click the branch name for a
+checkout menu; `zR`/`zM` fold; `<leader>` alone pops up which-key.
 
 ---
 
-### Stage 9 — Git
+### Stage 9 — Git ✅ done
 
-**Plugins:** `lewis6991/gitsigns.nvim`, `tpope/vim-fugitive`, `NeogitOrg/neogit`,
-`sindrets/diffview.nvim`, `ruifm/gitlinker.nvim`, `rbong/vim-flog`.
+**Plugins:** `lewis6991/gitsigns.nvim`, `tpope/vim-fugitive`,
+`sindrets/diffview.nvim`, `ruifm/gitlinker.nvim` (+ `nvim-lua/plenary.nvim`).
+**Files:** `lua/config/{gitsigns,fugitive,diffview,git-linker}.lua`.
 
-**Copy:** `lua/config/{gitsigns,fugitive,diffview,git-linker}.lua`.
+`fugitive` and `gitlinker` load on **`User InGitRepo`** — a custom event that only
+fires because `utils.inside_git_repo()` runs from the `git_repo_check` autocmd
+added in Stage 2. If the git maps do nothing, check that first; `:Lazy` will show
+them as never-loaded. (Verified working: both load in this repo.)
 
-> fugitive, neogit and gitlinker all use `event = "User InGitRepo"`. That event only
-> fires because of `utils.inside_git_repo()` from Stage 2. If git commands do nothing,
-> check that autocmd first — `:Lazy` will show them as never-loaded.
+| Keys | What |
+|---|---|
+| `]c` `[c` | next / previous hunk |
+| `<leader>hp` `<leader>hb` | preview hunk · blame line |
+| `<leader>hs` `<leader>hr` | stage / reset hunk (also visual, on the selection) |
+| `<leader>hu` `<leader>hS` `<leader>hR` | undo stage · stage buffer · reset buffer |
+| `<leader>gs` `gw` `gc` `gpl` `gpu` `gf` | fugitive: status · add · commit · pull · push · fetch |
+| `<leader>gbn` `<leader>gbd` | new / delete branch (both prompt) |
+| `<leader>gb` *(visual)* | blame the selection |
+| `<leader>gl` `<leader>gbr` | permalink to line · open repo in browser |
+| `:DiffviewOpen` · `]C` `[C` · `<leader>gC{t,o,a}` | diff view, conflict nav, choose theirs/ours/both |
 
-fugitive maps (`<leader>g…`): `gs` status · `gw` add · `gc` commit · `gpl` pull ·
-`gpu` push in a terminal split · `gb` blame (visual) · `gf` fetch ·
-`gbn` new branch (prompts) · `gbd` delete branch.
-gitlinker adds `<leader>gl` (permalink) and `<leader>gbr` (open in browser).
+Corrections to what this section used to say:
 
-With `<Space>` as leader these all live under `<Space>g`, alongside
-`<leader>gd`/`gr`/`gi` from glance (Stage 10) and `<leader>gbl` from fzf-lua.
-They coexist, but `<leader>gb` (visual blame) will wait for `timeoutlen`
-before firing because `gbn`/`gbd`/`gbl`/`gbr` share its prefix.
+| Claim | Reality |
+|---|---|
+| "gitsigns config maps hunk navigation **and staging**" | The target maps `]c`/`[c`, `<leader>hp` and `<leader>hb` and **nothing else** — no staging at all, which is the main reason to run gitsigns. `<leader>h{s,r,u,S,R}` were added here, including visual-range stage/reset |
+| "`<leader>gb` (visual blame) will wait for `timeoutlen` because `gbn`/`gbd`/`gbl`/`gbr` share its prefix" | **They do not compete — the modes differ.** `<leader>gb` is visual-only; `gbn`, `gbd`, `gbl` and `gbr` are all normal-mode. Verified: in visual mode the only `<leader>g` maps are `gb` and `gl`, so blame fires immediately |
 
-`gitsigns` config maps hunk navigation and staging on `on_attach`.
-neogit is a magit-style UI; fugitive is the command wrapper. Having both is
-redundant — pick one. Fugitive is the smaller, better-documented choice.
+Other changes from the target:
 
-**Verify:** open a file in this repo, make an edit, see signs; `<leader>gs`.
+| Change | Why |
+|---|---|
+| **gitlinker declares `plenary.nvim`** | It requires plenary (`gitlinker/git.lua:3`). The target only gets it because **neogit** lists plenary as a dependency — dropping neogit without this would have broken `<leader>gl` at keypress time, not at startup |
+| **neogit and vim-flog skipped** | neogit is a magit-style UI that overlaps fugitive almost entirely; this section already recommended picking one |
+| **diffview also loads on `:DiffviewFileHistory`** | The target only lists `cmd = { "DiffviewOpen" }`, so the file-history command would not load the plugin |
 
----
-
-### Stage 10 — Navigation, outline, quickfix
-
-**Plugins:** `nvim-tree/nvim-tree.lua`, `stevearc/aerial.nvim`, `smoka7/hop.nvim`,
-`kevinhwang91/nvim-hlslens`, `kevinhwang91/nvim-bqf`, `stevearc/quicker.nvim`,
-`dnlhc/glance.nvim`, `kosayoda/nvim-lightbulb`, `RRethy/vim-illuminate`.
-
-**Copy** the matching files from `lua/config/`.
-
-**Now re-enable** the three blocks held back in Stage 1:
-`custom-autocmd.lua:92-110` (open nvim-tree when nvim is given a directory) and
-`custom-autocmd.lua:204-228` (quit when only `qf`/`NvimTree` windows remain).
-
-`nvim-tree` config is 8 lines — `setup{}` plus `<space>s` to toggle. The previous
-config had a larger setup with diagnostic icons in the tree; keep that part, it's
-strictly better, and keep `<leader>e`/`<leader>ee` if you prefer those keys.
-
-`hop.nvim` binds `f` (`keys = { "f" }`, lazy). Note this shadows vim's `f{char}`.
-If `;`→`:` from Stage 1 was adopted, `f` repeat was already gone — these two go together.
-
-`hlslens` wraps `n`/`N`/`*`/`#` to show "3/17" next to the match. This is why
-`options.lua` has `shortmess+=S`.
-
-`bqf` and `quicker` both enhance the quickfix window; `bqf` is preview-focused,
-`quicker` makes it editable. They can coexist.
-
-`glance` adds `<space>gd`/`gr`/`gi` — see §4.
-
-`aerial` replaces `symbols-outline.nvim` from the previous config:
-`[t`/`]t` prev/next symbol, `<space>t` toggle.
-
-**Verify:** `nvim .` opens the tree; `f` then a letter jumps; `/` then `n` shows a count.
+**Verify:** confirmed working — in a tracked file with buffer-only edits, gitsigns
+reports `head=main added=2 changed=1`, the gutter shows `+` and `~` from
+`symbol_icon.git.diff`, and **lualine's diff section renders `+2 ~1`** — the
+component that had been inert since Stage 8 now has its data source. All nine
+hunk maps are buffer-local; all eight fugitive maps and both gitlinker maps exist.
 
 ---
 
-### Stage 11 — Text objects and editing power
+### Stage 10 — Navigation, outline, quickfix ✅ done
 
-Mostly `init`-only plugins with no config file. Add them in one go or one at a time.
+**Plugins:** `nvim-tree/nvim-tree.lua` (landed in Stage 3), `stevearc/aerial.nvim`,
+`smoka7/hop.nvim`, `kevinhwang91/nvim-hlslens`, `kevinhwang91/nvim-bqf`,
+`stevearc/quicker.nvim`, `dnlhc/glance.nvim`, `kosayoda/nvim-lightbulb`,
+`RRethy/vim-illuminate`.
+
+| Keys | What |
+|---|---|
+| `f` + 2 chars | hop: jump anywhere on screen (normal, visual, operator-pending) |
+| `n` `N` `*` `#` | hlslens: same motions, with a `[1/2]` counter at the match |
+| `[t` `]t` · `<leader>to` | aerial: prev/next symbol (buffer-local) · toggle outline |
+| `<leader>gd` `gr` `gi` | glance: peek definitions / references / implementations |
+| `<leader>ee` `ef` `ec` | nvim-tree: toggle · focus · change root (Stage 3) |
+| in `qf` | bqf preview + quicker editable list |
+
+Everything except nvim-tree and vim-illuminate is lazy — `keys`, `cmd` or
+`ft = "qf"` triggers — so none of them costs anything at startup.
+
+Changed from the target:
+
+| Change | Why |
+|---|---|
+| **`quicker` editing turned on** | The target sets `edit = { enabled = false }`, switching off the single feature this stage lists quicker *for*. With it on you can edit the quickfix list and `:w` to apply the changes across every file in it |
+| **`vim-illuminate` allowlist rewritten** | The target's list is `go java javascript json lua python sh toml typescript yaml` — **no `nix`**, the language this repo is mostly written in. go and java dropped; nix, elm, css, html and markdown added |
+| **`<space>t` → `<leader>to`**, **`<space>gd/gr/gi` → `<leader>gd/gr/gi`** | Bare `<space>` collides with the leader. See §4. The glance maps share the `<leader>g` namespace with fugitive but collide with none of them |
+| **hop declares its modes** | `keys = { { "f", mode = { "n", "x", "o" } } }` rather than bare `keys = { "f" }`, so the lazy stub exists in operator-pending too and `df<2 chars>` works on first press |
+| **aerial declares nvim-treesitter** | It is aerial's symbol backend until the LSP rebuild lands |
+
+> **`f` is now hop, not vim's within-line find.** `F`, `t` and `T` are untouched
+> (verified). `;`-as-f-repeat was already gone — Stage 1 made `;` = `:` — so these
+> two changes do go together, as this section said.
+
+`hlslens` needs `shortmess+=S` or nvim prints its own search count over the
+virtual text; `options.lua:167` already appends `cS`.
+
+`bqf` and `quicker` coexist: bqf brings preview (`auto_preview = false`, so press
+`p`), quicker brings the editable list and filename truncation.
+
+**Verify:** confirmed working, driven against a live instance — `f` then `fo`
+moved the cursor from `{1,0}` to `{2,11}`, landing on `foxtrot` two lines down;
+`/alpha` then `n` renders `[1/2]` beside the match. All eight plugins present,
+0 errors, `F`/`t`/`T` still vim's.
+
+---
+
+### Stage 11 — Text objects and editing power ✅ done
+
+All twelve adopted. Mostly `init`-only plugins; only yanky and live-command have
+a config file.
 
 | Plugin | Gives you |
 |---|---|
 | `wellle/targets.vim` | `ci,` `da(` `in[` — arguments, next/last variants of every pair |
-| `machakann/vim-sandwich` | `sa`/`sd`/`sr` add/delete/replace surrounding pairs. **Maps `s` to `<Nop>`** (`plugin_specs.lua:466-471`) — use `cl` instead |
-| `gbprod/yanky.nvim` | Yank ring: `[y`/`]y` cycle through previous yanks after a paste |
+| `machakann/vim-sandwich` | `sa`/`sd`/`sr` add/delete/replace pairs. Maps `s` to `<Nop>` — use `cl` |
+| `gbprod/yanky.nvim` | Yank ring: `[y`/`]y` cycle previous yanks after a paste |
 | `windwp/nvim-autopairs` | Auto-close brackets and quotes |
-| `tpope/vim-commentary` | `gcc`, `gc{motion}`. Replaces `Comment.nvim` |
-| `tpope/vim-repeat` | Makes `.` work with the plugins above |
-| `tpope/vim-eunuch` | `:Rename`, `:Delete`, `:Move` |
-| `smjonas/live-command.nvim` | Live preview of `:norm`, `:g`, `:s` |
+| `tpope/vim-commentary` | `gcc`, `gc{motion}` |
+| `tpope/vim-repeat` | Makes `.` work with the above |
+| `tpope/vim-eunuch` | `:Rename`, `:Delete`, `:Move`, `:Chmod`, `:Mkdir` |
+| `smjonas/live-command.nvim` | Live preview of `:Norm`, `:g`, `:s` |
 | `chrisbra/unicode.vim` | `ga` → what character is this |
-| `nvim-zh/whitespace.nvim` | Highlights trailing space; provides `:StripTrailingWhitespace` for `<leader><space>` from Stage 1 |
-| `nvim-zh/better-escape.vim` | `jk` to leave insert mode |
+| `nvim-zh/whitespace.nvim` | Trailing-space highlight + `:StripTrailingWhitespace` |
+| `nvim-zh/better-escape.vim` | `jk` to leave insert mode (200ms) |
 | `itchyny/vim-highlighturl` | Underlines URLs |
 
-**Verify:** `saiw"` to quote a word; `gcc`; yank three things, paste, `[y`.
+**`<leader><space>` is no longer parked.** whitespace.nvim provides
+`:StripTrailingWhitespace`, so the last deferred mapping in `lua/mappings.lua` is
+live and that file has no commented-out section left.
+
+`vim-highlighturl` also improves Stage 2's `iu` text object: `text_obj#URL()`
+checks the runtimepath for it and uses its URL pattern, falling back to an
+`expand('<cfile>')` length heuristic when absent.
+
+Changed from the target:
+
+| Change | Why |
+|---|---|
+| **yanky maps `p`/`P` in normal mode only** | The target maps `{ "n", "x" }`. Visual `p` is already `"_c<Esc>p` from Stage 1 — paste over a selection without clobbering the register — and yanky loads later, so it would have silently taken that over. Verified: normal `p` is `<Plug>(YankyPutAfter)`, visual `p` is still `"_c<Esc>p` |
+| **yanky loads on `VeryLazy`, not `cmd = "YankyRingHistory"`** | Its `config` installs the `p`/`P`/`[y`/`]y` maps *and* the autocmd that records yanks. Under the target's spec none of that existed until you ran that command by hand — **the plugin was inert**, and any yank made before it would be missing from the ring |
+| **`vim-eunuch` and `unicode.vim` list more triggers** | The target loads eunuch only on `:Rename`/`:Delete`, so `:Move`/`:Chmod`/`:Mkdir` never loaded it; unicode.vim had no trigger for `ga` at all |
+
+**Verify:** confirmed working — `saiw"` turned `word here` into `"word" here`;
+three successive `yy` left a 4-entry yank ring (`three,two,one`, plus one
+restored from ShaDa); `[y`/`]y` mapped to the Yanky plugs; `s` is `<Nop>` with
+`sa`/`sd`/`sr` live; `<leader><space>` resolves to `:StripTrailingWhitespace`
+and the command exists; `:Norm` appears once `CmdlineEnter` loads live-command.
 
 ---
 
-### Stage 12 — Filetype layer
+### Stage 12 — Filetype layer ✅ done
 
-**Copy selectively from `after/ftplugin/`:**
+**Taken from `after/ftplugin/`** (11 of 18): `lua.lua`, `vim.vim`, `markdown.vim`,
+`json.lua`, `yaml.vim`, `toml.vim`, `gitconfig.vim`, `text.vim`, `help.lua`,
+`man.lua`, `qf.vim`. Plus `.stylua.toml` and `ftdetect/pdc.vim`.
 
-Worth taking: `lua.lua` (`<F9>` to `:luafile %`, `<Space>f` to run stylua — needs
-remapping per §4, and `stylua` is not on PATH yet), `markdown.lua` (`:AddRef`
-reference-link helper with completion), `help.lua`, `man.lua`, `qf.vim`,
-`json.lua`, `yaml.vim`, `toml.vim`, `gitconfig.vim`, `text.vim`.
+**Skipped:** `python.lua`, `go.lua`, `cpp.vim`, `tex.lua`, `sql.vim`,
+`javascript.vim`, `markdown.lua` — languages not in use here. `ftdetect/snippets.vim`
+and `my_snippets/` go with **ultisnips**, which needs the python3 provider that
+`globals.lua` disables; `friendly-snippets` (Stage 5) covers snippets instead.
+`_typos.toml` needs typos-lsp and `.emmyrc.json` needs emmylua_ls — neither installed.
 
-Skip: `python.lua`, `go.lua`, `cpp.vim`, `tex.lua`, `sql.vim`, `javascript.vim`
-unless relevant. Create `elm.lua` / `nix.lua` on the same pattern if you want
-per-filetype run keys.
+**Plugins:** `MeanderingProgrammer/render-markdown.nvim` (ft-lazy),
+`godlygeek/tabular` (cmd-lazy), `vim-pandoc/vim-markdownfootnotes` (ft-lazy).
+The footnote plugin is what activates the guarded `^^`/`@@` block already in
+`markdown.vim`.
 
-**Plugins:** `MeanderingProgrammer/render-markdown.nvim`, `godlygeek/tabular`,
-`vim-pandoc/vim-markdownfootnotes`.
+Changed from the target:
 
-**Skip `SirVer/ultisnips` and `my_snippets/`** — needs the python3 provider that
-Stage 0 disabled. `friendly-snippets` from Stage 5 covers it.
+| Change | Why |
+|---|---|
+| **`set` → `setlocal` in all four `.vim` ftplugins** | Every option they touch (`formatoptions`, `keywordprg`, `concealcursor`, `synmaxcol`, `wrap`, `colorcolumn`, `commentstring`) is buffer- or window-local, so plain `set` also writes the **global** default and leaks it to other buffers. **Confirmed**: opening one `.vim` file left `keywordprg` as `:help` globally — it had been `:Man`. With `setlocal` it returns to `:Man` on leaving the buffer |
+| **`vim.vim` loses its fold settings** | It sets `foldmethod=expr` with `utils#VimFolds`. nvim-ufo (Stage 8) owns folding globally and sets `foldmethod=manual`; the two fight over every `.vim` buffer, and this config has several. Verified `foldmethod` is now `manual` in `.vim` buffers |
+| **`q` added to `help.lua` and `qf.vim`** | The target only restores `q`-to-close for **man** pages. Stage 1's global `q` reminder cost it in help and quickfix too; these are the same buffer-local fix. The global mapping, and `Q` for macros, are untouched |
+| **`<Space>f` → `<leader>lf` in `lua.lua` and `json.lua`** | Bare `<space>` collides with the leader (§4). Both are buffer-local, so they shadow the global `<leader>lf` (`vim.lsp.buf.format`) only for those filetypes — stylua for lua, `:JSONFormat` for json |
+| **`checktime` added after stylua** | stylua rewrites the file on disk behind nvim's back. Without it the buffer shows stale text until the `auto_read` autocmd happens to fire |
 
-**Tool configs:** copy `.stylua.toml` (2-space indent, matching `options.lua`) and
-`_typos.toml` if you add typos-lsp. `.emmyrc.json` only matters for emmylua_ls,
-which is commented out upstream.
+> `markdown.vim` rebinds `ic`/`ac` buffer-locally to `text_obj#MdCodeBlock`
+> (Stage 2), shadowing treesitter-textobjects' class objects. That is deliberate
+> — "class" means nothing in markdown, "code block" does.
+
+**Verify:** confirmed working — in a `.lua` buffer `<leader>lf` is buffer-local
+and runs stylua + `checktime`, `<F9>` is `:luafile %`, `formatoptions` is `qlcj`
+(no `o`/`r`); `q` is buffer-local `<cmd>quit<CR>` in **both** help and quickfix;
+the quickfix window opens 5 lines high; `.vim` buffers get `keywordprg=:help`
+and `<F9>` `:source %` with `foldmethod=manual`; markdown gets buffer-local
+`ic`/`ac`, the `+` list operator, `wrap`, and render-markdown loaded.
 
 ---
 
-### Stage 13 — Optional and skipped
+### Stage 13 — Optional and skipped ✅ done
+
+**Adopted:** `catgoose/nvim-colorizer.lua`, `tadaa/vimade`, `tpope/vim-scriptease`,
+`tpope/vim-obsession`. (`plugin/log-autocmds.vim` and `resources/head.tex` came
+earlier, with Stage 2.)
 
 | Plugin / file | Why it's here | Verdict |
 |---|---|---|
-| `glacambre/firenvim` | Edit browser textareas in nvim. `enabled` only on win/mac (`plugin_specs.lua:648`) | skip on Linux |
-| `lervag/vimtex` + `resources/head.tex` + `:ToPDF` | LaTeX authoring | skip unless you write LaTeX |
-| `iron.lua` | Python REPL. Needs python3 provider | skip |
-| `chrishrb/gx.nvim` | Open URL under cursor. `enabled` win/mac only | skip; `:!xdg-open` works |
-| `lyokha/vim-xkbswitch`, `Neur1n/neuims` | IME switching, mac/win only | skip |
-| `ojroques/vim-oscyank` | Clipboard over SSH via OSC52. nvim has this builtin now | skip |
-| `nickjvandyke/opencode.nvim` | opencode integration | personal call |
-| `tadaa/vimade` | Dims inactive windows | nice-to-have |
-| `catgoose/nvim-colorizer.lua` | Renders colour literals | useful for CSS/themes |
-| `esmuellert/codediff.nvim` | `:CodeDiff` | redundant with diffview |
-| `skywind3000/asyncrun.vim` | `:AsyncRun` into quickfix | redundant with `vim.system` / the old `:Run` command |
-| `tpope/vim-obsession` | Session saving | personal call |
-| `mg979/vim-visual-multi` | Multi-cursor. Already commented out upstream | — |
-| `lua/dotenv.lua` | Reads `~/.config/.env`. Nothing requires it | skip |
-| `plugin/log-autocmds.vim` | `:VerboseAutocmds` debug tool | keep around for debugging |
-| `glacambre/firenvim`, `tpope/vim-scriptease` | | scriptease is handy: `:Messages`, `:Scriptnames` |
+| `catgoose/nvim-colorizer.lua` | Renders colour literals | ✅ — this repo has several CSS files plus hex colours through the nvim config |
+| `tadaa/vimade` | Dims inactive windows (`fadelevel = 0.5`, animation off) | ✅ |
+| `tpope/vim-scriptease` | `:Messages`, `:Scriptnames`, `:Verbose` | ✅ cmd-lazy |
+| `tpope/vim-obsession` | `:Obsess` session recording | ✅ cmd-lazy |
+| `glacambre/firenvim` | Edit browser textareas | skip — `enabled` win/mac only |
+| `chrishrb/gx.nvim` | Open URL under cursor | skip — **`gx` is a builtin in nvim 0.12** (`vim/_core/defaults:157`), verified mapped out of the box |
+| `lervag/vimtex` | LaTeX authoring | skip. `:ToPDF` + `resources/head.tex` were taken in Stage 2 and error cleanly without pandoc |
+| `iron.lua` | Python REPL | skip — needs the python3 provider `globals.lua` disables |
+| `lyokha/vim-xkbswitch`, `Neur1n/neuims` | IME switching | skip — mac/win only |
+| `ojroques/vim-oscyank` | Clipboard over SSH | skip — nvim has OSC52 builtin |
+| `esmuellert/codediff.nvim` | `:CodeDiff` | skip — diffview (Stage 9) covers it |
+| `skywind3000/asyncrun.vim` | `:AsyncRun` into quickfix | skip — `:Run` (Stage 2) and `vim.system` cover it |
+| `nickjvandyke/opencode.nvim` | opencode agent integration | skip |
+| `mg979/vim-visual-multi` | Multi-cursor | skip — commented out upstream too |
+| `lua/dotenv.lua` | Reads `~/.config/.env` | skip — nothing requires it |
+
+> **colorizer only highlights the visible viewport.** It will look broken if you
+> test it headlessly or with the cursor away from the colours — `is_buffer_attached`
+> returns true while the namespace holds zero extmarks. Verified in a real
+> terminal: with the cursor on `custom-autocmd.lua:190` the namespace holds 3
+> extmarks (`hl = colorizer_mb_34495e`). `names` parsing is off, so the word
+> "red" in prose is not highlighted.
+
+**Verify:** `:Messages` and `:Obsess` exist; colour literals render in `.css` and
+in the config's own hex values; inactive windows dim.
 
 ---
 
@@ -623,7 +931,7 @@ several pairs collide:
 | `<space>wa`/`wr`/`wl` workspace folders | `lsp_conf.lua:75-79` | **`<leader>w` = save** |
 | `<space>qw`/`qb` diagnostics→quickfix | `diagnostic-conf.lua:43-48` | **`<leader>q` = quit** |
 | `<Space>f` stylua format | `after/ftplugin/lua.lua` | **`<leader>ff`/`fg`/`fh`/`ft`/`fb`/`fr` = fzf-lua** |
-| `<space>s` nvim-tree toggle | `config/nvim-tree.lua:5` | `<leader>s` if you keep the old symbol map |
+| ~~`<space>s` nvim-tree toggle~~ | `config/nvim-tree.lua:5` | resolved — see below |
 | `<space>t` aerial toggle | `config/aerial.lua` | — |
 | `<space>bp` bufferline pick | `config/bufferline.lua` | — |
 | `<space>gd`/`gr`/`gi` glance | `config/glance.lua` | shares `<leader>g` with fugitive (resolvable) |
@@ -635,19 +943,23 @@ Suggested scheme — LSP under `l`, diagnostics under `d`, toggles under `t`:
 
 | Target | Use instead | What |
 |---|---|---|
-| `<space>rn` | `<leader>lr` | rename |
-| `<space>ca` | `<leader>la` | code action |
-| `<space>wa` / `wr` / `wl` | `<leader>lwa` / `lwr` / `lwl` | workspace folders |
-| `<Space>f` (stylua) | `<leader>lf` | format buffer |
-| `<space>qw` | `<leader>dw` | window diagnostics → quickfix |
-| `<space>qb` | `<leader>db` | buffer diagnostics → quickfix |
-| `<space>s` | `<leader>e` / `<leader>ee` | nvim-tree focus / toggle (as before) |
-| `<space>t` | `<leader>to` | aerial outline |
-| `<space>bp` | `<leader>tb` | bufferline pick |
-| `<space>gd` / `gr` / `gi` | keep | glance — no conflict |
+| `<space>rn` | `<leader>lr` | rename ✅ |
+| `<space>ca` | `<leader>la` | code action ✅ |
+| `<space>wa` / `wr` / `wl` | `<leader>lwa` / `lwr` / `lwl` | workspace folders ✅ |
+| `<Space>f` (stylua) | `<leader>lf` | format buffer ✅ (via `vim.lsp.buf.format`) |
+| `<space>qw` | `<leader>dw` | window diagnostics → quickfix ✅ |
+| `<space>qb` | `<leader>db` | buffer diagnostics → quickfix ✅ |
+| `<space>s` | `<leader>ee` / `<leader>ef` / `<leader>ec` | nvim-tree toggle / focus / change root ✅ |
+| `<space>t` | `<leader>to` | aerial outline ✅ |
+| `<space>bp` | `<leader>tb` | bufferline pick ✅ |
+| `<space>gd` / `gr` / `gi` | `<leader>gd` / `gr` / `gi` | glance ✅ — no conflict with fugitive's `<leader>g*` |
 
 Keep from the previous config, unchanged: `<leader>w` save, `<leader>ff` /
-`<leader>fg` find, `<leader>p` paste, `<leader>e` tree.
+`<leader>fg` find, `<leader>p` paste.
+
+> The previous config's `<leader>e` focus / `<leader>ee` toggle is itself an instance
+> of the rule above: the one-key map is a prefix of the two-key one, so it only fires
+> after `timeoutlen`. Hence `<leader>e{e,f,c}` with no bare `<leader>e`.
 
 Mappings that **don't** involve leader and transplant verbatim:
 `gd`, `K`, `<C-k>`, `<C-]>` (LSP) · `[t`/`]t` (aerial) · `zR`/`zM`/`zr` (ufo) ·
@@ -699,11 +1011,11 @@ Pieces worth pulling back in as you go:
 
 | From | What | Where it goes |
 |---|---|---|
-| `lua/plugins/lsp.lua` | nixd flake-options settings | `after/lsp/nixd.lua` (Stage 4) |
-| `lua/highlights.lua` | transparent `Normal`/`NormalNC`/`SignColumn` | the `ColorScheme` autocmd (Stage 1) |
-| `lua/commands.lua` | `:Run` — detached `jobstart` | `plugin/command.lua` (Stage 2) |
+| `lua/plugins/lsp.lua` | nixd flake-options settings | ✅ `after/lsp/nixd.lua` (+ `after/lsp/elmls.lua`) |
+| `lua/highlights.lua` | transparent `Normal`/`NormalNC`/`SignColumn` | ✅ `ui.lua`, moves to the `ColorScheme` autocmd in Stage 1 |
+| `lua/commands.lua` | `:Run` — detached `jobstart` | ✅ `plugin/command.lua` |
 | `lua/keymaps.lua` | `<leader>k` opens kitty in cwd; `<A-j>` to escape insert | `mappings.lua` (Stage 1) — note better-escape.vim (Stage 11) does `jk` instead |
-| `lua/plugins/nvimtree.lua` | diagnostic icons in the tree | `config/nvim-tree.lua` (Stage 10) |
+| `lua/plugins/nvimtree.lua` | diagnostic icons in the tree | ✅ `config/nvim-tree.lua` |
 
 ---
 

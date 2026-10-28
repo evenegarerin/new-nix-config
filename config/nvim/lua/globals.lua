@@ -36,8 +36,7 @@ vim.cmd([[language en_US.UTF-8]])
 ------------------------------------------------------------------------
 --                    disable builtin plugins                         --
 ------------------------------------------------------------------------
--- netrw: replaced by nvim-tree in Stage 10. Disabling it now means `:Ex` and
--- opening a directory give you an empty buffer until then -- that is expected.
+-- netrw: replaced by nvim-tree, which is loaded from lua/plugin_specs.lua.
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 vim.g.netrw_liststyle = 3
@@ -54,10 +53,10 @@ vim.g.loaded_tutor_mode_plugin = 1
 -- Broken, see the upstream note in nvim.bak/lua/globals.lua
 vim.g.loaded_sql_completion = 1
 
--- NOTE: nvim.bak also sets `loaded_matchit` and `loaded_matchparen` here,
--- because it replaces them with vim-matchup. Only add those two lines in
--- Stage 6 when vim-matchup is actually installed -- setting them now just
--- removes % matching and bracket highlighting with nothing taking over.
+-- vim-matchup (Stage 6) replaces both of these: it provides % matching and
+-- bracket highlighting, with offscreen-match popups and deferred highlighting.
+vim.g.loaded_matchit = 1
+vim.g.loaded_matchparen = 1
 
 -- control how to show health check window
 vim.g.health = { style = nil }

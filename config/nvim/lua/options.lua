@@ -4,6 +4,7 @@
 local utils = require("utils")
 
 local fn = vim.fn
+local symbol_icon = require("symbol_icon")
 local opt = vim.opt
 local o = vim.o
 
@@ -19,7 +20,7 @@ opt.splitkeep = "screen" -- [bak] avoid flicker when splitting horizontally
 ------------------------------------------------------------------------
 -- [old] 200ms. The target uses 500, which is friendlier once which-key is in
 -- (Stage 8) because it gives you time to read the popup.
-opt.timeoutlen = 200
+opt.timeoutlen = 400 -- enough to read the which-key popup (Stage 8); [bak] uses 500
 opt.updatetime = 500 -- [bak] drives CursorHold, used by diagnostics + auto-read
 
 ------------------------------------------------------------------------
@@ -114,7 +115,7 @@ end
 --                            appearance                              --
 ------------------------------------------------------------------------
 opt.termguicolors = true -- [old] + [bak]
-opt.showmode = false -- [bak] lualine shows the mode (Stage 8)
+opt.showmode = false -- [bak] lualine's lualine_a shows the mode instead
 opt.ruler = false -- [bak]
 opt.showcmdloc = "statusline" -- [bak]
 opt.wrap = false -- [bak]
@@ -124,16 +125,18 @@ opt.signcolumn = "yes:1" -- [bak] always reserve one sign column
 opt.colorcolumn = "100" -- [bak]
 opt.synmaxcol = 250 -- [bak] stop highlighting very long lines
 
--- [old] Show tabs and trailing whitespace.
--- NOTE: the target drives `listchars` and `fillchars` from lua/symbol_icon.lua
--- (nerd font glyphs). Swap these for `symbol_icon.fillchars` in Stage 1.
+-- [bak] Fold chars, window separators, end-of-buffer and message separator.
+opt.fillchars = symbol_icon.fillchars
+
+-- Show tabs and trailing whitespace. [bak] glyphs, except `trail` which stays
+-- the ° from the previous config -- the target does not set `trail` at all.
 opt.list = true
 opt.listchars = {
-  tab = "  ",
+  tab = "→ ",
   trail = "°",
-  extends = ">",
-  precedes = "<",
-  nbsp = "+",
+  extends = "❯",
+  precedes = "❮",
+  nbsp = "␣",
 }
 
 -- [bak] Cursor shape/colour per mode. The Cursor/Cursor2 highlight groups it

@@ -5,7 +5,6 @@ tools: Read, Write, Edit, Glob, Grep, Bash
 model: inherit
 memory: project
 color: blue
-Omitclaudemd: true
 ---
 
 You are a senior software engineer implementing a clearly scoped task handed to you by a planner. You do not see the planner's conversation, so the task message is your full brief.

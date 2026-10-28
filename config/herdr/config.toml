@@ -35,15 +35,15 @@ focus_agent = "prefix+1..9"
 detach        = "prefix+shift+e"
 help          = "prefix+?"
 reload_config = "prefix+shift+r"
-goto          = ""                  # was prefix+g
+goto          = "prefix+g"
 
 # Navigate-mode movement            (only reachable via `goto`)
-navigate_workspace_up   = ""        # was up
-navigate_workspace_down = ""        # was down
-navigate_pane_left      = ""        # was h
-navigate_pane_down      = ""        # was j
-navigate_pane_up        = ""        # was k
-navigate_pane_right     = ""        # was l
+navigate_workspace_up   = "up"
+navigate_workspace_down = "down"
+navigate_pane_left      = "h"
+navigate_pane_down      = "j"
+navigate_pane_up        = "k"
+navigate_pane_right     = "l"
 
 
 # ---------------------------------------------------------------------------
@@ -95,6 +95,8 @@ agents     = ""
 enabled = false
 
 [update]
-
 version_check = false
 manifest_check = false
+
+[session]
+resume_agents_on_restore = true

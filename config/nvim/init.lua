@@ -13,20 +13,20 @@ require("globals")
 require("options")
 
 -- Stage 1: autocommands
--- require("custom-autocmd")
+require("custom-autocmd")
 
 -- Stage 1: user-defined mappings
--- require("mappings")
+require("mappings")
 
 -- Stage 3: lazy.nvim bootstrap + all plugin specs
--- require("plugin_specs")
+require("plugin_specs")
 
 -- Stage 4: LSP. Must come AFTER plugin_specs, nvim-lspconfig is loaded there.
--- require("lsp_conf")
+require("lsp_conf")
 
 -- Stage 4: diagnostic display config
--- require("diagnostic-conf")
+require("diagnostic-conf")
 
 -- Stage 3: colorscheme. Must come LAST so the ColorScheme autocmd defined in
 -- custom-autocmd.lua is already registered when the scheme is applied.
--- require("ui")
+require("ui")

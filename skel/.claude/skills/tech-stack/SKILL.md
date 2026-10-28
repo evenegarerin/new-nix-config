@@ -122,15 +122,22 @@ Nur bei Full-Stack oder Frontend-only. Mehrfachauswahl:
 | Real-Time Updates | SSE (`useSSE`-Hook) |
 | Notifications | Sonner |
 
+**PWA ist kein Feature, sondern gesetzt.** Jedes Frontend wird als Progressive
+Web App gebaut (`vite-plugin-pwa`, Manifest, Service Worker, Offline-Fallback) —
+siehe Stack-Standards → PWA. Nicht
+danach fragen, nur die PWA-Metadaten erheben: App-Name, Kurzname (≤ 12 Zeichen),
+`theme_color`, `background_color`.
+
 ### Phase 6: Infrastruktur
 
 1. **Docker**: Ja (Standard) | Nein
 2. **GitLab CI**: Ja (Standard) | Nein
 3. **Kubernetes-Manifeste**: Nein (Standard) — Deployment-Manifeste gehören in ein separates GitOps-/Deployment-Repo, nicht ins Scaffolding
 4. **Container-Registry**: Host der Registry (z.B. `registry.example.com`) — im Folgenden `{registry}`
-5. **Secrets**: Welche Zugangsdaten (DB, Keycloak-Client-Secret, S3, SMTP, Fremd-APIs) und welche Profile (`default`, `staging`, `production`)?
+5. **Secrets**: Welche Zugangsdaten (DB, Keycloak-Client-Secret, S3, SMTP, Fremd-APIs) werden gebraucht?
 
-secretspec ist gesetzt — es wird nur gefragt, *welche* Secrets es gibt.
+Der Weg ist gesetzt — OpenBao → `.envrc` → Umgebungsvariablen (Skill `secrets`).
+Gefragt wird nur, *welche* Secrets es gibt und wie die Variablen heißen.
 
 **Guardrails (Pflicht, nicht verhandelbar):** Rules in `.claude/rules/` sind nur
 Doku; ohne maschinelle Erzwingung erodiert die Architektur. Generiere daher immer:
@@ -163,10 +170,10 @@ Scaffolding praktisch immer veraltet.
 - **Tooling** (Node.js LTS, pnpm, Gradle Wrapper, JDK): offizielle Release-Seite
   prüfen; pnpm via `corepack use pnpm@latest`.
 
-Lookups parallel ausführen. Bei fehlendem Netz: auf `references/versions.md`
-(Fallback-Baseline) zurückgreifen und dem Benutzer melden, welche Versionen daher
-stammen. Danach eine Tabelle der tatsächlich gesetzten Versionen zeigen
-("Stand: {Datum}").
+Lookups parallel ausführen. Bei fehlendem Netz: **keine Versionen raten.** Frag
+den Benutzer nach den Versionen oder lass die betroffenen Einträge offen (`TODO:
+Version prüfen`) und sag ausdrücklich, welche Teile deshalb unvollständig sind.
+Danach eine Tabelle der tatsächlich gesetzten Versionen zeigen ("Stand: {Datum}").
 
 #### Scope
 
@@ -176,9 +183,9 @@ Das Scaffolding erstellt **nur**:
 - Application Entry Point (`@SpringBootApplication` + `@Modulithic`)
 - `SuccessResponse<T>`-Wrapper
 - `ModulithArchitectureTest` + ArchUnit/Konsist-Companion-Test
-- Frontend-Skeleton (Vite, Theme, Router, Hey-API-Config, Lint-Setup)
+- Frontend-Skeleton (Vite, Theme, Router, Hey-API-Config, Lint-Setup, PWA-Setup: Manifest, Service Worker, Icons, Offline-Fallback)
 - Infrastruktur (Dockerfile, docker-compose, `.gitlab-ci.yml` mit `check`-Stage, `justfile`, `.env.example`)
-- `secretspec.toml` + `.envrc`
+- `.envrc` (OpenBao-Secrets als Umgebungsvariablen)
 - `CLAUDE.md` + `.claude/rules/`
 - `docs/architecture/zielbild-schichten-und-events.md`
 - Event Publication Registry nur, wenn Events gewählt wurden
@@ -207,6 +214,9 @@ Beispiel-Module — die entstehen im Feature-Workflow.
 │       ├── components/
 │       ├── theme/            # MUI-Theme (createTheme)
 │       └── ui/               # Projektweite Basis-Komponenten
+│   └── public/
+│       ├── icons/            # PWA-Icons 192px + 512px (+ maskable)
+│       └── offline.html      # Offline-Fallback
 ├── build.gradle.kts
 ├── settings.gradle.kts       # include("{name}-api", "{name}-core", "{name}-frontend", "{name}-app")
 ├── gradle/wrapper/
@@ -215,7 +225,6 @@ Beispiel-Module — die entstehen im Feature-Workflow.
 ├── Dockerfile
 ├── .gitlab-ci.yml
 ├── .env.example
-├── secretspec.toml
 ├── .envrc
 ├── justfile
 └── CLAUDE.md
@@ -274,7 +283,7 @@ Serving (z.B. nginx, non-root).
 3. Core-Modul (Basis-Package mit `.gitkeep`)
 4. App-Modul (`@Modulithic`-Application, `application.yml`, `db/migration/`, `ModulithArchitectureTest`, ArchUnit-Test)
 5. Frontend-Modul (nur Full-Stack): `build.gradle.kts`, `package.json` ohne Deps, dann `pnpm add …`
-6. Infrastruktur (Docker, CI, docker-compose, justfile, secretspec)
+6. Infrastruktur (Docker, CI, docker-compose, justfile, `.envrc`)
 7. `CLAUDE.md`
 8. `.claude/rules/`
 9. `docs/architecture/zielbild-schichten-und-events.md`
@@ -287,8 +296,17 @@ Troubleshooting.
 
 #### `.claude/rules/`
 
-Templates in `references/rules.md`. Platzhalter ersetzen, nicht gewählte Blöcke
-(z.B. `{EVENTS}…{/EVENTS}`) entfernen, `globs:`-Frontmatter für dateispezifische Rules.
+Schreibe die Rules selbst aus den Stack-Standards weiter unten — es gibt keine
+Template-Dateien, die du kopieren könntest. Pro Rule gilt:
+
+- Eine Datei pro Thema, 20–60 Zeilen. Kurz und konkret, keine Lehrbuchtexte.
+- Frontmatter: `description:` (ein Satz) und bei dateispezifischen Rules `globs:`
+  (z.B. `**/*.tsx` für Frontend-Rules, `**/*.kt` für Kotlin-Rules).
+- DO/DON'T mit je einem Codebeispiel aus *diesem* Projekt (echte Package- und
+  Modulnamen, keine Platzhalter).
+- Nur Kapitel schreiben, die auf die getroffenen Entscheidungen zutreffen —
+  ohne gewählte Domain Events kein Event-Kapitel, ohne Frontend keine
+  Frontend-Rules.
 
 **Backend:**
 - `clean-architecture.md` — Abhängigkeitsregel, Schichten, Modulgrenzen, Modell-Strategie
@@ -305,6 +323,7 @@ Templates in `references/rules.md`. Platzhalter ersetzen, nicht gewählte Blöck
 - `react-code-standards.md` — Components, Props, Hooks; Data-Fetching-Hook-Schicht Pflicht (kein inline `useQuery`/`useMutation` in Routen/Komponenten)
 - `mui-standards.md` — Theme, `sx` statt System-Props, Grid `size`, Accessibility
 - `lint-setup.md` — type-aware ESLint (`recommendedTypeChecked`), geteiltes Paket `@{project}/eslint-config` (Base + React), `--max-warnings 0`
+- `pwa.md` — Manifest-Pflichtfelder, Service-Worker-Strategie, Offline-Fallback, Lighthouse-Check vor Release
 
 ## Stack-Standards (gelten immer)
 
@@ -355,33 +374,37 @@ Kommentare, Doku. Keine Umlaute/Transliterationen in Identifiern, kein Denglisch
 Ausnahmen (mit Kommentar): rechtliche Begriffe ohne Pendant, Normformate (DATEV,
 XRechnung, ZUGFeRD), Fremdschemata (einmal im Adapter übersetzt), Eigennamen.
 
-### Secrets: secretspec + OpenBao
+### Secrets: OpenBao + `.envrc`
 
-Jedes Projekt bekommt `secretspec.toml` + `.envrc`. Prozesse mit Zugangsdaten
-starten über `secretspec run` (Einstieg via justfile).
+Quelle der Wahrheit ist OpenBao. `.envrc` (direnv) holt die Werte und exportiert
+sie als Umgebungsvariablen; die Anwendung liest ausschließlich Umgebungsvariablen
+und kennt OpenBao nicht. Details im Skill `secrets`.
 
 | | Ort | Beispiele |
 |---|---|---|
 | Nicht geheim | `.env.example` / Env-Variablen | `SERVER_PORT`, `SPRING_PROFILES_ACTIVE`, Keycloak-Issuer/JWKS, S3-Endpoint/Bucket |
-| Geheim | `secretspec.toml` → OpenBao | DB-Passwort/URL, Keycloak-Client-Secret, S3-Keys, SMTP, API-Tokens |
+| Geheim | OpenBao → `.envrc` → Env-Variable | DB-Passwort/URL, Keycloak-Client-Secret, S3-Keys, SMTP, API-Tokens |
 
-Kein Secret in `.env.example`, auch nicht als Platzhalter.
+Kein Secret in `.env.example`, auch nicht als Platzhalter. Keine Vault-/OpenBao-
+Clients im Anwendungscode. Spring liest die Variablen über Placeholder in
+`application.yml` (`${SPRING_DATASOURCE_PASSWORD}`) — ohne Default-Wert, damit der
+Start bei fehlendem Secret laut scheitert.
 
-```toml
-[project]
-name = "{project}"
-revision = "1.0"
+```bash
+# .envrc
 
-[providers]
-bao = "openbao://{openbao-host}/apps"
+# --- Entwicklung: OpenBao gemockt mit offensichtlich falschen Werten ---
+export SPRING_DATASOURCE_PASSWORD="dev-fake-password"
+export KEYCLOAK_CLIENT_SECRET="dev-fake-client-secret"
 
-[profiles.default]
-SPRING_DATASOURCE_PASSWORD = { description = "Postgres-Passwort", required = true, providers = ["bao"] }
+# --- Echt: aus OpenBao holen ---
+# export SPRING_DATASOURCE_PASSWORD="$(bao kv get -mount=secret -field=password {project}/database)"
+# export KEYCLOAK_CLIENT_SECRET="$(bao kv get -mount=secret -field=client_secret {project}/keycloak)"
 ```
 
-Profile nur `default`/`staging`/`production`. Echte Zugangsdaten `required = true`
-ohne `default`. Pfade, `ref`, Policies und CI-Anbindung richten sich nach der jeweiligen
-OpenBao-Instanz — dafür die secretspec-Doku heranziehen.
+Fake-Werte müssen als solche erkennbar sein (`dev-`/`fake-`-Präfix). Nach jeder
+Änderung an `.envrc`: `direnv allow`. Welche OpenBao-Pfade für Staging/Production
+angelegt werden müssen, dem Benutzer sagen — nicht selbst in OpenBao schreiben.
 
 ### Infrastruktur
 
