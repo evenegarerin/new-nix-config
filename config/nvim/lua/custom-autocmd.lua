@@ -1,5 +1,3 @@
--- Autocommands. From ../nvim.bak/lua/custom-autocmd.lua, minus the groups
--- listed at the bottom of this file.
 local fn = vim.fn
 local api = vim.api
 
@@ -55,8 +53,7 @@ api.nvim_create_autocmd({ "BufWritePre" }, {
   end,
 })
 
--- Reload the file if it changed outside of nvim. `checktime` does not work in
--- the command line, so check we are not in it first.
+-- Reload the file if it changed outside of nvim. `checktime`
 api.nvim_create_augroup("auto_read", { clear = true })
 
 api.nvim_create_autocmd({ "FileChangedShellPost" }, {
@@ -172,10 +169,6 @@ api.nvim_create_autocmd({ "BufLeave", "FocusLost", "InsertEnter", "WinLeave" }, 
   end,
 })
 
--- The single place highlight groups are overridden. It must stay a single
--- `custom_highlight` group with `clear = true`: a second autocmd using the same
--- group name would wipe this one.
---
 -- This module loads before `ui`, so the hook is registered before the
 -- colorscheme is applied -- that ordering is the whole point, see init.lua.
 api.nvim_create_autocmd("ColorScheme", {
@@ -211,18 +204,16 @@ api.nvim_create_autocmd("ColorScheme", {
     vim.api.nvim_set_hl(0, "IlluminatedWordRead", { reverse = true, update = true })
     vim.api.nvim_set_hl(0, "IlluminatedWordText", { reverse = true, update = true })
 
-    -- Let the terminal background show through (kitty runs at
-    -- background_opacity 0.8). From the pre-rebuild lua/highlights.lua.
-    --
-    -- nvim_set_hl REPLACES a group rather than patching it, so the existing
-    -- definition has to be read back and merged -- otherwise clearing the
-    -- background also throws away the scheme's foreground.
+    -- Let the terminal background show through
     local transparent = {
       "Normal",
       "NormalNC",
       "SignColumn",
       "NvimTreeNormal",
       "NvimTreeNormalNC",
+      "TabLine",
+      "TabLineSel",
+      "TabLineFill",
     }
 
     for _, group in ipairs(transparent) do
@@ -235,9 +226,7 @@ api.nvim_create_autocmd("ColorScheme", {
   end,
 })
 
--- Detect whether we are in a git repo. The `User InGitRepo` event this fires is
--- what the Stage 9 git plugins lazy-load on -- without it they never load and
--- nothing tells you why.
+-- Detect whether we are in a git repo.
 api.nvim_create_autocmd({ "VimEnter", "DirChanged" }, {
   group = api.nvim_create_augroup("git_repo_check", { clear = true }),
   pattern = "*",
@@ -275,16 +264,3 @@ api.nvim_create_autocmd("BufReadPre", {
   end,
 })
 
-------------------------------------------------------------------------
---              groups NOT taken from ../nvim.bak                     --
-------------------------------------------------------------------------
--- custom-autocmd.lua:204-228  `auto_close_win` -- quit nvim when only `qf` and
---   `NvimTree` windows are left. Deliberately not adopted.
---
--- custom-autocmd.lua:267-301  `format check` -- runs `stylua --check` /
---   `black --check` on BufWritePost. stylua is not on PATH, so every Lua save
---   would print "stylua not found!". Revisit once it is in configuration.nix.
---
--- custom-autocmd.lua:303-313  `auto_save` -- `silent! update` on InsertLeave and
---   TextChanged. Combined with the format-on-save that Stage 4 brings, it
---   reformats at nearly every typing pause.

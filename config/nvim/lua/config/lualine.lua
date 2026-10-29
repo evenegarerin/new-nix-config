@@ -320,5 +320,5 @@ require("lualine").setup {
     lualine_z = {},
   },
   tabline = {},
-  extensions = { "quickfix", "fugitive", "nvim-tree" },
+  extensions = { "quickfix", "nvim-tree" },
 }

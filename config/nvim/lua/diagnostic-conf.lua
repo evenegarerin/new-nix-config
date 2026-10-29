@@ -2,11 +2,6 @@ local symbol_icon = require("symbol_icon")
 local diagnostic = vim.diagnostic
 local api = vim.api
 
--- NOTE: the target is deliberately quiet -- underline/virtual_text/virtual_lines
--- all false, signs only, message in a float on CursorHold. The inline display
--- below is carried over from the pre-rebuild config instead
--- (4dedfd2^:config/nvim/lua/plugins/lsp.lua). Set virtual_text = false to get
--- the target's behaviour back.
 diagnostic.config {
   underline = true,
   virtual_text = true,
@@ -43,17 +38,12 @@ local set_qflist = function(buf_num, severity)
   vim.cmd([[copen]])
 end
 
--- NOTE: the target binds these to `<space>qw`/`<space>qb`, which collide with
--- `<leader>q` (quit). See README.md section 4.
 vim.keymap.set("n", "<leader>dw", diagnostic.setqflist, { desc = "window diagnostics to qf" })
 
 vim.keymap.set("n", "<leader>db", function()
   set_qflist(0)
 end, { desc = "buffer diagnostics to qf" })
 
--- Full message in a float for the line under the cursor. With virtual_text on
--- this is the long form -- it shows the source and wraps, where the inline text
--- is truncated to the window width.
 api.nvim_create_autocmd("CursorHold", {
   pattern = "*",
   callback = function()

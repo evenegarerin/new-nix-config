@@ -13,13 +13,9 @@ vim.g.logging_level = vim.log.levels.INFO
 ------------------------------------------------------------------------
 --                         builtin variables                          --
 ------------------------------------------------------------------------
--- NOTE: the target config uses "," as leader. We keep <Space>, which means
--- every `<space>X` mapping copied from nvim.bak has to be rewritten as a
--- two-key `<leader>` sequence. See the "Leader key" section in README.md.
 vim.g.mapleader = " "
 
 -- Disable language providers we do not use. Perl/Ruby/Node are never needed;
--- python3 is only required by ultisnips and iron.nvim, both of which we skip.
 vim.g.loaded_perl_provider = 0
 vim.g.loaded_ruby_provider = 0
 vim.g.loaded_node_provider = 0
@@ -50,10 +46,9 @@ vim.g.loaded_tarPlugin = 1
 
 vim.g.loaded_tutor_mode_plugin = 1
 
--- Broken, see the upstream note in nvim.bak/lua/globals.lua
+-- Broken, maybe
 vim.g.loaded_sql_completion = 1
 
--- vim-matchup (Stage 6) replaces both of these: it provides % matching and
 -- bracket highlighting, with offscreen-match popups and deferred highlighting.
 vim.g.loaded_matchit = 1
 vim.g.loaded_matchparen = 1

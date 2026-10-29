@@ -54,7 +54,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
       }
     end, { desc = "go to definition" })
 
-    map("n", "<C-]>", vim.lsp.buf.definition, { desc = "go to definition" })
+    map("n", "<leader>ld", vim.lsp.buf.definition, { desc = "go to definition" })
 
     map("n", "K", function()
       vim.lsp.buf.hover {
@@ -67,8 +67,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
     map("n", "<C-k>", vim.lsp.buf.signature_help, { desc = "signature help" })
 
-    -- NOTE: the target uses a bare `<space>` prefix for all of these, which
-    -- collides with <Space> as leader. See README.md section 4.
     map("n", "<leader>lr", vim.lsp.buf.rename, { desc = "LSP rename" })
     map("n", "<leader>la", vim.lsp.buf.code_action, { desc = "LSP code action" })
     map("n", "<leader>lf", function()
@@ -98,11 +96,6 @@ vim.lsp.config("*", {
 })
 
 -- server name (as nvim-lspconfig knows it) -> the executable it needs.
--- A server is only enabled if its executable is on PATH; missing non-optional
--- ones warn, missing optional ones stay quiet.
---
--- All of these except elm-language-server and ruff were added to
--- ../../configuration.nix in Stage 4.
 local enabled_lsp_servers = {
   nixd = { exe = "nixd", optional = false },
   lua_ls = { exe = "lua-language-server", optional = false },
@@ -113,7 +106,6 @@ local enabled_lsp_servers = {
   yamlls = { exe = "yaml-language-server", optional = true },
   marksman = { exe = "marksman", optional = true },
 
-  -- python: pyright for types/completion, ruff for lint/format/imports
   pyright = { exe = "pyright-langserver", optional = true },
   ruff = { exe = "ruff", optional = true },
 }
@@ -128,11 +120,6 @@ for server_name, server_info in pairs(enabled_lsp_servers) do
   end
 end
 
--- NOTE: the target calls vim.notify once per missing server, inline. Two or more
--- warnings during startup overflow the message area and you get a
--- "Press ENTER or type command to continue" prompt on *every* launch. Batching
--- them into one message and deferring it past startup keeps the warning without
--- the prompt.
 if #missing > 0 then
   table.sort(missing)
   vim.schedule(function()
@@ -158,11 +145,6 @@ end, {
   desc = "Show LSP log",
 })
 
--- NOTE: the target defines `:LspRestart` as `lsp restart`, which is not a real
--- command and fails. Neither does nvim ship one: nvim-lspconfig dropped
--- `:LspRestart`/`:LspStart`/`:LspStop` when it moved to `vim.lsp.enable`, and on
--- 0.12.4 `exists(":LspRestart")` is 0. So it is implemented here -- stop the
--- attached clients, then reload the buffer, which re-attaches them because the
 -- `vim.lsp.enable` registration survives.
 vim.api.nvim_create_user_command("LspRestart", function()
   local clients = vim.lsp.get_clients { bufnr = 0 }

@@ -144,6 +144,8 @@ in
 
   systemd.user.services.elephant.enableDefaultPath = false;
 
+  environment.variables.EDITOR = "nvim";
+
   environment.systemPackages = with pkgs; [
     kitty
     file
@@ -268,6 +270,7 @@ in
     # lazydocker
     pandoc
     texliveSmall
+    hyprshot
   ];
 
   programs.dconf = {

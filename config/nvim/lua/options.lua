@@ -1,6 +1,3 @@
--- Merge of the previous config's options and the plugin-independent subset of
--- ../../nvim.bak/lua/options.lua. Lines marked [bak] come from the target,
--- lines marked [old] are carried over from the config that was in use before.
 local utils = require("utils")
 
 local fn = vim.fn
@@ -11,33 +8,24 @@ local o = vim.o
 ------------------------------------------------------------------------
 --                            windows                                 --
 ------------------------------------------------------------------------
-opt.splitbelow = true -- [bak] new horizontal splits go below
-opt.splitright = true -- [bak] new vertical splits go right
-opt.splitkeep = "screen" -- [bak] avoid flicker when splitting horizontally
+opt.splitbelow = true
+opt.splitright = true
+opt.splitkeep = "screen"
 
 ------------------------------------------------------------------------
 --                        timing / responsiveness                     --
 ------------------------------------------------------------------------
--- [old] 200ms. The target uses 500, which is friendlier once which-key is in
--- (Stage 8) because it gives you time to read the popup.
--- NOTE: this does NOT control when the which-key popup appears -- that is
--- `delay` in lua/config/which-key.lua, and the two add together. What this does
--- control is how long vim waits on a genuinely ambiguous mapping, i.e. one that
--- is complete *and* a prefix of a longer one. There are exactly two in this
--- config: `gc` vs `gcc` (vim-commentary) and `s` vs `sa`/`sd`/`sr`
--- (vim-sandwich). [bak] uses 500.
 opt.timeoutlen = 200
-opt.updatetime = 500 -- [bak] drives CursorHold, used by diagnostics + auto-read
+opt.updatetime = 500
 
 ------------------------------------------------------------------------
 --                         files and backups                          --
 ------------------------------------------------------------------------
-opt.swapfile = false -- [old] + [bak]
-opt.undofile = true -- [bak] persistent undo across sessions
-opt.autoread = true -- [bak] reload when changed outside nvim
-opt.confirm = true -- [bak] ask instead of failing on unsaved changes
+opt.swapfile = false
+opt.undofile = true
+opt.autoread = true
+opt.confirm = true
 
--- [bak] Ignore build artefacts and binaries during cmdline globbing.
 opt.wildignore:append {
   "*.o",
   "*.obj",
@@ -61,7 +49,6 @@ opt.wildignore:append {
 opt.wildignorecase = true
 opt.wildmode = "list:longest"
 
--- [bak] Keep backups out of the project tree.
 vim.g.backupdir = fn.stdpath("data") .. "/backup//"
 -- nvim does not create backupdir itself; without this it silently falls back
 -- to writing the backup next to the file (or skips it).
@@ -77,32 +64,31 @@ opt.fileformats = { "unix", "dos" }
 ------------------------------------------------------------------------
 --                          indentation                               --
 ------------------------------------------------------------------------
-opt.tabstop = 2 -- [bak]
-opt.softtabstop = 2 -- [bak]
-opt.shiftwidth = 2 -- [bak]
-opt.expandtab = true -- [bak]
-opt.shiftround = true -- [bak] round indent to a multiple of shiftwidth
-opt.smartindent = true -- [old]
+opt.tabstop = 2
+opt.softtabstop = 2
+opt.shiftwidth = 2
+opt.expandtab = true
+opt.shiftround = true
+opt.smartindent = true
 
 ------------------------------------------------------------------------
 --                       line numbers and cursor                      --
 ------------------------------------------------------------------------
-opt.number = true -- [old] + [bak]
-opt.relativenumber = true -- [old] + [bak]
-opt.scrolloff = 5 -- [old] + [bak]
-opt.sidescrolloff = 3 -- [old]
-opt.startofline = false -- [bak] keep the column when jumping
-opt.virtualedit = "block" -- [bak] useful for visual block editing
+opt.number = true
+opt.relativenumber = true
+opt.scrolloff = 5
+opt.sidescrolloff = 3
+opt.startofline = false
+opt.virtualedit = "block"
 
 ------------------------------------------------------------------------
 --                             search                                 --
 ------------------------------------------------------------------------
-opt.ignorecase = true -- [old] + [bak]
-opt.smartcase = true -- [old] + [bak]
-opt.incsearch = true -- [old]
-opt.hlsearch = true -- [old]
+opt.ignorecase = true
+opt.smartcase = true
+opt.incsearch = true
+opt.hlsearch = true
 
--- [bak] Use ripgrep for :grep when available.
 if utils.executable("rg") then
   opt.grepprg = "rg --vimgrep --no-heading --smart-case"
   opt.grepformat = "%f:%l:%c:%m"
@@ -111,8 +97,6 @@ end
 ------------------------------------------------------------------------
 --                            clipboard                               --
 ------------------------------------------------------------------------
--- [bak] Only append unnamedplus if a clipboard provider actually exists,
--- otherwise every yank is slow and prints a provider warning.
 if fn["provider#clipboard#Executable"]() ~= "" then
   opt.clipboard:append("unnamedplus")
 end
@@ -120,28 +104,20 @@ end
 ------------------------------------------------------------------------
 --                            appearance                              --
 ------------------------------------------------------------------------
-opt.termguicolors = true -- [old] + [bak]
-opt.showmode = false -- [bak] lualine's lualine_a shows the mode instead
-opt.ruler = false -- [bak]
-opt.showcmdloc = "statusline" -- [bak]
-opt.wrap = false -- [bak]
-opt.linebreak = true -- [bak] break at word boundaries when wrap is on
-opt.showbreak = "|-> " -- [bak] marker for soft-wrapped lines
--- The gutter is drawn by lua/statuscolumn.lua, which gives gitsigns a cell of
--- its own that nothing else can take -- blank when the line is unchanged.
--- `signcolumn = "no"` because that module renders the signs itself; leaving it
--- on would draw a second, native sign column beside the one we build.
--- Special windows (nvim-tree, quickfix, help) keep their own `signcolumn`.
+opt.termguicolors = true
+opt.showmode = false
+opt.ruler = false
+opt.showcmdloc = "statusline"
+opt.wrap = false
+opt.linebreak = true
+opt.showbreak = "|-> "
 opt.signcolumn = "no"
 opt.statuscolumn = "%{%v:lua.require'statuscolumn'.render()%}"
-opt.colorcolumn = "100" -- [bak]
-opt.synmaxcol = 250 -- [bak] stop highlighting very long lines
+-- opt.colorcolumn = "100"
+opt.synmaxcol = 250
 
--- [bak] Fold chars, window separators, end-of-buffer and message separator.
 opt.fillchars = symbol_icon.fillchars
 
--- Show tabs and trailing whitespace. [bak] glyphs, except `trail` which stays
--- the ° from the previous config -- the target does not set `trail` at all.
 opt.list = true
 opt.listchars = {
   tab = "→ ",
@@ -151,20 +127,16 @@ opt.listchars = {
   nbsp = "␣",
 }
 
--- [bak] Cursor shape/colour per mode. The Cursor/Cursor2 highlight groups it
--- refers to are defined by the ColorScheme autocmd in Stage 1.
-opt.guicursor =
-  "n-v:block-Cursor/lCursor,i-c-ci-ve:ver50-blinkwait50-blinkoff100-blinkon175-Cursor2/lCursor2,r-cr:hor20,o:hor20"
+opt.guicursor = "n-v:block-Cursor/lCursor,i-c-ci-ve:ver50-blinkwait50-blinkoff100-blinkon175-Cursor2/lCursor2,r-cr:hor20,o:hor20"
 
-opt.mouse = "n" -- [bak] mouse in normal mode only
+opt.mouse = "n"
 opt.mousemodel = "popup"
 opt.mousescroll = { "ver:1", "hor:0" }
 
-opt.visualbell = true -- [bak]
-opt.errorbells = false -- [bak]
-opt.history = 500 -- [bak]
+opt.visualbell = true
+opt.errorbells = false
+opt.history = 500
 
--- [bak] Floating window + popup menu look. `winborder`/`pumborder` are 0.11+.
 opt.pumheight = 10
 opt.pumblend = 5
 opt.pumborder = "single"
@@ -174,24 +146,22 @@ opt.winborder = "single"
 ------------------------------------------------------------------------
 --                   completion and messages                          --
 ------------------------------------------------------------------------
-opt.completeopt:append("menuone") -- [bak] show menu even for a single match
-opt.completeopt:remove("preview") -- [bak]
-opt.shortmess:append("cS") -- [bak] silence completion + search-count messages
-opt.messagesopt = "hit-enter,history:500" -- [bak]
+opt.completeopt:append("menuone")
+opt.completeopt:remove("preview")
+opt.shortmess:append("cS")
+opt.messagesopt = "hit-enter,history:500"
 
 ------------------------------------------------------------------------
 --                              misc                                  --
 ------------------------------------------------------------------------
--- [bak] Extra pairs for % and matching-bracket highlighting.
 opt.matchpairs:append { "<:>" }
 
-opt.spelllang = { "en" } -- [bak] (target also adds "cjk")
+opt.spelllang = { "en" }
 opt.spellsuggest:append("9")
 
-opt.tildeop = true -- [bak] make ~ an operator, so it takes a motion
-opt.isfname:remove { "=", "," } -- [bak]
+opt.tildeop = true
+opt.isfname:remove { "=", "," }
 
--- [bak] diff behaviour: side-by-side, histogram algorithm, char-level inline.
 opt.diffopt = {
   "vertical",
   "filler",
@@ -202,7 +172,3 @@ opt.diffopt = {
   "algorithm:histogram",
 }
 opt.diffopt:append("inline:char")
-
--- NOTE: the target also sets `title`/`titlestring` via utils.get_titlestr(),
--- and `autowrite`/`autowriteall`. Both arrive with their respective stages --
--- get_titlestr is part of the full utils.lua pulled in at Stage 1.

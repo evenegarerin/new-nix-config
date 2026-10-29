@@ -111,19 +111,19 @@ Everything in `../nvim.bak/`, what it does, and which stage introduces it.
 | `statuscolumn.lua` | 144 | Two fixed gutter cells: gitsigns gets its own | 9 ✅ |
 | `fzf-lua.lua` | 55 | Fuzzy finder + `<leader>f*` maps | 7 ✅ |
 | `bufferline.lua` | 52 | Buffer tabline | 8 ✅ |
-| `diffview.lua` | 51 | Full-window diff/history view || 9 ✅ |
+| `diffview.lua` | 51 | Full-window diff/history view | **removed** -- tried in Stage 9, dropped |
 | `treesitter-textobjects.lua` | 50 | `af`/`if`/`ac`/`ic`/`as` text objects | 6 ✅ |
 | `nvim_ufo.lua` | 47 | Better folding, LSP/treesitter-backed | **removed** -- tried in Stage 8, dropped |
-| `git-linker.lua` | 47 | Yank a permalink to the current line on the forge || 9 ✅ |
+| `git-linker.lua` | 29 | Yank a permalink to the current line on the forge || 9 ✅ |
 | `nvim_hop.lua` | 28 | `f` → jump anywhere on screen || 10 ✅ |
-| `fugitive.lua` | 27 | `<leader>g*` git maps || 9 ✅ |
+| `fugitive.lua` | 27 | `<leader>g*` git maps | **removed** -- tried in Stage 9, replaced by lazygit |
 | `nvim-statuscol.lua` | 23 | Clickable number/sign/fold column | **removed** -- tried in Stage 8, dropped |
 | `gx.lua` | 21 | Open URL under cursor (mac/win only, `plugin_specs.lua:275`) | skip |
 | `vim-illuminate.lua` | 20 | Highlight other occurrences of word under cursor || 10 ✅ |
 | `lightbulb.lua` | 20 | Sign when a code action is available || 10 ✅ |
-| `aerial.lua` | 19 | Symbol outline sidebar || 10 ✅ |
+| `aerial.lua` | 19 | Symbol outline sidebar | **removed** -- tried in Stage 10, dropped |
 | `yanky.lua` | 17 | Yank ring, `[y`/`]y` to cycle past pastes | **removed** — tried in Stage 11, dropped |
-| `snacks.lua` | 12 | Prettier `vim.ui.input` and `vim.ui.select` | 7 ✅ |
+| `snacks.lua` | 31 | Prettier `vim.ui.input`/`vim.ui.select`, plus lazygit (`<leader>gg`) | 7 ✅ |
 | `glance.lua` | 12 | Peek definitions/references in a float || 10 ✅ |
 | `nvim-notify.lua` | 10 | Notification popups | 8 ✅ |
 | `nvim-colorizer.lua` | 9 | Render `#rrggbb` in its own colour | optional |
@@ -701,14 +701,17 @@ checkout menu; `zR`/`zM` fold; `<leader>` alone pops up which-key.
 
 ### Stage 9 — Git ✅ done
 
-**Plugins:** `lewis6991/gitsigns.nvim`, `tpope/vim-fugitive`,
-`sindrets/diffview.nvim`, `ruifm/gitlinker.nvim` (+ `nvim-lua/plenary.nvim`).
-**Files:** `lua/config/{gitsigns,fugitive,diffview,git-linker}.lua`.
+**Plugins:** `lewis6991/gitsigns.nvim`, `ruifm/gitlinker.nvim`
+(+ `nvim-lua/plenary.nvim`).
+**Files:** `lua/config/{gitsigns,git-linker}.lua`.
 
-`fugitive` and `gitlinker` load on **`User InGitRepo`** — a custom event that only
-fires because `utils.inside_git_repo()` runs from the `git_repo_check` autocmd
-added in Stage 2. If the git maps do nothing, check that first; `:Lazy` will show
-them as never-loaded. (Verified working: both load in this repo.)
+`tpope/vim-fugitive` was adopted here too, then removed -- see the deviations
+below. The git UI is **lazygit**, launched from snacks.
+
+`gitlinker` loads on **`User InGitRepo`** — a custom event that only fires
+because `utils.inside_git_repo()` runs from the `git_repo_check` autocmd added
+in Stage 2. It is now the event's only consumer; if `<leader>gl` does nothing,
+check that first — `:Lazy` will show it as never-loaded. (Verified working.)
 
 | Keys | What |
 |---|---|
@@ -716,11 +719,9 @@ them as never-loaded. (Verified working: both load in this repo.)
 | `<leader>hp` `<leader>hb` | preview hunk · blame line |
 | `<leader>hs` `<leader>hr` | stage / reset hunk (also visual, on the selection) |
 | `<leader>hu` `<leader>hS` `<leader>hR` | undo stage · stage buffer · reset buffer |
-| `<leader>gs` `gw` `gc` `gpl` `gpu` `gf` | fugitive: status · add · commit · pull · push · fetch |
-| `<leader>gbn` `<leader>gbd` | new / delete branch (both prompt) |
-| `<leader>gb` *(visual)* | blame the selection |
+| `<leader>gg` | **lazygit** in a float (snacks) |
+| `<leader>gG` `<leader>gh` | lazygit: repo log · history of this file |
 | `<leader>gl` `<leader>gbr` | permalink to line · open repo in browser |
-| `:DiffviewOpen` · `]C` `[C` · `<leader>gC{t,o,a}` | diff view, conflict nav, choose theirs/ours/both |
 
 Corrections to what this section used to say:
 
@@ -734,22 +735,23 @@ Other changes from the target:
 | Change | Why |
 |---|---|
 | **gitlinker declares `plenary.nvim`** | It requires plenary (`gitlinker/git.lua:3`). The target only gets it because **neogit** lists plenary as a dependency — dropping neogit without this would have broken `<leader>gl` at keypress time, not at startup |
-| **neogit and vim-flog skipped** | neogit is a magit-style UI that overlaps fugitive almost entirely; this section already recommended picking one |
-| **diffview also loads on `:DiffviewFileHistory`** | The target only lists `cmd = { "DiffviewOpen" }`, so the file-history command would not load the plugin |
+| **neogit and vim-flog skipped** | neogit is a magit-style UI; this section already recommended picking one git UI. That one is lazygit |
+| **`tpope/vim-fugitive` removed, replaced by lazygit** | Adopted during this stage with nine `<leader>g*` maps, then dropped: the user works in lazygit, which covers status, commit, pull/push and branch management better. **No new plugin was needed** -- `folke/snacks.nvim` is already loaded eagerly for `input`/`picker` and ships a `lazygit` module that is *not* `enabled`-gated (only snacks' event-driven modules are, see `snacks/init.lua`), so it was callable already and only keymaps were missing. snacks also themes lazygit from the colorscheme and sets `os.editPreset = "nvim-remote"`, so `e` inside lazygit opens the file in a new tab of the running nvim. **What was lost:** `:Gdiffsplit` staging-by-editing (lazygit stages hunks and lines), `:Gclog`/`:Ggrep` into quickfix (no replacement), the `:git` → `:Git` cabbrev, and **visual-mode blame** -- gitsigns' `<leader>hb` is one line, normal mode only. `<leader>gw` (`:Gwrite`) is covered by gitsigns `<leader>hs`/`<leader>hS` |
+| **`sindrets/diffview.nvim` removed** | Adopted here (with `cmd` widened to include `:DiffviewFileHistory`, which the target omits, plus `enhanced_diff_hl`, `disable_diagnostics`, a `diff3_mixed` merge layout and `]C`/`[C`/`<leader>gC{t,o,a}` conflict maps), then dropped. Measured working: the file panel listed all 15 working-tree changes with per-file `+/-` counts, the diff panes were real `diff`-mode windows (treesitter, folds, `/`, own motions), `:DiffviewFileHistory %` drove the diff from a 10-line bottom panel, and `--cached`, `HEAD~2`, `HEAD~3..HEAD~1` and directory history all parsed. Removed anyway: day-to-day diffing is gitsigns inline and lazygit (`<leader>gg`), the plugin had **no keymap** so every use meant typing the command in full, and it was lazy on `cmd` so it stayed unloaded most sessions. **What was lost:** the three-way merge-conflict resolver -- `]C`/`[C` plus take-theirs/ours/both -- which nothing else here replaces; lazygit hands conflicts back to the editor as plain `<<<<<<<` markers. Also gone: whole-changeset browsing across arbitrary revisions, and per-file/per-directory history in an editable buffer |
+| **gitlinker's `dev.azure.com` callback dropped** | 24 of the file's 47 lines built Azure DevOps' query-string URL shape (`?path=…&version=GC<sha>&line=…`) instead of `/blob/<sha>/path#L10`. Nothing here lives on Azure DevOps, and the callback also carried a stray `vim.print(url_data)` that dumped the raw table into `:messages` on every link. GitHub, GitLab, Bitbucket and Sourcehut are handled by the plugin itself; verified `<leader>gl` still yields a SHA permalink unchanged |
 | **gitsigns gets its own gutter cell**: `lua/statuscolumn.lua` (new) + `signcolumn = "no"` / `statuscolumn` in `options.lua` | Signs share one native column and `%s` packs them left, so gitsigns -- the lowest-priority producer at **6**, against diagnostics **13** and lightbulb 10 -- was never drawn on a line that also had a diagnostic. Raising the priority and widening to `yes:2` was tried first and is **not** sufficient: priority decides the *order* signs are drawn in, not which cell they land in, so a line with a diagnostic and no git change still put the diagnostic in cell 1. `statuscolumn.lua` renders two fixed cells instead -- cell 1 is gitsigns and nothing else, blank when the line is unchanged; cell 2 is everything else, highest priority first -- then the line number (`relativenumber` included, since setting `'statuscolumn'` replaces the whole gutter). Both cells are padded to a fixed display width (git glyphs are 1 cell, the diagnostic/lightbulb emoji are 2) or the number column shifts. Measured: `'~🆇    9 '` git+diagnostic, `' ⚠️  12 '` diagnostic only, `'     15 '` neither -- all width 8. gitsigns namespaces are matched by name prefix, not by taking the first `pairs()` hit: there are several (`gitsigns_signs_`, staged, blame) and the iteration order is undefined. nvim-tree, quickfix and help keep their own gutters -- the module returns early for any `buftype ~= ""` |
 
 **Verify:** confirmed working — in a tracked file with buffer-only edits, gitsigns
 reports `head=main added=2 changed=1`, the gutter shows `+` and `~` from
 `symbol_icon.git.diff`, and **lualine's diff section renders `+2 ~1`** — the
 component that had been inert since Stage 8 now has its data source. All nine
-hunk maps are buffer-local; all eight fugitive maps and both gitlinker maps exist.
+hunk maps are buffer-local and both gitlinker maps exist.
 
 ---
 
 ### Stage 10 — Navigation, outline, quickfix ✅ done
 
-**Plugins:** `nvim-tree/nvim-tree.lua` (landed in Stage 3), `stevearc/aerial.nvim`,
-`smoka7/hop.nvim`, `kevinhwang91/nvim-hlslens`, `kevinhwang91/nvim-bqf`,
+**Plugins:** `nvim-tree/nvim-tree.lua` (landed in Stage 3), `smoka7/hop.nvim`, `kevinhwang91/nvim-hlslens`, `kevinhwang91/nvim-bqf`,
 `dnlhc/glance.nvim`, `kosayoda/nvim-lightbulb`,
 `RRethy/vim-illuminate`.
 
@@ -757,7 +759,6 @@ hunk maps are buffer-local; all eight fugitive maps and both gitlinker maps exis
 |---|---|
 | `f` + 2 chars | hop: jump anywhere on screen (normal, visual, operator-pending) |
 | `n` `N` `*` `#` | hlslens: same motions, with a `[1/2]` counter at the match |
-| `[t` `]t` · `<leader>to` | aerial: prev/next symbol (buffer-local) · toggle outline |
 | `<leader>gd` `gr` `gi` | glance: peek definitions / references / implementations |
 | `<leader>ee` `ef` `ec` | nvim-tree: toggle · focus · change root (Stage 3) |
 | in `qf` | bqf preview |
@@ -771,9 +772,9 @@ Changed from the target:
 |---|---|
 | **`stevearc/quicker.nvim` removed** | Adopted during this stage, then dropped. It made the quickfix list a modifiable buffer so `:w` wrote edits back across every file in it -- verified working before removal. Noted here because the target ships it with `edit = { enabled = false }`, which switches off that single feature; anyone re-adopting it needs `edit = { enabled = true }` |
 | **`vim-illuminate` allowlist rewritten** | The target's list is `go java javascript json lua python sh toml typescript yaml` — **no `nix`**, the language this repo is mostly written in. go and java dropped; nix, elm, css, html and markdown added |
-| **`<space>t` → `<leader>to`**, **`<space>gd/gr/gi` → `<leader>gd/gr/gi`** | Bare `<space>` collides with the leader. See §4. The glance maps share the `<leader>g` namespace with fugitive but collide with none of them |
+| **`<space>t` → `<leader>to`**, **`<space>gd/gr/gi` → `<leader>gd/gr/gi`** | Bare `<space>` collides with the leader. See §4. The glance maps share the `<leader>g` namespace with gitlinker and lazygit but collide with none of them |
 | **hop declares its modes** | `keys = { { "f", mode = { "n", "x", "o" } } }` rather than bare `keys = { "f" }`, so the lazy stub exists in operator-pending too and `df<2 chars>` works on first press |
-| **aerial declares nvim-treesitter** | It is aerial's symbol backend until the LSP rebuild lands |
+| **`stevearc/aerial.nvim` removed** | Adopted during this stage (with `nvim-treesitter` declared as its symbol backend, and `<space>t` retranslated to `<leader>to`), then dropped. Measured working: the sidebar listed all nine functions of `lua/utils.lua` from the **treesitter** backend -- instant, no wait for lua_ls -- `AerialToggle!` left the cursor in the source window, `]t`/`[t` stepped 1 → 9 → 20 → 30 → 41 and back, and `:AerialNavToggle` gave a three-pane parent/sibling/child float. Removed anyway: `<leader>ft` (fzf-lua `lsp_document_symbols`) answers "take me to symbol X" better, dropbar's winbar already answers "where am I", and the files in this repo are flat Lua modules and Nix attrsets where a 20-40 column sidebar earns little. **What was lost:** the persistent, ambient outline -- nothing else here displays a file's shape without being asked -- and `[t`/`]t` symbol stepping. Note `[t`/`]t` were **dead in a fresh session anyway**: the spec's `keys` listed only `<leader>to`, so until the sidebar had been opened once they ran nvim 0.12's built-in `:tprevious`/`:tnext` (`vim/_core/defaults.lua:379-387`), which they now do again. `nvim-treesitter-textobjects.move` (already installed) would restore the stepping via `goto_next_start("@function.outer")` -- verified, but deliberately **not** adopted |
 
 > **`f` is now hop, not vim's within-line find.** `F`, `t` and `T` are untouched
 > (verified). `;`-as-f-repeat was already gone — Stage 1 made `;` = `:` — so these
@@ -891,7 +892,7 @@ earlier, with Stage 2.)
 | `iron.lua` | Python REPL | skip — needs the python3 provider `globals.lua` disables |
 | `lyokha/vim-xkbswitch`, `Neur1n/neuims` | IME switching | skip — mac/win only |
 | `ojroques/vim-oscyank` | Clipboard over SSH | skip — nvim has OSC52 builtin |
-| `esmuellert/codediff.nvim` | `:CodeDiff` | skip — diffview (Stage 9) covers it |
+| `esmuellert/codediff.nvim` | `:CodeDiff` | skip — `:terminal git diff` and lazygit cover it; diffview was tried in Stage 9 and removed |
 | `skywind3000/asyncrun.vim` | `:AsyncRun` into quickfix | skip — `:Run` (Stage 2) and `vim.system` cover it |
 | `nickjvandyke/opencode.nvim` | opencode agent integration | skip |
 | `mg979/vim-visual-multi` | Multi-cursor | skip — commented out upstream too |
@@ -924,9 +925,8 @@ several pairs collide:
 | `<space>qw`/`qb` diagnostics→quickfix | `diagnostic-conf.lua:43-48` | **`<leader>q` = quit** |
 | `<Space>f` stylua format | `after/ftplugin/lua.lua` | **`<leader>ff`/`fg`/`fh`/`ft`/`fb`/`fr` = fzf-lua** |
 | ~~`<space>s` nvim-tree toggle~~ | `config/nvim-tree.lua:5` | resolved — see below |
-| `<space>t` aerial toggle | `config/aerial.lua` | — |
 | `<space>bp` bufferline pick | `config/bufferline.lua` | — |
-| `<space>gd`/`gr`/`gi` glance | `config/glance.lua` | shares `<leader>g` with fugitive (resolvable) |
+| `<space>gd`/`gr`/`gi` glance | `config/glance.lua` | shares `<leader>g` with gitlinker/lazygit (resolvable) |
 
 **Rule: translate every bare `<space>X` into a two-key `<leader>` sequence.**
 Never leave a one-key `<leader>` mapping that is a prefix of another.
@@ -942,9 +942,8 @@ Suggested scheme — LSP under `l`, diagnostics under `d`, toggles under `t`:
 | `<space>qw` | `<leader>dw` | window diagnostics → quickfix ✅ |
 | `<space>qb` | `<leader>db` | buffer diagnostics → quickfix ✅ |
 | `<space>s` | `<leader>ee` / `<leader>ef` / `<leader>ec` | nvim-tree toggle / focus / change root ✅ |
-| `<space>t` | `<leader>to` | aerial outline ✅ |
 | `<space>bp` | `<leader>tb` | bufferline pick ✅ |
-| `<space>gd` / `gr` / `gi` | `<leader>gd` / `gr` / `gi` | glance ✅ — no conflict with fugitive's `<leader>g*` |
+| `<space>gd` / `gr` / `gi` | `<leader>gd` / `gr` / `gi` | glance ✅ — no conflict in the `<leader>g*` namespace |
 
 Keep from the previous config, unchanged: `<leader>w` save, `<leader>ff` /
 `<leader>fg` find, `<leader>p` paste.
@@ -954,8 +953,7 @@ Keep from the previous config, unchanged: `<leader>w` save, `<leader>ff` /
 > after `timeoutlen`. Hence `<leader>e{e,f,c}` with no bare `<leader>e`.
 
 Mappings that **don't** involve leader and transplant verbatim:
-`gd`, `K`, `<C-k>`, `<C-]>` (LSP) · `[t`/`]t` (aerial) ·
-`gS` (treesj) · `f` (hop) ·
+`gd`, `K`, `<C-k>`, `<C-]>` (LSP) · `gS` (treesj) · `f` (hop) ·
 `af`/`if`/`ac`/`ic`/`as` (treesitter textobjects) · the `\…` family from `mappings.lua`.
 
 > which-key (Stage 8) makes collisions visible: a prefix that waits for more input

@@ -8,7 +8,7 @@ require("bufferline").setup {
     left_mouse_command = "buffer %d",
     middle_mouse_command = nil,
     indicator = {
-      icon = "▎", -- this should be omitted if indicator style is not 'icon'
+      icon = "▎",
       style = "icon",
     },
     buffer_close_icon = symbol_icon.tabline.buffer_close,
@@ -21,11 +21,7 @@ require("bufferline").setup {
     tab_size = 10,
     diagnostics = false,
     custom_filter = function(bufnr)
-      -- if the result is false, this buffer will be shown, otherwise, this
-      -- buffer will be hidden.
-
-      -- filter out filetypes you don't want to see
-      local exclude_ft = { "qf", "fugitive", "git" }
+      local exclude_ft = { "qf", "git" }
       local cur_ft = vim.bo[bufnr].filetype
       local should_filter = vim.tbl_contains(exclude_ft, cur_ft)
 
@@ -39,7 +35,7 @@ require("bufferline").setup {
     show_buffer_close_icons = true,
     show_close_icon = true,
     show_tab_indicators = true,
-    persist_buffer_sort = true, -- whether or not custom sorted buffers should persist
+    persist_buffer_sort = true,
     separator_style = "bar",
     enforce_regular_tabs = false,
     always_show_bufferline = true,
@@ -47,8 +43,6 @@ require("bufferline").setup {
   },
 }
 
--- NOTE: the target binds a bare `<space>bp`, which collides with <Space> as
--- leader. See README.md section 4.
 vim.keymap.set("n", "<leader>tb", "<cmd>BufferLinePick<CR>", {
   desc = "pick a buffer",
 })

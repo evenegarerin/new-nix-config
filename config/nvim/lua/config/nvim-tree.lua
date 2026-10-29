@@ -38,4 +38,8 @@ map("<leader>ef", function()
     api.tree.focus()
   end
 end, "nvim-tree: toggle focus")
-map("<leader>ec", api.tree.change_root_to_node, "nvim-tree: cd to node")
+map("<leader>eg", api.tree.change_root_to_node, "nvim-tree: cd to node")
+map("<leader>es", function()
+  api.tree.find_file { open = true, focus = true, update_root = true }
+end, "nvim-tree: reveal current file")
+map("<leader>ec", api.tree.collapse_all, "nvim-tree: collapse all")

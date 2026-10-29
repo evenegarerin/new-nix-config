@@ -15,8 +15,6 @@ in
     gtk.enable = true;
   };
 
-  environment.variables.EDITOR = "nvim";
-
   xdg.userDirs = {
     enable = true;
     createDirectories = true;
@@ -29,6 +27,9 @@ in
   };
 
   home.activation.createConfigSymlinks =
+    let
+      value = "true";
+    in
     config.lib.dag.entryAfter [ "writeBoundary" ] ''
       mkdir -p "$HOME/.config"
       mkdir -p "$HOME/.config/VSCodium/User"
@@ -54,6 +55,7 @@ in
       ln -sfn "${nixConfig}/pcmanfm" "$HOME/.config/pcmanfm"
       ln -sfn "${nixConfig}/herdr/config.toml" "$HOME/.config/herdr/config.toml"
       ln -sfn "${nixConfig}/claude/keybindings.json" "$HOME/.claude/keybindings.json"
+      ln -sfn "${nixConfig}/claude/statusline.sh" "$HOME/.claude/statusline.sh"
       ln -sfn "${nixConfig}/walker" "$HOME/.config/walker"
 
       for profile in "$HOME"/.config/mozilla/firefox/*.default; do

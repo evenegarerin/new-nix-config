@@ -84,3 +84,12 @@ z fuzzy finding
 claude sesssions close when i start herdr after reboot, for jan this does not happen                                -- migth be fixed
 
 nvim left of on gitsigns
+
+leader t to open terminal
+leader ec to collapse the whole file tree
+
+wireframes should be wired into each other to make show workflow
+
+buffer navigation left and right, buffer close
+
+diagnoses does not show right now in nvim-tree

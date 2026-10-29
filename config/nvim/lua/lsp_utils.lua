@@ -54,8 +54,6 @@ M.show_lsp_menu = function(size, position)
 
   local lsp_names = M.get_attached_lsp()
 
-  -- NOTE: the target mounts an empty menu when nothing is attached, which gives
-  -- you a blank box with no way to tell it apart from a broken one.
   if #lsp_names == 0 then
     vim.notify("No LSP attached to this buffer", vim.log.levels.INFO, { title = "nvim-config" })
     return

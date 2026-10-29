@@ -12,6 +12,8 @@ types `just` and sees every important workflow, each with a one-line description
 Everything below serves that goal. Rules come with a reason so you can judge edge cases instead of
 pattern-matching.
 
+**everytime you create or work on a just file** make sure that all recipes work and dont error.
+
 ## 1. Orient before writing
 
 Do these first, every time. They are cheap and they prevent the most common failures.

@@ -148,18 +148,6 @@ local plugin_specs = {
   -- pattern -- without it `iu` falls back to an expand('<cfile>') heuristic.
   { "itchyny/vim-highlighturl", event = "VeryLazy" },
 
-  -- Symbol outline. Replaces symbols-outline.nvim from the pre-rebuild config.
-  -- `[t`/`]t` prev/next symbol (buffer-local), `<leader>to` toggle.
-  {
-    "stevearc/aerial.nvim",
-    cmd = { "AerialToggle", "AerialOpen", "AerialNext", "AerialPrev" },
-    keys = { "<leader>to" },
-    dependencies = { "nvim-treesitter/nvim-treesitter" },
-    config = function()
-      require("config.aerial")
-    end,
-  },
-
   -- Jump anywhere on screen. Binds `f` -- this replaces vim's within-line
   -- f{char}; F, t and T are untouched. `;` as f-repeat was already given up in
   -- Stage 1, where it became `:`.
@@ -229,21 +217,14 @@ local plugin_specs = {
     end,
   },
 
-  -- Git commands inside nvim.
+  -- Permalinks to the current line on the forge.
   --
   -- NOTE: `User InGitRepo` is a custom event -- it only fires because
   -- `utils.inside_git_repo()` runs from the `git_repo_check` autocmd in
-  -- custom-autocmd.lua (Stage 2). If the git maps do nothing, check that first:
-  -- `:Lazy` will show these as never-loaded.
-  {
-    "tpope/vim-fugitive",
-    event = "User InGitRepo",
-    config = function()
-      require("config.fugitive")
-    end,
-  },
-
-  -- Permalinks to the current line on the forge.
+  -- custom-autocmd.lua (Stage 2). This is now its only consumer; if
+  -- `<leader>gl` does nothing, check that first -- `:Lazy` will show this as
+  -- never-loaded.
+  --
   -- NOTE: gitlinker requires plenary. The target gets it only because neogit
   -- lists it as a dependency; neogit is skipped here, so it is declared.
   {
@@ -255,20 +236,12 @@ local plugin_specs = {
     end,
   },
 
-  -- Full-window diff and file history.
-  {
-    "sindrets/diffview.nvim",
-    cmd = { "DiffviewOpen", "DiffviewFileHistory" },
-    config = function()
-      require("config.diffview")
-    end,
-  },
-
   { "nvim-lua/plenary.nvim", lazy = true },
 
   -- NOTE: the target also ships NeogitOrg/neogit (a magit-style UI) alongside
-  -- fugitive, and rbong/vim-flog. neogit overlaps fugitive almost entirely;
-  -- both are skipped.
+  -- fugitive, and rbong/vim-flog. Both are skipped, and fugitive itself has
+  -- since been removed -- lazygit covers that ground, launched from snacks
+  -- (`<leader>gg`, see config/snacks.lua).
 
   -- Buffer tabline. The target guards this with `cond = firenvim_not_active`;
   -- firenvim is not installed, so the guard is dropped.
@@ -343,9 +316,10 @@ local plugin_specs = {
     end,
   },
 
-  -- Loaded only for `input` and `picker`: it upgrades vim.ui.input and
-  -- vim.ui.select, which is what makes LSP rename and code-action pickers look
-  -- right. Its ~20 other modules stay off.
+  -- Three of its ~20 modules are used: `input` and `picker`, which upgrade
+  -- vim.ui.input and vim.ui.select (what makes LSP rename and code-action
+  -- pickers look right), and `lazygit`, which needs no `enabled` flag because
+  -- it is on-demand rather than event-driven. The rest stay off.
   {
     "folke/snacks.nvim",
     priority = 1000,
