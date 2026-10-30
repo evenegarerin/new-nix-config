@@ -145,6 +145,8 @@ in
   systemd.user.services.elephant.enableDefaultPath = false;
 
   environment.variables.EDITOR = "nvim";
+  environment.variables.BROWSER = "firefox";
+  environment.variables.Term = "kitty";
 
   environment.systemPackages = with pkgs; [
     kitty
