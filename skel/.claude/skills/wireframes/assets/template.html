@@ -87,6 +87,49 @@
             font-size: var(--fs-s);
         }
 
+        /* Flow navigation: where this screen sits in the click-through flow. */
+        .wf-flow {
+            font-family: var(--font-ui);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: var(--s2);
+            padding: var(--s2) var(--s4);
+            background: var(--g1);
+            border-bottom: 1px solid var(--g3);
+            font-size: var(--fs-s);
+        }
+
+        .wf-flow .wf-flow-label {
+            color: var(--g5);
+        }
+
+        .wf-flow ol {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: var(--s2);
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .wf-flow li+li::before {
+            content: "\2192";
+            margin-right: var(--s2);
+            color: var(--g4);
+        }
+
+        .wf-flow [aria-current="page"] {
+            font-weight: 700;
+            text-decoration: none;
+            color: var(--g7);
+        }
+
+        .wf-flow .wf-flow-index {
+            margin-left: auto;
+        }
+
         .wf-controls {
             font-family: var(--font-ui);
             display: flex;
@@ -266,6 +309,26 @@
             cursor: pointer;
         }
 
+        /* An action that navigates to another wireframe is an <a class="btn">. */
+        a.btn {
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        a.btn:focus-visible {
+            outline: 3px solid var(--g6);
+            outline-offset: 2px;
+        }
+
+        /* A destination that is not wireframed yet: still shown, but visibly not clickable. */
+        .btn[aria-disabled="true"] {
+            border-style: dashed;
+            color: var(--g4);
+            border-color: var(--g4);
+            cursor: not-allowed;
+        }
+
         .btn-primary {
             background: var(--g7);
             color: var(--g0);
@@ -320,6 +383,10 @@
             <dd>[The one thing they should do here]</dd>
             <dt>Status</dt>
             <dd>draft</dd>
+            <dt>Reached from</dt>
+            <dd><a href="./[previous-screen].html">[previous-screen]</a></dd>
+            <dt>Leads to</dt>
+            <dd><a href="./[next-screen].html">[next-screen]</a></dd>
             <dt>Related</dt>
             <dd><a href="./[related-screen].html">[related-screen]</a></dd>
         </dl>
@@ -330,6 +397,17 @@
             </ul>
         </details>
     </header>
+
+    <!-- ===== Flow position: delete this nav if the screen is standalone ===== -->
+    <nav class="wf-flow" aria-label="Flow">
+        <span class="wf-flow-label">[Flow name]:</span>
+        <ol>
+            <li><a href="./[previous-screen].html">[previous-screen]</a></li>
+            <li><a href="./[framed-content].html" aria-current="page">[framed content]</a></li>
+            <li><a href="./[next-screen].html">[next-screen]</a></li>
+        </ol>
+        <a class="wf-flow-index" href="./index.html">All wireframes</a>
+    </nav>
 
     <!-- ===== Controls: viewport + state switchers ===== -->
     <div class="wf-controls" role="toolbar" aria-label="Wireframe controls">
@@ -351,6 +429,9 @@
             <section data-state="default" class="is-active">
                 <div class="screen">
                     <!-- Default / populated state. Use realistic content, incl. one long and one empty value. -->
+                    <!-- An action that leaves this screen is a real link, so the flow is click-through:
+                         <a class="btn btn-primary" href="./[next-screen].html">[Primary action]</a>
+                         Not wireframed yet? <a class="btn" aria-disabled="true">[Label]</a> + a note saying why. -->
                 </div>
             </section>
 

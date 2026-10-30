@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Wireframes – [Project]</title>
+    <style>
+        /* The index is chrome, not a wireframe: system font, no sketch face, no embedded font. */
+        :root {
+            --g0: #ffffff;
+            --g1: #f4f4f4;
+            --g3: #c8c8c8;
+            --g4: #9a9a9a;
+            --g5: #666666;
+            --g7: #111111;
+            --wf-accent: #e6007a;
+            --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            --s1: 4px;
+            --s2: 8px;
+            --s3: 16px;
+            --s4: 24px;
+            --s5: 32px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: var(--s4);
+            font-family: var(--font-ui);
+            font-size: 16px;
+            color: var(--g7);
+            background: var(--g1);
+            line-height: 1.5;
+        }
+
+        main {
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin: 0 0 var(--s2);
+        }
+
+        h2 {
+            font-size: 18px;
+            margin: var(--s5) 0 var(--s2);
+            padding-bottom: var(--s1);
+            border-bottom: 1px solid var(--g3);
+        }
+
+        p.lede {
+            margin: 0 0 var(--s4);
+            color: var(--g5);
+        }
+
+        /* A flow: its screens in the order the user walks them. */
+        ol.flow {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: var(--s2);
+        }
+
+        ol.flow li+li::before {
+            content: "\2192";
+            margin-right: var(--s2);
+            color: var(--g4);
+        }
+
+        ol.flow a,
+        ul.loose a {
+            display: inline-block;
+            padding: var(--s1) var(--s2);
+            background: var(--g0);
+            border: 1px solid var(--g4);
+            color: var(--g7);
+            text-decoration: none;
+        }
+
+        ol.flow a:focus-visible,
+        ul.loose a:focus-visible {
+            outline: 3px solid var(--g7);
+            outline-offset: 2px;
+        }
+
+        ul.loose {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--s2);
+        }
+
+        .status {
+            font-size: 12px;
+            color: var(--g5);
+            margin-left: var(--s1);
+        }
+
+        .note {
+            font-size: 14px;
+            color: var(--wf-accent);
+            margin: var(--s2) 0 0;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h1>Wireframes – [Project]</h1>
+        <p class="lede">Every wireframe in this folder. Start at a flow's first screen and click through it.</p>
+
+        <!-- One section per flow; screens listed in the order the user walks them. -->
+        <h2>[Flow name]</h2>
+        <ol class="flow">
+            <li><a href="./[first-screen].html">[first screen]</a><span class="status">draft</span></li>
+            <li><a href="./[second-screen].html">[second screen]</a><span class="status">draft</span></li>
+        </ol>
+        <p class="note">[Optional: what this flow covers, or what is still missing from it.]</p>
+
+        <!-- Screens that are not part of a flow. -->
+        <h2>Standalone screens</h2>
+        <ul class="loose">
+            <li><a href="./[screen].html">[screen]</a><span class="status">draft</span></li>
+        </ul>
+    </main>
+</body>
+
+</html>
