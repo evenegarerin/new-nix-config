@@ -109,6 +109,34 @@ api.nvim_create_autocmd({ "VimEnter" }, {
   callback = open_nvim_tree,
 })
 
+-- Start lua_ls with no buffer attached, so nvim-tree can show diagnostics for files that were never opened.
+-- The cost is a lua-language-server process on every start in a lua project, whether or not a lua file is ever opened.
+api.nvim_create_autocmd("VimEnter", {
+  group = api.nvim_create_augroup("eager_lua_ls", { clear = true }),
+  desc = "start lua_ls detached so nvim-tree has diagnostics",
+  callback = function()
+    -- `nvim file.lua` already attached one during startup
+    if #vim.lsp.get_clients { name = "lua_ls" } > 0 then
+      return
+    end
+
+    local root = vim.fs.root(fn.getcwd(), { ".luarc.json", "init.lua" })
+    if not root then
+      return
+    end
+
+    local cfg = vim.lsp.config.lua_ls
+    if not cfg or type(cfg.cmd) ~= "table" or not utils.executable(cfg.cmd[1]) then
+      return
+    end
+
+    vim.lsp.start(
+      vim.tbl_deep_extend("force", vim.deepcopy(cfg), { root_dir = root }),
+      { attach = false }
+    )
+  end,
+})
+
 -- Do not use smart case in command line mode
 api.nvim_create_augroup("dynamic_smartcase", { clear = true })
 api.nvim_create_autocmd("CmdlineEnter", {
@@ -204,11 +232,18 @@ api.nvim_create_autocmd("ColorScheme", {
     vim.api.nvim_set_hl(0, "IlluminatedWordRead", { reverse = true, update = true })
     vim.api.nvim_set_hl(0, "IlluminatedWordText", { reverse = true, update = true })
 
-    -- Let the terminal background show through
+    -- Let the terminal background show through the following groups
     local transparent = {
       "Normal",
       "NormalNC",
       "SignColumn",
+      "LineNr",
+      "LineNrAbove",
+      "LineNrBelow",
+      "CursorLineNr",
+      "CursorLineSign",
+      "CursorLineFold",
+      "FoldColumn",
       "NvimTreeNormal",
       "NvimTreeNormalNC",
       "TabLine",
@@ -216,13 +251,30 @@ api.nvim_create_autocmd("ColorScheme", {
       "TabLineFill",
     }
 
-    for _, group in ipairs(transparent) do
+    local function make_transparent(group)
       local hl = vim.api.nvim_get_hl(0, { name = group, link = false })
       hl.bg = "none"
       vim.api.nvim_set_hl(0, group, hl)
     end
 
+    for _, group in ipairs(transparent) do
+      make_transparent(group)
+    end
+
+    local sign_prefixes = { "GitSigns", "DiagnosticSign" }
+
+    for group, _ in pairs(vim.api.nvim_get_hl(0, {})) do
+      for _, prefix in ipairs(sign_prefixes) do
+        if vim.startswith(group, prefix) then
+          make_transparent(group)
+          break
+        end
+      end
+    end
+
     vim.api.nvim_set_hl(0, "NvimTreeWinSeparator", { bg = "none", fg = "#a3a3a3" })
+
+    vim.api.nvim_set_hl(0, "StatusColumnSeparator", { bg = "none", fg = "#828282" })
   end,
 })
 

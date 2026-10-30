@@ -43,6 +43,29 @@ require("bufferline").setup {
   },
 }
 
-vim.keymap.set("n", "<leader>tb", "<cmd>BufferLinePick<CR>", {
-  desc = "pick a buffer",
+-- Move along the tabline as it is drawn
+vim.keymap.set("n", "<leader>bh", "<cmd>BufferLineCyclePrev<cr>", {
+  silent = true,
+  desc = "bufferline: focus buffer to the left",
 })
+
+vim.keymap.set("n", "<leader>bl", "<cmd>BufferLineCycleNext<cr>", {
+  silent = true,
+  desc = "bufferline: focus buffer to the right",
+})
+
+vim.keymap.set("n", "<leader>bx", function()
+  -- `update` writes only when modified, and fails with E32 on a buffer that has no file name -- so only reach for it when there is something it can write.
+  if vim.bo.modified and vim.bo.buftype == "" and vim.api.nvim_buf_get_name(0) ~= "" then
+    local ok, err = pcall(vim.cmd.update)
+
+    -- A readonly file or a bad path must not end with the buffer closed and the changes gone.
+    if not ok then
+      vim.notify(tostring(err), vim.log.levels.ERROR, { title = "nvim-config" })
+      return
+    end
+  end
+
+  Snacks.bufdelete()
+end, { desc = "bufferline: save and close buffer" })
+

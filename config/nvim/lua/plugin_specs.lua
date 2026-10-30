@@ -188,15 +188,6 @@ local plugin_specs = {
     end,
   },
 
-  -- Sign in the gutter when a code action is available.
-  {
-    "kosayoda/nvim-lightbulb",
-    event = "LspAttach",
-    config = function()
-      require("config.lightbulb")
-    end,
-  },
-
   -- Highlight other occurrences of the word under the cursor.
   {
     "RRethy/vim-illuminate",

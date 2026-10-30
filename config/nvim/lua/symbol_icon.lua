@@ -1,16 +1,10 @@
--- Every nerd-font glyph used anywhere in the config, in one table: change an
--- icon here and it updates at every use site. Taken whole from
--- ../nvim.bak/lua/symbol_icon.lua (it has no dependencies).
---
--- A Stage 1 file, pulled forward because lualine reads from it throughout.
--- Stage 1 also wires `fillchars`/`indent`/`tabline` below into options.lua and
--- the plugins that use them; right now only the lualine-facing keys are live.
+-- Every nerd-font glyph used anywhere in the config, in one table: change an icon here and it updates at every use site. Taken whole from
 
 local M = {}
 
 M.lsp = {
   icon = "",
-  not_exist = "🚫",
+  not_exist = "",
 }
 
 M.git = {
@@ -34,10 +28,9 @@ M.file = {
 }
 
 M.diagnostic = {
-  error = "🆇",
-  warn = "⚠️",
-  info = "ℹ️",
-  hint = "",
+  error = "",
+  warn = "",
+  info = "󰋼",
 }
 
 M.IME = {

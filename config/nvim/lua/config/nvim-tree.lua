@@ -1,4 +1,5 @@
 local api = require("nvim-tree.api")
+local symbol_icon = require("symbol_icon")
 
 require("nvim-tree").setup {
   on_attach = function(bufnr)
@@ -17,11 +18,13 @@ require("nvim-tree").setup {
     show_on_dirs = true,
     show_on_open_dirs = true,
 
+    -- Same glyphs as the statuscolumn gutter and lualine; nvim-tree spells
+    -- the warn key `warning`.
     icons = {
-      hint = "󰌵",
-      info = "󰋼",
-      warning = "",
-      error = "",
+      hint = symbol_icon.diagnostic.hint,
+      info = symbol_icon.diagnostic.info,
+      warning = symbol_icon.diagnostic.warn,
+      error = symbol_icon.diagnostic.error,
     },
   },
 }

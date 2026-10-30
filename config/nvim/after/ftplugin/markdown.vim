@@ -1,73 +1,22 @@
-" NOTE: the target uses `set` here. Every one of these options is buffer- or
-" window-local, so `set` also writes the global default and leaks the value to
-" other buffers -- confirmed for keywordprg, which stayed `:help` everywhere
-" after visiting a .vim file. `setlocal` throughout.
 setlocal concealcursor=c
 setlocal synmaxcol=3000  " For long Chinese paragraphs
 
 setlocal wrap
 
-" Fix minor issue with footnote, see https://github.com/vim-pandoc/vim-markdownfootnotes/issues/22
+" vim-markdownfootnotes' own ftplugin runs before this file and claims
+" <Leader>f and <Leader>r buffer-locally whenever nothing has taken them yet --
+" with `mapleader = ' '` that is <Space>f and <Space>r. In normal mode it
+" hijacks the leader: <Space>f inserts a footnote as soon as the second key
+" misses 'timeoutlen' (200ms, options.lua), and <Space>r runs :q on the window.
+" Insert mode is worse still: no longer mapping starts with <Space>f there, so
+" there is no timeout to ride out and any word beginning with `f` after a space
+" -- "for", "from", "a fair bit" -- splits the window and swallows the rest of
+" the sentence into a footnote definition.
+" The <Plug> mappings stay, so :call markdownfootnotes#VimFootnotes() and any
+" deliberate binding still work.
 if exists(':FootnoteNumber')
-  nnoremap <buffer><silent> ^^ :<C-U>call markdownfootnotes#VimFootnotes('i')<CR>
-  inoremap <buffer><silent> ^^ <C-O>:<C-U>call markdownfootnotes#VimFootnotes('i')<CR>
-  imap <buffer> <silent> @@ <Plug>ReturnFromFootnote
-  nmap <buffer> <silent> @@ <Plug>ReturnFromFootnote
+  silent! nunmap <buffer> <Leader>f
+  silent! nunmap <buffer> <Leader>r
+  silent! iunmap <buffer> <Leader>f
+  silent! iunmap <buffer> <Leader>r
 endif
-
-" Text objects for Markdown code blocks.
-xnoremap <buffer><silent> ic :<C-U>call text_obj#MdCodeBlock('i')<CR>
-xnoremap <buffer><silent> ac :<C-U>call text_obj#MdCodeBlock('a')<CR>
-onoremap <buffer><silent> ic :<C-U>call text_obj#MdCodeBlock('i')<CR>
-onoremap <buffer><silent> ac :<C-U>call text_obj#MdCodeBlock('a')<CR>
-
-" Use + to turn several lines to an unordered list.
-" Ref: https://vi.stackexchange.com/q/5495/15292 and https://stackoverflow.com/q/42438795/6064933.
-nnoremap <buffer><silent> + :set operatorfunc=AddListSymbol<CR>g@
-xnoremap <buffer><silent> + :<C-U> call AddListSymbol(visualmode(), 1)<CR>
-
-function! AddListSymbol(type, ...) abort
-  if a:0
-    let line_start = line("'<")
-    let line_end = line("'>")
-  else
-    let line_start = line("'[")
-    let line_end = line("']")
-  endif
-
-  " add list symbol to each line
-  for line in range(line_start, line_end)
-    let text = getline(line)
-
-    let l:end = matchend(text, '^\s*')
-    if l:end == 0
-      let new_text = '+ ' . text
-    else
-      let new_text = text[0 : l:end-1] . ' + ' . text[l:end :]
-    endif
-
-    call setline(line, new_text)
-  endfor
-endfunction
-
-" Add hard line breaks for Markdown
-" nnoremap <buffer><silent> \ :set operatorfunc=AddLineBreak<CR>g@
-xnoremap <buffer><silent> \ :<C-U> call AddLineBreak(visualmode(), 1)<CR>
-
-function! AddLineBreak(type, ...) abort
-  if a:0
-    let line_start = line("'<")
-    let line_end = line("'>")
-  else
-    let line_start = line("'[")
-    let line_end = line("']")
-  endif
-
-  for line in range(line_start, line_end)
-    let text = getline(line)
-    " add backslash to each line
-    let new_text = text . "\\"
-
-    call setline(line, new_text)
-  endfor
-endfunction

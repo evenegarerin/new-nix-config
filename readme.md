@@ -67,29 +67,16 @@ skanlite
 how to properly escape submap since catchall does not seem to work anymore
 bug in the current hyprland version; wait for fix
 
-take a look at this: -> https://github.com/jdhao/nvim-config
-
 lazy git                                        -- custom config
-neovim config
 quick shell (bar)                               -- no
 dentritic nixos config
 
-marquee in waybar in white text, and behind everything else
-maybe yes quick shell ???
-
 change default time for hyprland notification, or make it so that they stay present if my mouse is over them                            -- maybe not possible
 
-z fuzzy finding 
-
 claude sesssions close when i start herdr after reboot, for jan this does not happen                                -- migth be fixed
-
-nvim left of on gitsigns
-
-leader t to open terminal
-leader ec to collapse the whole file tree
 
 wireframes should be wired into each other to make show workflow
 
 buffer navigation left and right, buffer close
 
-diagnoses does not show right now in nvim-tree
+use the last characters (seperator chracter of the statuscolumn) color to convey gitsigns information

@@ -1,31 +1,9 @@
--- A hand-rolled `'statuscolumn'` whose only job is to give gitsigns a slot of
--- its own.
---
--- Why this exists: the native sign column cannot reserve a slot. `%s` packs
--- signs to the left and `'signcolumn'` only caps how many fit, so with
--- `yes:2` a line carrying a diagnostic but no git change puts the diagnostic
--- in the first cell. Sign priority decides the *order* signs are drawn in, not
--- which cell they land in, so no combination of priorities fixes that.
---
--- Here the two cells are explicit. Slot 1 renders gitsigns and nothing else,
--- blank when the line is unchanged. Slot 2 renders everything else
--- (diagnostics, nvim-lightbulb), highest priority first. Then the line number.
---
--- Setting `'statuscolumn'` replaces the whole gutter, so the number column is
--- rendered here too -- including `relativenumber`, which `custom-autocmd.lua`
--- toggles per window.
-
 local M = {}
 
 local api = vim.api
 
--- Resolved on first use: gitsigns loads at `VeryLazy`, so its namespaces do
--- not exist while the first buffer is drawn.
---
--- There is more than one -- `gitsigns_signs_` holds the unstaged signs and
--- gitsigns adds further namespaces for staged signs and blame -- so this
--- collects every id whose name starts with `gitsigns`, rather than picking the
--- first match out of `pairs()`, whose order is not defined.
+local SEPARATOR = "%#StatusColumnSeparator#" .. require("symbol_icon").fillchars.vert .. "%*"
+
 local git_ns = nil
 
 local function gitsigns_ns()
@@ -50,10 +28,6 @@ local function gitsigns_ns()
   return git_ns
 end
 
--- Cell budget per slot. Git signs (`+ ~ _ ‾ │`) are one cell wide; the
--- diagnostic and lightbulb icons are emoji and take two. Both slots are padded
--- to a fixed width or the line number shifts sideways depending on what
--- happens to be on the line.
 local GIT_WIDTH = 1
 local OTHER_WIDTH = 2
 
@@ -118,7 +92,7 @@ local function number()
 
   -- a soft-wrapped continuation row: keep the width, drop the digits
   if vim.v.virtnum ~= 0 then
-    return "%=" .. string.rep(" ", 2) .. " "
+    return "%=" .. string.rep(" ", 2) .. SEPARATOR
   end
 
   local n = vim.v.lnum
@@ -126,15 +100,13 @@ local function number()
     n = vim.v.relnum
   end
 
-  return "%=" .. n .. " "
+  return "%=" .. n .. SEPARATOR
 end
 
 --- @return string
 function M.render()
-  -- Special windows (nvim-tree, quickfix, help, terminal) keep whatever gutter
-  -- they set for themselves; only the number part applies there.
   if vim.bo.buftype ~= "" then
-    return number()
+    return "%s" .. number()
   end
 
   local git, other = slots()
