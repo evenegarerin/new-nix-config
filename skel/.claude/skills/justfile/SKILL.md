@@ -74,6 +74,12 @@ meanings, before inventing names:
 | `fmt` / `fmt-check` | Format / verify formatting (read-only) |
 | `check` | All read-only gates; what CI and pre-commit run |
 | `clean` | Remove generated files |
+| `wireframes` | Open `.wireframes/` in the browser (projects with a UI) |
+
+`wireframes` is quick access, not a build step: it opens the `.wireframes/` folder the wireframes
+skill writes into, preferring its `index.html` entry point. Copy it from `references/patterns.md`
+§11 rather than retyping — it honours `$BROWSER`, falls back to `xdg-open`, and fails with a
+readable message when nothing has been wireframed yet.
 
 Pair every mutating quality recipe with a read-only twin (`fmt` / `fmt-check`). `check` must only
 call the read-only ones, so running it never dirties the tree. Match an existing scheme
@@ -232,7 +238,7 @@ Useful introspection: `just --show <r>`, `just --evaluate`, `just --usage <r>` (
   the minimum `just` version. Read when using anything beyond basic recipes, or when the installed
   version is old.
 - `references/patterns.md` — starter templates (generic, Python/uv, Node/pnpm, Rust, Go, Docker),
-  check/fix pairs, modules layout, GitHub Actions, Make migration table. Read when creating a
-  justfile or wiring CI.
+  check/fix pairs, modules layout, GitHub Actions, Make migration table, the `wireframes` opener.
+  Read when creating a justfile or wiring CI.
 - `scripts/lint_justfile.py` — structural linter; run after creating or editing.
 - Manual for anything else: `just --man` or https://just.systems/man/en/ (match installed version).

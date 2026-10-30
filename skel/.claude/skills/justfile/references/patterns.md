@@ -15,6 +15,7 @@ with just ≥1.27 unless noted.
 8. Modules layout
 9. CI (GitHub Actions)
 10. Migrating from Make / npm scripts
+11. Wireframes opener
 
 ## 1. Layout conventions
 
@@ -59,6 +60,19 @@ check: fmt-check lint test
 # Run linters
 lint:
     ./scripts/lint.sh
+
+# --- Design ----------------------------------------------------------
+# Drop this section if the project has no UI.
+
+# Open the wireframes in the browser
+wireframes:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    dir="{{ justfile_directory() }}/.wireframes"
+    [ -d "$dir" ] || { echo "no wireframes yet — create one first ($dir)" >&2; exit 1; }
+    page="$dir/index.html"
+    [ -f "$page" ] || page="$dir"
+    exec "${BROWSER:-xdg-open}" "$page"
 
 # --- Housekeeping ----------------------------------------------------
 
@@ -380,3 +394,39 @@ delete the Makefile only when nothing references it.
 npm scripts: `"lint": "eslint ."` → a `lint` recipe calling `pnpm eslint .` or `pnpm run lint`.
 Keep lifecycle scripts (`prepare`, `postinstall`) in package.json — package managers run those,
 not just.
+
+## 11. Wireframes opener
+
+Projects with a UI keep low-fidelity wireframes as self-contained HTML in `.wireframes/`. This
+recipe is the quick way back into them — no build step, no server, just the browser.
+
+```just
+# Open the wireframes in the browser
+wireframes:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    dir="{{ justfile_directory() }}/.wireframes"
+    [ -d "$dir" ] || { echo "no wireframes yet — create one first ($dir)" >&2; exit 1; }
+    page="$dir/index.html"
+    [ -f "$page" ] || page="$dir"
+    exec "${BROWSER:-xdg-open}" "$page"
+```
+
+Why it is written this way:
+
+- **`$BROWSER` with an `xdg-open` fallback.** `$BROWSER` is the user's explicit choice and wins, but
+  it is unset on many desktops, where a bare `"$BROWSER" "$page"` would fail with an empty-command
+  error. `xdg-open` then hands the file to whatever is registered for HTML. On macOS use `open`;
+  if the project is cross-platform, split it with `[linux]` / `[macos]` variants rather than guessing.
+- **`justfile_directory()`, not a relative path.** The recipe then works from any subdirectory, and
+  from a module, where cwd is the module file's directory.
+- **Prefers `index.html`.** The wireframes set has an index listing every screen grouped by flow;
+  it is the intended entry point. Falling back to the directory gives the browser's file listing,
+  which still works when no index exists yet.
+- **A script recipe.** The existence checks need shell state across lines, which line recipes do not
+  have — and script recipes do not inherit `set shell`, so `set -euo pipefail` is spelled out.
+- **Fails loudly when there is nothing to show.** Opening an empty directory listing looks like a
+  broken browser; a one-line message on stderr plus exit 1 does not.
+
+The recipe only reads, so it needs no `[confirm]`, and it must stay out of `check` — it opens a
+window and never belongs in CI.
