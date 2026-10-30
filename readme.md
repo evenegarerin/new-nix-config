@@ -77,6 +77,4 @@ claude sesssions close when i start herdr after reboot, for jan this does not ha
 
 wireframes should be wired into each other to make show workflow
 
-buffer navigation left and right, buffer close
-
 use the last characters (seperator chracter of the statuscolumn) color to convey gitsigns information
