@@ -79,6 +79,9 @@
       "sidebar.visibility": {
         "Value": "always-show",
         "Status": "locked"
+      },
+      "userChromeJS.experimental.enabled": {
+        "Value": true
       }
     }
   }

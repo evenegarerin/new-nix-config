@@ -22,11 +22,11 @@ Für jedes Kapitel gibt es ein Beispiel wie es aus dem Terminal gemacht werden k
 
 ### 1. Netzwerk herstellen
 
-* Im Terminal `nmcli` starten
+* Im Terminal `nmtui` starten
 * "Activate a connection" wählen
 * Netzwerk auswählen
-* Spam Escape um nmcli zu verlassen
-* Mit `ping google.com` testen
+* Spam Escape um nmtui zu verlassen
+* Mit `ping -c3 google.com` testen
 
 ### 2. Flakes in der installer-shell aktivieren
 
@@ -52,24 +52,18 @@ export P=p                        # "p" bei nvme (nvme0n1p1), "" bei sata (sda1)
 
 ### 4. Festplatte partitionieren
 
-Drei Partitionen:
+Zwei Partitionen:
 
 | # | größe       | typ        | zweck                                              |
 |---|-------------|------------|----------------------------------------------------|
 | 1 | 1 GiB       | EFI (ef00) | `/boot` — grub + kernel + initrd, unverschlüsselt   |
-| 2 | halber ram  | swap       | swap, bei jedem boot mit zufälligem schlüssel verschlüsselt |
-| 3 | rest        | luks       | luks-container mit dem root-dateisystem             |
+| 2 | rest        | luks       | luks-container mit dem root-dateisystem             |
 
 
 ```sh
-# swap = die hälfte des verbauten rams, in MiB
-export SWAP_MIB=$(( $(awk '/MemTotal/{print $2}' /proc/meminfo) / 1024 / 2 ))
-echo "swap wird ${SWAP_MIB} MiB groß"
-
 sgdisk --zap-all "$DISK"
 sgdisk -n 1:0:+1G             -t 1:ef00 -c 1:boot      "$DISK"
-sgdisk -n 2:0:+${SWAP_MIB}M   -t 2:8200 -c 2:swap      "$DISK"
-sgdisk -n 3:0:0               -t 3:8309 -c 3:cryptroot "$DISK"
+sgdisk -n 2:0:0               -t 2:8309 -c 2:cryptroot "$DISK"
 
 partprobe "$DISK"
 lsblk "$DISK"
@@ -77,15 +71,14 @@ lsblk "$DISK"
 
 ### 5. Verschlüsseln und Formatieren
 
-luks2 auf partition 3, darauf dann die dateisysteme.
+luks2 auf partition 2, darauf dann die dateisysteme.
 Die passphrase, die hier gesetzt wird nicht vergessen, das wäre schade.
 
 ```sh
-cryptsetup luksFormat --type luks2 "${DISK}${P}3"      # YES tippen, dann die passphrase zweimal
-cryptsetup open "${DISK}${P}3" cryptroot               # wird als /dev/mapper/cryptroot entsperrt
+cryptsetup luksFormat --type luks2 "${DISK}${P}2"      # YES tippen, dann die passphrase zweimal
+cryptsetup open "${DISK}${P}2" cryptroot               # wird als /dev/mapper/cryptroot entsperrt
 
 mkfs.fat -F32 -n boot "${DISK}${P}1"
-mkswap -L swap "${DISK}${P}2"
 mkfs.ext4 -L nixos /dev/mapper/cryptroot
 ```
 
@@ -95,7 +88,6 @@ mkfs.ext4 -L nixos /dev/mapper/cryptroot
 mount /dev/mapper/cryptroot /mnt
 mkdir -p /mnt/boot
 mount -o umask=077 "${DISK}${P}1" /mnt/boot
-swapon "${DISK}${P}2"
 ```
 
 ### 7. hardware-konfiguration erzeugen
@@ -104,7 +96,7 @@ swapon "${DISK}${P}2"
 Die datei muss also auch auf der live-iso unter `/etc/nixos/` liegen — kopieren reicht.
 
 ```sh
-nixos-generate-config --root /mnt/root
+nixos-generate-config --root /mnt
 
 mkdir -p /etc/nixos
 cp /mnt/etc/nixos/hardware-configuration.nix /etc/nixos/hardware-configuration.nix
@@ -115,9 +107,7 @@ prüfen, ob das luks-gerät erkannt wurde — es sollte eine zeile wie
 
 Fehlt die luks-zeile, dann ist das ein Problem, in dem Fall ein trusted adult um hilfe fragen.
 
-### 8. Zweimal installieren.
-
-Home Manager nutzt absolute Pfade um sym links zu erstellen, diese links werden nach der installation nicht funktionieren, dafür müssen wir nach dem Installieren noch mal rebuilden.
+### 8. Installieren.
 
 * Falls git nicht installiert ist, git so hohlen `nix-shell -p git`
 * Die config so clonen `git clone https://github.com/evenegarerin/new-nix-config`
@@ -126,11 +116,8 @@ Home Manager nutzt absolute Pfade um sym links zu erstellen, diese links werden 
 * Falls die config schon vorhanden ist muss git vor dem installieren trotzem hinzugefügt werden.
 
 * In das Configurations Verzeichniss gehen `cd nix-config`.
-* Erste Installation `nixos-install --flake /mnt/home/castle/nix-config#default --impure --root /mnt/root`
-* Die config in das Home Verzeichnis kopieren `cp -r ../nix-config /mnt/root/home/castle/nix-config`, change castle wenn der username anders ist.
-* Dann chroot in das instalierte system `chroot /mnt`
-* Und geh in das Configurations Verzeichnis `cd /home/castle/nix-config`, change castle wenn der username anders ist.
-* Rebuild `sudo nixos-rebuild switch --flake .#default --impure`, danach funktionieren alle sym links
+* Erste Installation `nixos-install --flake .#default --impure --root /mnt --no-root-password`
+* Die config in das Home Verzeichnis kopieren `cp -r ../nix-config /mnt/home/castle/nix-config`, change castle wenn der username anders ist.
 
 ### 9. Erster Start
 
