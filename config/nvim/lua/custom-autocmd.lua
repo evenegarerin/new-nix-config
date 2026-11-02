@@ -173,6 +173,17 @@ api.nvim_create_autocmd("TermOpen", {
   end,
 })
 
+api.nvim_create_autocmd({ "BufWinEnter", "WinEnter" }, {
+  group = api.nvim_create_augroup("statuscolumn_restore", { clear = true }),
+  pattern = "*",
+  desc = "put back a statuscolumn Neovim cleared after an evaluation error",
+  callback = function()
+    if vim.bo.buftype == "" and vim.wo.statuscolumn == "" then
+      vim.wo.statuscolumn = require("statuscolumn").FORMAT
+    end
+  end,
+})
+
 -- Absolute line numbers in insert mode and in inactive windows, relative
 -- everywhere else.
 local number_toggle_group = api.nvim_create_augroup("numbertoggle", { clear = true })

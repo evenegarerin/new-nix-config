@@ -148,6 +148,15 @@ in
   environment.variables.BROWSER = "firefox";
   environment.variables.Term = "kitty";
 
+  programs.firefox = {
+    enable = true;
+    autoConfig = builtins.readFile(builtins.fetchurl {  
+      url = "https://raw.githubusercontent.com/MrOtherGuy/fx-autoconfig/master/program/config.js";
+      sha256 = "1mx679fbc4d9x4bnqajqx5a95y1lfasvf90pbqkh9sm3ch945p40";
+    });
+    policies = (builtins.fromJSON (builtins.readFile ./config/firefox/policies.json)).policies;
+  };
+
   environment.systemPackages = with pkgs; [
     kitty
     file
@@ -223,7 +232,6 @@ in
     qutebrowser
     hyprlock
     hypridle
-    firefox
     vscodium
     claude-code
     gnupg
@@ -297,9 +305,6 @@ in
       };
     }];
   };
-
-  environment.etc."firefox/policies/policies.json".source =
-    ./config/firefox/policies.json;
 
   environment.pathsToLink = [
     "/share/glib-2.0/schemas"

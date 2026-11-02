@@ -60,8 +60,7 @@ in
 
       for profile in "$HOME"/.config/mozilla/firefox/*.default; do
         [ -d "$profile" ] || continue
-        mkdir -p "$profile/chrome"
-        ln -sfn "${nixConfig}/firefox/userChrome.css" "$profile/chrome/userChrome.css"
+        ln -sfn "${nixConfig}/firefox/chrome" "$profile/chrome"
       done
     '';
 }

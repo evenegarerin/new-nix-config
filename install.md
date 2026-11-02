@@ -5,10 +5,10 @@
 
 
 ### post install
-change your users password with passw
+1. change your users password with passw
 
-sudo -i
+2. sudo -i
 
-change you root user password with passw
+3. change you root user password with passw
 
-exit
+4. exit

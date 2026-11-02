@@ -4,6 +4,14 @@ local api = vim.api
 
 local SEPARATOR = "%#StatusColumnSeparator#" .. require("symbol_icon").fillchars.vert .. "%*"
 
+-- Builtin items only, so this can never be the thing that throws. `%l` honours
+-- `number`/`relativenumber` on its own.
+local FALLBACK = "%s%=%l" .. SEPARATOR
+
+--- The format string `statuscolumn` is set to, shared with `options.lua` and the
+--- `statuscolumn_restore` autocmd in `custom-autocmd.lua`.
+M.FORMAT = "%{%v:lua.require'statuscolumn'.render()%}"
+
 local git_ns = nil
 
 local function gitsigns_ns()
@@ -41,9 +49,16 @@ local function chunk(detail, width)
     return string.rep(" ", width)
   end
 
-  local text = vim.trim(detail.sign_text)
-  local pad = math.max(0, width - vim.fn.strdisplaywidth(text))
-  local hl = detail.sign_hl_group or "SignColumn"
+  -- Both fields come from a third party's extmark, so neither is trusted: a
+  -- non-string `sign_text` would throw, and an empty group name renders as `%##`,
+  -- which errors with E5248.
+  local text = type(detail.sign_text) == "string" and vim.trim(detail.sign_text) or ""
+  local pad = math.max(0, width - api.nvim_strwidth(text))
+
+  local hl = detail.sign_hl_group
+  if type(hl) ~= "string" or hl == "" then
+    hl = "SignColumn"
+  end
 
   return table.concat { "%#", hl, "#", text, "%*", string.rep(" ", pad) }
 end
@@ -103,14 +118,38 @@ local function number()
   return "%=" .. n .. SEPARATOR
 end
 
+--- The real renderer. May throw -- only `M.render` is safe to hand to the redraw loop.
 --- @return string
-function M.render()
+local function render()
   if vim.bo.buftype ~= "" then
     return "%s" .. number()
   end
 
   local git, other = slots()
   return git .. other .. number()
+end
+
+local reported = false
+
+--- @return string
+function M.render()
+  local ok, result = pcall(render)
+  if ok then
+    return result
+  end
+
+  -- Never let an error reach the redraw loop: Neovim answers by clearing this
+  -- window's `statuscolumn` for the rest of the session, and every window split off
+  -- it inherits the empty value. The gutter then silently reverts to the builtin
+  -- one, losing the separator and the sign cells with no hint as to why.
+  if not reported then
+    reported = true
+    vim.schedule(function()
+      vim.notify("statuscolumn: " .. tostring(result), vim.log.levels.ERROR)
+    end)
+  end
+
+  return FALLBACK
 end
 
 return M

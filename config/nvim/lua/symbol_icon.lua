@@ -13,9 +13,9 @@ M.git = {
     added = "+",
     modified = "~",
     removed = "-",
-    delete = { text = "_" },
-    topdelete = { text = "‾" },
-    changedelete = { text = "│" },
+    delete = "_",
+    topdelete = "‾",
+    changedelete = "│",
   },
   commit = {
     ahead = "↑",
@@ -31,6 +31,7 @@ M.diagnostic = {
   error = "",
   warn = "",
   info = "󰋼",
+  hint = "󰌵",
 }
 
 M.IME = {

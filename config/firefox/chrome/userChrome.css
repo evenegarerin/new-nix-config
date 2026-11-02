@@ -10,14 +10,19 @@
     overflow: hidden !important;
 }
 
+#sidebar-main,
 #sidebar-main[sidebar-launcher-expanded] {
-    width: 56px !important;
-    min-width: 56px !important;
+    width: fit-content !important;
+    min-width: 0 !important;
     max-width: 56px !important;
     overflow: hidden !important;
 }
 
-#tabbrowser-tabs[orient="vertical"][expanded] :is(.tab-label-container, .tab-close-button) {
+.tab-close-button {
+    display: none !important;
+}
+
+#tabbrowser-tabs[orient="vertical"][expanded] .tab-label-container {
     display: none !important;
 }
 

@@ -112,7 +112,7 @@ opt.wrap = true
 opt.linebreak = true
 opt.showbreak = " 󱞪 "
 opt.signcolumn = "no"
-opt.statuscolumn = "%{%v:lua.require'statuscolumn'.render()%}"
+opt.statuscolumn = require("statuscolumn").FORMAT
 -- opt.colorcolumn = "100"
 opt.synmaxcol = 250
 
