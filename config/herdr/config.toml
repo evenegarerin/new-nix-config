@@ -25,6 +25,7 @@ swap_pane_down   = "prefix+shift+c"
 new_workspace      = "prefix+shift+k"
 previous_workspace = "prefix+k"
 next_workspace     = "prefix+j"
+close_workspace    = "prefix+shift+d"
 
 # Agents
 previous_agent = ""
@@ -62,7 +63,6 @@ remote_image_paste       = ""   # was ctrl+v (only active in herdr --remote)
 # Workspaces / worktrees
 new_worktree     = ""   # was prefix+shift+g
 rename_workspace = ""   # was prefix+shift+w
-close_workspace  = ""   # was prefix+shift+d
 switch_workspace = ""
 open_worktree    = ""
 remove_worktree  = ""

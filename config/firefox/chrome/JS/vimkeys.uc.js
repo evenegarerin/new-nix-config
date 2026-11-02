@@ -23,6 +23,7 @@
     k: (ctx) => scrollBy(ctx, -SCROLL_STEP),
     gg: (ctx) => scrollToEdge(ctx, "top"),
     G: (ctx) => scrollToEdge(ctx, "bottom"),
+    t: () => openNewTab(),
     x: () => gBrowser.removeTab(gBrowser.selectedTab, { animate: true }),
     X: () => restoreTab(),
     H: ({ browser }) => browser.canGoBack && browser.goBack(),
@@ -354,7 +355,16 @@
     anim.frame = window.requestAnimationFrame(tick);
   }
 
-  // ---- Tabs (X) ------------------------------------------------------------
+  // ---- Tabs (t, X) ---------------------------------------------------------
+  // Same as Ctrl+T: respects your new-tab page setting and focuses the address bar.
+  function openNewTab() {
+    if (window.BrowserCommands?.openTab) {
+      BrowserCommands.openTab();
+    } else {
+      window.BrowserOpenTab();
+    }
+  }
+
   function restoreTab() {
     if (window.SessionWindowUI?.undoCloseTab) {
       SessionWindowUI.undoCloseTab(window);
