@@ -67,14 +67,11 @@ skanlite
 how to properly escape submap since catchall does not seem to work anymore
 bug in the current hyprland version; wait for fix
 
-lazy git                                        -- custom config
 quick shell (bar)                               -- no
 dentritic nixos config
 
 change default time for hyprland notification, or make it so that they stay present if my mouse is over them                            -- maybe not possible
 
 claude sesssions close when i start herdr after reboot, for jan this does not happen                                -- migth be fixed
-
-wireframes should be wired into each other to make show workflow
 
 use the last characters (seperator chracter of the statuscolumn) color to convey gitsigns information

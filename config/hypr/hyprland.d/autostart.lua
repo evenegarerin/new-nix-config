@@ -1,0 +1,15 @@
+-- Processes started once, when the compositor comes up.
+
+hl.on("hyprland.start", function()
+    hl.exec_cmd("hyprlock --immediate-render --no-fade-in")
+    hl.exec_cmd("hyprpaper")
+    hl.exec_cmd("hypridle")
+    hl.exec_cmd("kitty")
+    hl.exec_cmd("waybar")
+    hl.exec_cmd("nm-applet")
+    hl.exec_cmd("swaync")
+    hl.exec_cmd("blueman-applet")
+    hl.exec_cmd("wl-clip-persist")
+    hl.exec_cmd("env -u HL_INITIAL_WORKSPACE_TOKEN pcmanfm --daemon-mode")
+    hl.exec_cmd("walker --gapplication-service")
+end)
