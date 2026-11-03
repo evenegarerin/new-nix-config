@@ -409,7 +409,7 @@ wireframes:
     [ -d "$dir" ] || { echo "no wireframes yet — create one first ($dir)" >&2; exit 1; }
     page="$dir/index.html"
     [ -f "$page" ] || page="$dir"
-    exec "${BROWSER:-xdg-open}" "$page"
+    exec "${BROWSER:-xdg-open}" "--new-tab" "$page"
 ```
 
 Why it is written this way:

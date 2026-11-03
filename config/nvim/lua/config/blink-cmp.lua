@@ -68,9 +68,13 @@ require("blink.cmp").setup {
         },
       },
     },
+    -- NOTE: per_filetype REPLACES sources.default rather than extending it, so
+    -- every source these filetypes should keep has to be listed again --
+    -- otherwise prose buffers silently lose LSP, snippets, buffer and path.
     per_filetype = {
-      text = { "dictionary" },
-      markdown = { "dictionary" },
+      text = { "dictionary", "buffer", "path" },
+      markdown = { "dictionary", "lsp", "snippets", "buffer", "path" },
+      tex = { "dictionary", "lsp", "snippets", "buffer", "path" },
     },
   },
 

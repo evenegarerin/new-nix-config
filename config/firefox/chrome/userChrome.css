@@ -33,3 +33,39 @@
 #sidebar-launcher-splitter {
     display: none !important;
 }
+
+#sidebar-button {
+  display: none !important;
+}
+
+#back-button {
+  display: none !important;
+}
+
+#forward-button {
+  display: none !important;
+}
+
+#stop-reload-button {
+  display: none !important;
+}
+
+#home-button {
+  display: none !important;
+}
+
+#fxa-toolbar-menu-button {
+  display: none !important;
+}
+
+#alltabs-button {
+  display: none !important;
+}
+
+#PanelUI-button {
+  display: none !important;
+}
+
+#nav-bar-customization-target {
+    padding-inline-start: 220px !important; /* padding to offset removed icons on the left, magic number, might brake */
+}

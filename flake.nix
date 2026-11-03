@@ -16,6 +16,7 @@
   outputs =
     {
       nixpkgs,
+      nixpkgs-unstable,
       home-manager,
       ...
     }@inputs:
@@ -26,13 +27,17 @@
         inherit system;
         config.allowUnfree = true;
       };
+      pkgs-unstable = import nixpkgs-unstable {
+        inherit system;
+        config.allowUnfree = true;
+      };
     in
     {
       nixosConfigurations.default = nixpkgs.lib.nixosSystem {
         inherit system;
 
         specialArgs = {
-          inherit inputs;
+          inherit inputs pkgs-unstable;
         };
 
         modules = [

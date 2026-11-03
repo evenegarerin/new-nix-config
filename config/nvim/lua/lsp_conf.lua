@@ -105,6 +105,7 @@ local enabled_lsp_servers = {
   bashls = { exe = "bash-language-server", optional = true },
   yamlls = { exe = "yaml-language-server", optional = true },
   marksman = { exe = "marksman", optional = true },
+  texlab = { exe = "texlab", optional = true },
 
   pyright = { exe = "pyright-langserver", optional = true },
   ruff = { exe = "ruff", optional = true },

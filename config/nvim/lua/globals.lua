@@ -15,6 +15,10 @@ vim.g.logging_level = vim.log.levels.INFO
 ------------------------------------------------------------------------
 vim.g.mapleader = " "
 
+-- Already the implicit default; set explicitly because vimtex hangs its whole
+-- mapping set off <localleader> (\ll compile, \lv view, ...).
+vim.g.maplocalleader = "\\"
+
 -- Disable language providers we do not use. Perl/Ruby/Node are never needed;
 vim.g.loaded_perl_provider = 0
 vim.g.loaded_ruby_provider = 0

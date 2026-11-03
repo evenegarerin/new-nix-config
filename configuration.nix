@@ -2,6 +2,7 @@
   lib,
   config,
   pkgs,
+  pkgs-unstable,
   inputs,
   ...
 }:
@@ -150,14 +151,15 @@ in
 
   programs.firefox = {
     enable = true;
-    autoConfig = builtins.readFile(builtins.fetchurl {  
+    autoConfig = builtins.readFile(builtins.fetchurl {
       url = "https://raw.githubusercontent.com/MrOtherGuy/fx-autoconfig/master/program/config.js";
       sha256 = "1mx679fbc4d9x4bnqajqx5a95y1lfasvf90pbqkh9sm3ch945p40";
     });
     policies = (builtins.fromJSON (builtins.readFile ./config/firefox/policies.json)).policies;
   };
 
-  environment.systemPackages = with pkgs; [
+  environment.systemPackages =
+    (with pkgs; [
     kitty
     file
     waybar
@@ -231,7 +233,7 @@ in
     hyprlock
     hypridle
     vscodium
-    claude-code
+    # claude-code
     gnupg
     pinentry-tty
     gnome-text-editor
@@ -258,6 +260,7 @@ in
     yaml-language-server
     marksman
     pyright
+    texlab
     tree-sitter-grammars.tree-sitter-nix
     tree-sitter-grammars.tree-sitter-json
     tree-sitter-grammars.tree-sitter-toml
@@ -277,9 +280,29 @@ in
     unzip
     # lazydocker
     pandoc
-    texliveSmall
+    (texliveSmall.withPackages (
+      ps: with ps; [
+        latexmk # vimtex's compiler backend
+        tcolorbox # head.tex:23 -- block quote boxes
+        newverbs # head.tex:1
+        enumitem # head.tex:60 -- 9-deep list nesting
+        framed # pandoc's Shaded environment, pulled in by --highlight-style
+        # tcolorbox is loaded as [most], which drags in most of its libraries
+        pgf
+        environ
+        tikzfill
+        pdfcol
+        listings
+        listingsutf8
+        xurl # optional in pandoc's xelatex template
+        selnolig # optional in pandoc's xelatex template
+      ]
+    ))
+    zathura # PDF viewer, SyncTeX source for vimtex
     hyprshot
-  ];
+  ]) ++ ( with pkgs-unstable; [
+    claude-code
+  ]);
 
   programs.dconf = {
     enable = true;
@@ -331,8 +354,6 @@ in
   environment.etc."xdg/kdeglobals".source = pkgs.runCommand "kdeglobals" { } ''
     cat ${pkgs.dracula-theme}/share/color-schemes/Dracula.colors > $out
   '';
-
-  console.keyMap = "de";
 
   services.pulseaudio.enable = false;
   security.rtkit.enable = true;

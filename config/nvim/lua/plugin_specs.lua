@@ -77,6 +77,27 @@ local plugin_specs = {
   -- has a guarded block wiring these up -- inert unless this plugin is present.
   { "vim-pandoc/vim-markdownfootnotes", ft = { "markdown" } },
 
+  -- LaTeX. Compiles with latexmk and views in zathura; `g:matchup_override_vimtex`
+  -- below in this file has been waiting for this plugin to exist.
+  -- localleader is `\`, so: \ll compile (continuous), \lv forward-search,
+  -- \lt TOC, \lk stop, \lc clean. `<localleader>l` is vimtex's own default
+  -- prefix, so no `g:vimtex_mappings_prefix` is needed.
+  --
+  -- NOTE: vimtex's docs are explicit that it must not be lazy-loaded on `ft` --
+  -- it installs its own ftdetect and would miss the first buffer.
+  {
+    "lervag/vimtex",
+    lazy = false,
+    init = function()
+      vim.g.vimtex_view_method = "zathura"
+      vim.g.vimtex_compiler_method = "latexmk"
+
+      -- Populate the quickfix list but never jump to it or open it on its own;
+      -- a warning-only run should not yank the cursor out of the prose.
+      vim.g.vimtex_quickfix_mode = 0
+    end,
+  },
+
   ---------------------------------------------------------------------------
   -- Stage 11: text objects and editing power. Mostly init-only plugins.
   ---------------------------------------------------------------------------
