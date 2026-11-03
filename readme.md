@@ -75,3 +75,7 @@ change default time for hyprland notification, or make it so that they stay pres
 claude sesssions close when i start herdr after reboot, for jan this does not happen                                -- migth be fixed
 
 use the last characters (seperator chracter of the statuscolumn) color to convey gitsigns information
+
+maybes:
+use concy for system monitoring and waybar widgets
+make a polkit agent thing so virt-manager works.
