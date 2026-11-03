@@ -53,7 +53,9 @@ api.nvim_create_autocmd({ "BufWritePre" }, {
   end,
 })
 
--- Reload the file if it changed outside of nvim. `checktime`
+-- Reload a buffer when its file changed outside of nvim. `autoread` only acts
+-- once nvim gets around to looking at the file, so `checktime` has to be
+-- triggered explicitly.
 api.nvim_create_augroup("auto_read", { clear = true })
 
 api.nvim_create_autocmd({ "FileChangedShellPost" }, {
@@ -68,13 +70,36 @@ api.nvim_create_autocmd({ "FileChangedShellPost" }, {
   end,
 })
 
-api.nvim_create_autocmd({ "FocusGained", "CursorHold" }, {
-  pattern = "*",
+-- Reloading mid-command, mid-prompt or under a running terminal job pulls the
+-- rug out from under whatever is going on, so stay out of those modes. Insert
+-- mode is skipped as well; `InsertLeave` picks the file up right after.
+local function check_file_changed()
+  if fn.getcmdwintype() ~= "" or api.nvim_get_mode().mode:find("^[cirRt!]") then
+    return
+  end
+
+  vim.cmd("silent! checktime")
+end
+
+api.nvim_create_autocmd(
+  { "FocusGained", "BufEnter", "CursorHold", "InsertLeave", "TermLeave" },
+  {
+    pattern = "*",
+    group = "auto_read",
+    callback = check_file_changed,
+  }
+)
+
+-- None of the events above fire while nvim just sits there: `CursorHold` goes
+-- off once and only re-arms when the cursor moves. Poll so that a file another
+-- process rewrites shows up in an untouched, idle window too.
+local check_timer = vim.uv.new_timer()
+check_timer:start(1000, 1000, vim.schedule_wrap(check_file_changed))
+
+api.nvim_create_autocmd("VimLeavePre", {
   group = "auto_read",
   callback = function()
-    if fn.getcmdwintype() == "" then
-      vim.cmd("checktime")
-    end
+    check_timer:stop()
   end,
 })
 
