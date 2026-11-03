@@ -15,7 +15,8 @@
             font-display: swap;
         }
 
-        /* ---------- Tokens: grayscale only. --wf-accent is reserved for annotations. ---------- */
+        /* ---------- Tokens: grayscale only. --wf-accent is reserved for annotations
+           and for the live affordance glow; never for the design itself. ---------- */
         :root {
             --g0: #ffffff;
             --g1: #f4f4f4;
@@ -26,6 +27,9 @@
             --g6: #333333;
             --g7: #111111;
             --wf-accent: #e6007a;
+            /* The accent at low alpha, for the live affordance glow. */
+            --wf-glow: rgba(230, 0, 122, 0.45);
+            --wf-glow-strong: rgba(230, 0, 122, 0.85);
             --font: "Excalifont", "Comic Sans MS", system-ui, sans-serif;
             --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
             --s1: 4px;
@@ -45,70 +49,73 @@
             box-sizing: border-box;
         }
 
+        html {
+            height: 100%;
+        }
+
+        /* The window is the device: one bar, then the frame fills what is left. */
         body {
             margin: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
             font-family: var(--font);
             font-size: var(--fs-m);
             color: var(--g7);
             background: var(--g1);
         }
 
-        /* ---------- Wireframe chrome (header, controls, notes) ---------- */
-        .wf-meta {
-            font-family: var(--font-ui);
-            background: var(--g0);
-            border-bottom: 1px solid var(--g3);
-            padding: var(--s3) var(--s4);
-        }
-
-        .wf-meta h1 {
-            margin: 0 0 var(--s1);
-            font-size: var(--fs-l);
-        }
-
-        .wf-meta dl {
-            display: grid;
-            grid-template-columns: max-content 1fr;
-            gap: var(--s1) var(--s3);
-            margin: var(--s2) 0 0;
-            font-size: var(--fs-s);
-        }
-
-        .wf-meta dt {
-            color: var(--g5);
-        }
-
-        .wf-meta dd {
-            margin: 0;
-        }
-
-        .wf-meta details {
-            margin-top: var(--s2);
-            font-size: var(--fs-s);
-        }
-
-        /* Flow navigation: where this screen sits in the click-through flow. */
-        .wf-flow {
+        /* ---------- The only chrome: one control bar ---------- */
+        .wf-bar {
+            flex: 0 0 auto;
             font-family: var(--font-ui);
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            gap: var(--s2);
-            padding: var(--s2) var(--s4);
-            background: var(--g1);
-            border-bottom: 1px solid var(--g3);
-            font-size: var(--fs-s);
+            gap: var(--s2) var(--s3);
+            padding: var(--s2) var(--s3);
+            background: var(--g2);
+            border-bottom: 1px solid var(--g4);
+            font-size: var(--fs-xs);
         }
 
-        .wf-flow .wf-flow-label {
+        .wf-bar .wf-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: var(--s1);
+        }
+
+        .wf-bar .wf-label {
             color: var(--g5);
         }
 
+        .wf-bar button {
+            font: inherit;
+            padding: var(--s1) var(--s2);
+            border: 1px solid var(--g4);
+            background: var(--g0);
+            color: var(--g7);
+            cursor: pointer;
+        }
+
+        .wf-bar button[aria-pressed="true"] {
+            background: var(--g6);
+            color: var(--g0);
+            border-color: var(--g6);
+        }
+
+        .wf-bar a {
+            color: var(--g6);
+        }
+
+        /* Flow navigation: where this screen sits in the click-through flow. */
         .wf-flow ol {
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            gap: var(--s2);
+            gap: var(--s1);
             list-style: none;
             margin: 0;
             padding: 0;
@@ -116,7 +123,7 @@
 
         .wf-flow li+li::before {
             content: "\2192";
-            margin-right: var(--s2);
+            margin-right: var(--s1);
             color: var(--g4);
         }
 
@@ -126,120 +133,138 @@
             color: var(--g7);
         }
 
-        .wf-flow .wf-flow-index {
+        .wf-spacer {
             margin-left: auto;
         }
 
-        .wf-controls {
-            font-family: var(--font-ui);
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--s3);
-            padding: var(--s2) var(--s4);
-            background: var(--g2);
-            font-size: var(--fs-s);
-            align-items: center;
-        }
-
-        .wf-controls button {
-            font: inherit;
-            padding: var(--s1) var(--s2);
-            border: 1px solid var(--g4);
-            background: var(--g0);
-            cursor: pointer;
-        }
-
-        .wf-controls button[aria-pressed="true"] {
-            background: var(--g6);
-            color: var(--g0);
-        }
-
-        .wf-layout {
-            display: grid;
-            grid-template-columns: 1fr 320px;
-            gap: var(--s4);
-            padding: var(--s4);
-            align-items: start;
-        }
-
-        @media (max-width: 900px) {
-            .wf-layout {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Viewport frame */
-        .wf-frame {
-            margin: 0 auto;
-            background: var(--g0);
-            border: 1px solid var(--g4);
-            width: 100%;
-            max-width: 1280px;
-            transition: max-width .2s;
+        /* ---------- The stage and the frame ---------- */
+        .wf-stage {
+            flex: 1 1 auto;
+            min-height: 0;
             overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            background: var(--g1);
         }
 
+        .wf-frame {
+            width: 100%;
+            background: var(--g0);
+            display: flex;
+            flex-direction: column;
+            overflow: auto;
+        }
+
+        /* Only Desktop (full) is the window. The other two are devices standing on the page. */
         .wf-frame[data-viewport="mobile"] {
             max-width: 375px;
+            border-left: 1px solid var(--g4);
+            border-right: 1px solid var(--g4);
         }
 
         .wf-frame[data-viewport="tablet"] {
             max-width: 768px;
+            border-left: 1px solid var(--g4);
+            border-right: 1px solid var(--g4);
         }
 
-        /* States: only the active state is shown */
+        /* States: only the active one is shown */
         [data-state] {
             display: none;
         }
 
         [data-state].is-active {
-            display: block;
+            display: flex;
+            flex-direction: column;
+            flex: 1 0 auto;
         }
 
-        /* Annotations */
+        .screen {
+            flex: 1 0 auto;
+            display: flex;
+            flex-direction: column;
+            padding: var(--s4);
+        }
+
+        /* A screen that draws its own full-bleed chrome turns the padding off. */
+        .screen-flush {
+            padding: 0;
+        }
+
+        /* ---------- Annotations: a marker on the thing, text revealed on hover/focus/tap ---------- */
         .wf-marker {
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            flex: 0 0 auto;
             width: 20px;
             height: 20px;
+            padding: 0;
+            border: 0;
             border-radius: 50%;
             background: var(--wf-accent);
             color: #fff;
+            font-family: var(--font-ui);
             font-size: 11px;
             font-weight: 700;
+            line-height: 1;
             vertical-align: middle;
             margin: 0 var(--s1);
+            cursor: help;
         }
 
+        .wf-marker:focus-visible {
+            outline: 3px solid var(--g7);
+            outline-offset: 2px;
+        }
+
+        /* Keeps a marker on the same line as the block element it annotates. */
+        .wf-anchor {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--s1);
+            /* Keeps a marker on a full width anchor off the frame's right edge. */
+            padding-right: var(--s2);
+        }
+
+        .wf-anchor>:first-child {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        /*
+         * The note text. Clipped to a pixel but still in the accessibility tree:
+         * the tooltip reads from here, and this is the only route to a note for a
+         * keyboard or a screen reader. Never display:none, never hidden.
+         */
         .wf-notes {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            margin: -1px;
+            padding: 0;
+            overflow: hidden;
+            clip-path: inset(50%);
+            white-space: nowrap;
+        }
+
+        .wf-tip {
+            position: fixed;
+            z-index: 50;
+            max-width: 320px;
+            padding: var(--s2) var(--s3);
+            background: var(--g7);
+            color: var(--g0);
+            border-left: 3px solid var(--wf-accent);
             font-family: var(--font-ui);
-            background: var(--g0);
-            border: 1px solid var(--wf-accent);
-            padding: var(--s3);
-            font-size: var(--fs-s);
-            position: sticky;
-            top: var(--s3);
+            font-size: var(--fs-xs);
+            line-height: 1.45;
+            pointer-events: none;
         }
 
-        .wf-notes h2 {
-            margin: 0 0 var(--s2);
-            font-size: var(--fs-m);
-            color: var(--wf-accent);
-        }
-
-        .wf-notes ol {
-            margin: 0;
-            padding-left: var(--s4);
-        }
-
-        .wf-notes li {
-            margin-bottom: var(--s2);
-        }
-
-        .wf-question::before {
-            content: "? Open question: ";
-            font-weight: 700;
+        .wf-tip[hidden] {
+            display: none;
         }
 
         /* ---------- Placeholder primitives for the wireframe itself ---------- */
@@ -299,6 +324,16 @@
             font-size: var(--fs-s);
         }
 
+        /* A drawing surface (map, canvas, floor plan). Fills its box. */
+        .ph-canvas {
+            position: relative;
+            flex: 1 1 auto;
+            min-height: 220px;
+            background: var(--g1);
+            border: 1px solid var(--g3);
+            overflow: hidden;
+        }
+
         .btn {
             font: inherit;
             min-height: 44px;
@@ -329,14 +364,55 @@
             cursor: not-allowed;
         }
 
+        /* ---------- Live affordances ----------
+
+           Nothing in a grayscale drawing separates a button that works from a
+           button that is only drawn, and the click is the wrong place to find
+           out: nothing happens, and the reviewer reads a broken prototype
+           rather than an undrawn screen. So anything that really does
+           something carries a faint accent glow, and what is clickable is
+           visible before anybody clicks it.
+
+           The accent, because this is information about the prototype rather
+           than about the product, which is the same reason the markers are
+           accent. It is still never a design colour and never stands for
+           anything the product means.
+
+           A real link is detected; a button that only acts in place has
+           nothing in the markup to go on, so it opts in with `wf-live`.
+           Disabled links are excluded on purpose: the dashed border is their
+           whole point. Markers are excluded because they are already accent.
+           Inputs are left alone -- typing in a field is not navigation, and
+           glowing every control would make the glow mean nothing. */
+        .wf-frame a[href]:not([aria-disabled="true"]),
+        .wf-frame .wf-live:not([disabled]):not([aria-disabled="true"]) {
+            box-shadow: 0 0 5px 1px var(--wf-glow);
+        }
+
+        .wf-frame .wf-marker {
+            box-shadow: none;
+        }
+
+        .wf-frame a[href]:not([aria-disabled="true"]):hover,
+        .wf-frame .wf-live:not([disabled]):not([aria-disabled="true"]):hover {
+            box-shadow: 0 0 7px 2px var(--wf-glow-strong);
+        }
+
         .btn-primary {
             background: var(--g7);
             color: var(--g0);
         }
 
+        .btn-small {
+            min-height: 32px;
+            padding: 0 var(--s2);
+            font-size: var(--fs-s);
+        }
+
         .btn:focus-visible,
         input:focus-visible,
-        select:focus-visible {
+        select:focus-visible,
+        textarea:focus-visible {
             outline: 3px solid var(--g6);
             outline-offset: 2px;
         }
@@ -348,7 +424,13 @@
             min-height: 44px;
             padding: 0 var(--s2);
             border: 1px solid var(--g4);
+            background: var(--g0);
             width: 100%;
+        }
+
+        textarea {
+            padding: var(--s2);
+            min-height: 120px;
         }
 
         label {
@@ -363,80 +445,183 @@
             font-style: italic;
         }
 
-        /* ---------- Screen content styles go below ---------- */
-        .screen {
-            padding: var(--s4);
+        /* ---------- Generic lo-fi layout primitives ---------- */
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: var(--s2);
+        }
+
+        .stack {
+            display: flex;
+            flex-direction: column;
+            gap: var(--s3);
+        }
+
+        .grow {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: var(--s3);
+        }
+
+        .card,
+        .panel {
+            border: 1px solid var(--g4);
+            background: var(--g0);
+            padding: var(--s3);
+        }
+
+        .panel {
+            background: var(--g1);
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--s1);
+            border: 1px solid var(--g4);
+            border-radius: 999px;
+            padding: 1px var(--s2);
+            font-size: var(--fs-xs);
+            white-space: nowrap;
+        }
+
+        .chip-solid {
+            background: var(--g6);
+            color: var(--g0);
+            border-color: var(--g6);
+        }
+
+        /* An inline message strip. The left bar is its only distinguishing mark. */
+        .alert {
+            border: 1px solid var(--g4);
+            border-left: 6px solid var(--g5);
+            background: var(--g1);
+            padding: var(--s2) var(--s3);
+            font-size: var(--fs-s);
+        }
+
+        .alert-strong {
+            border-left-color: var(--g7);
+            background: var(--g2);
+        }
+
+        .muted {
+            color: var(--g5);
+        }
+
+        .caption {
+            font-size: var(--fs-s);
+            color: var(--g5);
+        }
+
+        .divider {
+            border: 0;
+            border-top: 1px solid var(--g3);
+            margin: var(--s3) 0;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            margin: 0;
+            font-weight: 700;
+        }
+
+        h1 {
+            font-size: var(--fs-xl);
+        }
+
+        h2 {
+            font-size: var(--fs-l);
+        }
+
+        h3 {
+            font-size: var(--fs-m);
+        }
+
+        h4 {
+            font-size: var(--fs-s);
+        }
+
+        p {
+            margin: 0;
         }
     </style>
 </head>
 
 <body>
 
-    <!-- ===== Wireframe metadata ===== -->
-    <header class="wf-meta">
-        <h1>[Framed content]</h1>
-        <p>[One sentence: what this screen is for.]</p>
-        <dl>
-            <dt>Primary user</dt>
-            <dd>[Who]</dd>
-            <dt>Primary action</dt>
-            <dd>[The one thing they should do here]</dd>
-            <dt>Status</dt>
-            <dd>draft</dd>
-            <dt>Reached from</dt>
-            <dd><a href="./[previous-screen].html">[previous-screen]</a></dd>
-            <dt>Leads to</dt>
-            <dd><a href="./[next-screen].html">[next-screen]</a></dd>
-            <dt>Related</dt>
-            <dd><a href="./[related-screen].html">[related-screen]</a></dd>
-        </dl>
-        <details>
-            <summary>Changelog</summary>
-            <ul>
-                <li>[YYYY-MM-DD] Created.</li>
-            </ul>
-        </details>
-    </header>
+    <!--
+    ===== WIREFRAME METADATA (read in an editor, never rendered) =====
+    An HTML comment may not contain two hyphens. Write an em dash instead.
 
-    <!-- ===== Flow position: delete this nav if the screen is standalone ===== -->
-    <nav class="wf-flow" aria-label="Flow">
-        <span class="wf-flow-label">[Flow name]:</span>
-        <ol>
-            <li><a href="./[previous-screen].html">[previous-screen]</a></li>
-            <li><a href="./[framed-content].html" aria-current="page">[framed content]</a></li>
-            <li><a href="./[next-screen].html">[next-screen]</a></li>
-        </ol>
-        <a class="wf-flow-index" href="./index.html">All wireframes</a>
-    </nav>
+    TITLE:          [Framed content]
+    PURPOSE:        [One sentence: what this screen is for.]
+    PRIMARY USER:   [Who]
+    PRIMARY ACTION: [The one thing they should do here]
+    STATUS:         draft
+    REACHED FROM:   [label] (./[previous-screen].html)
+    LEADS TO:       [label] (./[next-screen].html)
+    RELATED:        [label] (./[related-screen].html)
 
-    <!-- ===== Controls: viewport + state switchers ===== -->
-    <div class="wf-controls" role="toolbar" aria-label="Wireframe controls">
-        <span>Viewport:</span>
-        <button data-viewport-btn="mobile">Mobile 375</button>
-        <button data-viewport-btn="tablet">Tablet 768</button>
-        <button data-viewport-btn="desktop" aria-pressed="true">Desktop 1280</button>
-        <span>State:</span>
-        <button data-state-btn="default" aria-pressed="true">Default</button>
-        <button data-state-btn="empty">Empty</button>
-        <button data-state-btn="loading">Loading</button>
-        <button data-state-btn="error">Error</button>
+    OPEN QUESTIONS:
+      - [Something the user needs to decide. Not a note: it is about the screen, not a spot on it.]
+
+    CHANGELOG:
+      - [YYYY-MM-DD] Created.
+    -->
+
+    <!-- ===== The only chrome: flow position + viewport + state ===== -->
+    <div class="wf-bar" role="toolbar" aria-label="Wireframe controls">
+        <nav class="wf-group wf-flow" aria-label="Flow">
+            <span class="wf-label">[Flow name]:</span>
+            <ol>
+                <li><a href="./[previous-screen].html">[previous screen]</a></li>
+                <li><a href="./[framed-content].html" aria-current="page">[framed content]</a></li>
+                <li><a href="./[next-screen].html">[next screen]</a></li>
+            </ol>
+        </nav>
+        <div class="wf-group wf-spacer">
+            <span class="wf-label">Viewport</span>
+            <button data-viewport-btn="mobile">Mobile 375</button>
+            <button data-viewport-btn="tablet">Tablet 768</button>
+            <button data-viewport-btn="desktop" aria-pressed="true">Desktop (full)</button>
+        </div>
+        <div class="wf-group">
+            <span class="wf-label">State</span>
+            <button data-state-btn="default" aria-pressed="true">Default</button>
+            <button data-state-btn="empty">Empty</button>
+            <button data-state-btn="loading">Loading</button>
+            <button data-state-btn="error">Error</button>
+        </div>
+        <a class="wf-group" href="./index.html">All wireframes</a>
     </div>
 
-    <div class="wf-layout">
-        <!-- ===== The wireframe ===== -->
+    <!-- ===== The wireframe ===== -->
+    <div class="wf-stage">
         <div class="wf-frame" data-viewport="desktop">
 
             <section data-state="default" class="is-active">
                 <div class="screen">
-                    <!-- Default / populated state. Use realistic content, incl. one long and one empty value. -->
+                    <!-- Default / populated state. Realistic content, incl. one long and one empty value. -->
                     <!-- An action that leaves this screen is a real link, so the flow is click-through:
                          <a class="btn btn-primary" href="./[next-screen].html">[Primary action]</a>
                          Not wireframed yet? <a class="btn" aria-disabled="true">[Label]</a> + a note saying why. -->
+                    <!-- A note is a marker on the thing it describes:
+                         <button type="button" class="wf-marker" data-note="1" aria-label="Note 1">1</button> -->
                 </div>
             </section>
 
             <section data-state="empty">
-                <div class="screen"><!-- First-use / no data state --></div>
+                <div class="screen"><!-- First use / no data --></div>
             </section>
 
             <section data-state="loading">
@@ -448,16 +633,18 @@
             </section>
 
         </div>
-
-        <!-- ===== Annotations ===== -->
-        <aside class="wf-notes" aria-label="Annotations">
-            <h2>Notes</h2>
-            <ol>
-                <li>[Behavior / data source / decision + reason]</li>
-                <li class="wf-question">[Something the user needs to decide]</li>
-            </ol>
-        </aside>
     </div>
+
+    <!--
+      The note text, and the only route to it for a keyboard or a screen reader.
+      Each .wf-marker's data-note is the 1-based position of its note in this list.
+      Reorder the list and every data-note moves with it.
+    -->
+    <ol id="wf-notes" class="wf-notes">
+        <li>[Behavior / data source / decision + reason]</li>
+    </ol>
+
+    <div id="wf-tip" class="wf-tip" role="tooltip" hidden></div>
 
     <script>
         // Viewport switcher
@@ -465,11 +652,43 @@
             document.querySelector('.wf-frame').dataset.viewport = btn.dataset.viewportBtn;
             document.querySelectorAll('[data-viewport-btn]').forEach(b => b.setAttribute('aria-pressed', b === btn));
         }));
-        // State switcher (add/remove buttons to match the states this screen actually has)
+
+        // State switcher (add/remove bar buttons to match the states this screen has)
         document.querySelectorAll('[data-state-btn]').forEach(btn => btn.addEventListener('click', () => {
             document.querySelectorAll('[data-state]').forEach(s => s.classList.toggle('is-active', s.dataset.state === btn.dataset.stateBtn));
             document.querySelectorAll('[data-state-btn]').forEach(b => b.setAttribute('aria-pressed', b === btn));
+            hideTip();
         }));
+
+        // Annotations: the tooltip reads its text from #wf-notes, which stays the single source.
+        const tip = document.getElementById('wf-tip');
+        const notes = document.querySelectorAll('#wf-notes > li');
+
+        function showTip(marker) {
+            const note = notes[Number(marker.dataset.note) - 1];
+            if (!note) return;
+            tip.textContent = note.textContent.trim();
+            tip.hidden = false;
+            const r = marker.getBoundingClientRect();
+            const w = tip.offsetWidth, h = tip.offsetHeight;
+            let left = r.left + r.width / 2 - w / 2;
+            left = Math.max(8, Math.min(left, window.innerWidth - w - 8));
+            let top = r.bottom + 8;
+            if (top + h > window.innerHeight - 8) top = Math.max(8, r.top - h - 8);
+            tip.style.left = left + 'px';
+            tip.style.top = top + 'px';
+        }
+
+        function hideTip() { tip.hidden = true; }
+
+        document.querySelectorAll('.wf-marker').forEach(m => {
+            m.addEventListener('mouseenter', () => showTip(m));
+            m.addEventListener('mouseleave', hideTip);
+            m.addEventListener('focus', () => showTip(m));
+            m.addEventListener('blur', hideTip);
+            m.addEventListener('click', e => { e.preventDefault(); tip.hidden ? showTip(m) : hideTip(); });
+        });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') hideTip(); });
     </script>
 </body>
 
