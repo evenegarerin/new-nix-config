@@ -78,4 +78,3 @@ use the last characters (seperator chracter of the statuscolumn) color to convey
 
 maybes:
 use concy for system monitoring and waybar widgets
-make a polkit agent thing so virt-manager works.

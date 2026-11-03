@@ -32,7 +32,7 @@ in
   networking.hostName = "thinkpad";
 
   security.sudo.extraConfig = ''
-    Defaults rootpw
+    Defaults rootpw, pwfeedback
   '';
 
   security.polkit.adminIdentities = [ "unix-user:0" ];
@@ -177,7 +177,6 @@ in
     ripgrep
     fd
     imv
-    polkit_gnome
     mission-center
     nwg-displays
     nwg-look
@@ -221,7 +220,6 @@ in
     sqlite-utils
     localsend
     polkit
-    polkit_gnome
     postman
     gnome-calculator
     # qalculate-gtk
@@ -355,6 +353,7 @@ in
       "wheel"
       "i2c"
       "docker"
+      "libvirtd"
     ];
   };
 
