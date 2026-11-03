@@ -1,14 +1,15 @@
-
 // vimkeys core: everything that happens inside a page (keys, link hints,
 // scrolling) plus the settings and key bindings. Shared by vimkeys.uc.js
-// (about: pages, browser dialogs) and the VimkeysActor child (file:// pages),
-// so there is exactly one place to change any of it.
+// (about: pages, browser dialogs) and the VimkeysActor child (every page where
+// Vimium can't run), so there is exactly one place to change any of it.
 
 // ---- Settings (same meaning as Vimium's options) ---------------------------
 export const SETTINGS = {
   hintChars: "sadfjklewcmpgh", // "Characters used for link hints"
   scrollStep: 60,              // "Scroll step size" in px
   smoothScroll: true,          // "Use smooth scrolling"
+  // vimkeys steps aside wherever this extension (Vimium-FF) can run.
+  vimiumId: "{d7742d87-e61d-4b78-b8a1-b469842139fa}",
 };
 
 // ---- Key bindings ----------------------------------------------------------
@@ -59,7 +60,7 @@ const LOG_PREFIX = "[vimkeys]";
 
 // Per-session state shared by every browser window (a module is loaded once
 // per process, while vimkeys.uc.js runs once per window).
-export const session = { fileActorRegistered: false };
+export const session = { pageActorRegistered: false };
 
 // ---- DOM helpers -----------------------------------------------------------
 export function eventTarget(event) {

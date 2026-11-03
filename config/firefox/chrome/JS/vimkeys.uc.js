@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name           vimkeys
-// @description    Vimium-style keys where extensions can't run: about: pages, browser dialogs, file:// pages
+// @description    Vimium-style keys wherever Vimium can't run: about: pages, browser dialogs, file://, …
 // @include        main
 // ==/UserScript==
 
 // Settings, key bindings, hints and scrolling live in vimkeys/core.sys.mjs.
-// This script covers what only the browser window can do: tab, history and
-// find commands, pages loaded in the browser process (about:config, …) and
-// browser dialogs. The VimkeysActor covers file:// pages and sends its
-// browser commands here (see runBrowserCommand below).
+// VimkeysActor brings them to every page Vimium can't reach (about:config,
+// the new tab page, file://, …) and sends browser commands here. This script
+// covers what only the browser window can do: tab, history and find commands
+// (see runBrowserCommand), browser dialogs, and registering the actor.
 
 (function () {
   "use strict";
@@ -41,7 +41,7 @@
       .catch((err) => console.error("[vimkeys]", err));
   }
 
-  // Used by VimkeysActorParent for keys pressed in file:// pages.
+  // Used by VimkeysActorParent for keys pressed in pages.
   window.vimkeys = { runBrowserCommand };
 
   function tabFor(browser) {
@@ -72,59 +72,26 @@
     }
   }
 
-  // ---- Keys ----------------------------------------------------------------
-  const keys = new KeyHandler({
-    hintDocument: (ctx) => topDialogFrame()?.contentDocument ?? ctx.browser.contentDocument,
-    runBrowserCommand: (name, ctx) => runBrowserCommand(name, ctx.browser),
-  });
+  // ---- Browser dialogs -----------------------------------------------------
+  // Pages, about:config included, get their keys from VimkeysActor. What's left
+  // here are Firefox's own dialogs (confirmations, alerts, …): they sit on top
+  // of any tab, including normal websites where Vimium can't reach them. Only f
+  // is handled there; Enter, Escape and Tab keep their usual dialog behaviour.
+  // Firefox shows them in a <browser class="dialogFrame"> in the browser
+  // window (tab-modal and window-modal ones alike).
+  const dialogHints = new KeyHandler({ hintDocument: () => null, runBrowserCommand: () => {} });
 
   function onKeyDown(event) {
-    if (keys.handleHintKey(event)) return;
-    if (event.ctrlKey || event.altKey || event.metaKey || event.isComposing) return;
-
-    // Browser dialogs (confirmations, alerts, …) sit on top of any tab, including
-    // normal websites where Vimium can't reach them. Only f is handled there;
-    // Enter, Escape and Tab keep their usual dialog behaviour.
+    if (dialogHints.handleHintKey(event)) return;
+    if (event.key !== "f" || event.ctrlKey || event.altKey || event.metaKey || event.isComposing) return;
     const dialogFrame = dialogFrameOf(windowOf(eventTarget(event)));
-    if (dialogFrame) {
-      const doc = dialogFrame.contentDocument;
-      const typing = isEditable(eventTarget(event)) || isEditable(deepActiveElement(doc));
-      if (event.key === "f" && !typing) {
-        consume(event);
-        if (!event.repeat) keys.startHints(doc);
-      }
-      return;
-    }
-
-    const ctx = getContext(event);
-    if (ctx) keys.onKeyDown(event, ctx);
+    if (!dialogFrame) return;
+    const doc = dialogFrame.contentDocument;
+    if (isEditable(eventTarget(event)) || isEditable(deepActiveElement(doc))) return;
+    consume(event);
+    if (!event.repeat) dialogHints.startHints(doc);
   }
 
-  // Only act on pages loaded in the browser process. Normal websites are
-  // Vimium's job and file:// pages the actor's, so nobody fights over a key.
-  function getContext(event) {
-    const browser = gBrowser.selectedBrowser;
-    if (!browser || browser.isRemoteBrowser) return null;
-    const target = eventTarget(event);
-    const win = windowOf(target);
-    if (!win || !isInsideBrowser(win, browser)) return null;
-    return { browser, target, win, code: event.code };
-  }
-
-  function isInsideBrowser(win, browser) {
-    const bc = win.browsingContext;
-    if (bc && browser.browsingContext && bc.top === browser.browsingContext) return true;
-    try {
-      return win.top === browser.contentWindow;
-    } catch {
-      return false;
-    }
-  }
-
-  // ---- Browser dialogs -----------------------------------------------------
-  // Firefox shows its dialogs in a <browser class="dialogFrame"> in the browser
-  // window (tab-modal and window-modal ones alike). Dialogs inside a page, like
-  // the ones in about:preferences, are part of that page and need nothing extra.
   function isBrowserDialogFrame(frame) {
     return frame.ownerDocument === document && frame.classList?.contains("dialogFrame");
   }
@@ -140,33 +107,23 @@
     return null;
   }
 
-  // The dialog f should target: the focused one, else the last visible one.
-  // Dialogs of background tabs are hidden, so they never count.
-  function topDialogFrame() {
-    const frames = [...document.querySelectorAll("browser.dialogFrame")].filter((frame) => {
-      const { width, height } = frame.getBoundingClientRect();
-      return width > 0 && height > 0 && frame.contentDocument?.documentElement;
-    });
-    if (!frames.length) return null;
-    const focused = dialogFrameOf(Services.focus.focusedWindow);
-    return frames.includes(focused) ? focused : frames.at(-1);
-  }
-
-  // ---- file:// pages -------------------------------------------------------
-  // Registered here rather than with fx-autoconfig's @WindowActor header,
-  // because that helper only allows about:-page processes and file:// pages
-  // run in a process of their own. Leaving out remoteTypes lets the actor
-  // follow file:// pages into whatever process Firefox puts them in.
+  // ---- Pages Vimium can't reach --------------------------------------------
+  // The actor comes to every page in a tab; on each one its child asks Firefox
+  // whether Vimium's scripts run there and only takes over if they don't (see
+  // VimkeysActorChild). Registered here rather than with fx-autoconfig's
+  // @WindowActor header, which only allows about:-page processes.
   const ACTOR_NAME = "VimkeysActor";
-  const ACTOR_DIR = "chrome://userscripts/content/VimkeysActor/";
+  const ACTOR_DIR = "chrome://userscripts/content/vimkeys/";
   const ACTOR_OPTIONS = {
     parent: { esModuleURI: ACTOR_DIR + "VimkeysActorParent.sys.mjs" },
     child: {
       esModuleURI: ACTOR_DIR + "VimkeysActorChild.sys.mjs",
       events: { DOMContentLoaded: {} },
     },
-    matches: ["file:///*"],
-    allFrames: true, // so keys also work inside iframes of a local page
+    // No `matches`: every page. Only pages in tabs, though; not sidebars,
+    // extension popups or devtools.
+    messageManagerGroups: ["browsers"],
+    allFrames: true, // frames are checked on their own, just like Vimium's
     // Firefox refuses actors in web and file:// processes unless they are
     // declared safe there, i.e. their parent side can't be abused by a
     // compromised page process. Ours only accepts a fixed list of command
@@ -175,10 +132,10 @@
     safeForUntrustedWebProcess: true,
   };
 
-  function registerFileActor() {
+  function registerPageActor() {
     // Every browser window runs this script; only the first one registers.
-    if (session.fileActorRegistered) return;
-    session.fileActorRegistered = true;
+    if (session.pageActorRegistered) return;
+    session.pageActorRegistered = true;
     try {
       ChromeUtils.registerWindowActor(ACTOR_NAME, ACTOR_OPTIONS);
     } catch {
@@ -186,12 +143,12 @@
       // by an old copy of this script whose @WindowActor header made
       // fx-autoconfig register it without file:// support. Replace that one.
       console.warn(`[vimkeys] '${ACTOR_NAME}' was already registered elsewhere ` +
-        "(an old @WindowActor header?); replacing it with the file:// version.");
+        "(an old @WindowActor header?); replacing it with this version.");
       try {
         ChromeUtils.unregisterWindowActor(ACTOR_NAME);
         ChromeUtils.registerWindowActor(ACTOR_NAME, ACTOR_OPTIONS);
       } catch (err) {
-        console.error("[vimkeys] could not register the file:// actor:", err);
+        console.error("[vimkeys] could not register the page actor:", err);
       }
     }
   }
@@ -199,14 +156,12 @@
   // ---- Startup -------------------------------------------------------------
   function init() {
     window.addEventListener("keydown", onKeyDown, true);
-    window.addEventListener("keyup", (event) => keys.onKeyUp(event), true);
-    window.addEventListener("blur", () => keys.onBlur());
-    // Clicking anywhere in the window (toolbar included) ends hint mode.
-    window.addEventListener("mousedown", () => keys.exitHints(), true);
-    gBrowser.tabContainer.addEventListener("TabSelect", () => keys.stop());
+    // Clicking anywhere in the window or switching tabs ends dialog hints.
+    window.addEventListener("mousedown", () => dialogHints.exitHints(), true);
+    gBrowser.tabContainer.addEventListener("TabSelect", () => dialogHints.exitHints());
   }
 
-  registerFileActor();
+  registerPageActor();
 
   if (gBrowserInit.delayedStartupFinished) {
     init();
