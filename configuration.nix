@@ -86,7 +86,12 @@
 
     ohMyZsh = {
       enable = true;
-      plugins = [ "git" "sudo" "history" "command-not-found" ];
+      plugins = [
+        "git"
+        "sudo"
+        "history"
+        "command-not-found"
+      ];
       theme = "af-magic";
     };
   };
@@ -126,12 +131,12 @@
 
       # Hold Strg+Alt to reach the AltGr level, Windows-style.
       settings."control+alt" = {
-        "7" = "G-7";                                              # {
-        "8" = "G-8";                                              # [
-        "9" = "G-9";                                              # ]
-        "0" = "G-0";                                              # }
-        minus = "G-minus";                                        # ß -> \
-        rightbrace = "G-rightbrace";                              # + -> ~
+        "7" = "G-7"; # {
+        "8" = "G-8"; # [
+        "9" = "G-9"; # ]
+        "0" = "G-0"; # }
+        minus = "G-minus"; # ß -> \
+        rightbrace = "G-rightbrace"; # + -> ~
       };
     };
   };
@@ -151,180 +156,191 @@
 
   programs.firefox = {
     enable = true;
-    autoConfig = builtins.readFile(builtins.fetchurl {
-      url = "https://raw.githubusercontent.com/MrOtherGuy/fx-autoconfig/master/program/config.js";
-      sha256 = "1mx679fbc4d9x4bnqajqx5a95y1lfasvf90pbqkh9sm3ch945p40";
-    });
+    autoConfig = builtins.readFile (
+      builtins.fetchurl {
+        url = "https://raw.githubusercontent.com/MrOtherGuy/fx-autoconfig/master/program/config.js";
+        sha256 = "1mx679fbc4d9x4bnqajqx5a95y1lfasvf90pbqkh9sm3ch945p40";
+      }
+    );
     policies = (builtins.fromJSON (builtins.readFile ./config/firefox/policies.json)).policies;
   };
 
   environment.systemPackages =
     (with pkgs; [
-    kitty
-    file
-    waybar
-    gnote
-    glib
-    andromeda-gtk-theme
-    lowfi
-    spotify
-    wev
-    mp3gain
-    evtest
-    pcmanfm
-    pass
-    resonance
-    blueman
-    ruff
-    ripgrep
-    fd
-    imv
-    mission-center
-    nwg-displays
-    nwg-look
-    playerctl
-    hyprcursor
-    nemo
-    xev
-    keypunch
-    appflowy
-    devtoolbox
-    jq
-    pulseaudio
-    brightnessctl
-    bluez
-    pnpm
-    nodejs
-    (python3.withPackages (
-      python-pkgs: with python-pkgs; [
-        dbus-python
-        standard-imghdr
-        numpy
-        python-lsp-server
-        python-lsp-ruff
-        pynvim
-      ]
-    ))
-    nixfmt
-    git
-    fzf
-    networkmanagerapplet
-    hyprpaper
-    elmPackages.elm-format
-    elmPackages.elm-language-server
-    elmPackages.elm
-    elmPackages.elm-review
-    elm-land
-    typescript
-    wl-clipboard
-    wl-clip-persist
-    sqlite-utils
-    localsend
-    polkit
-    cmd-polkit # polkit agent that delegates the prompt to a command (walker)
-    postman
-    gnome-calculator
-    # qalculate-gtk
-    yazi
-    # wofi
-    # ulauncher
-    walker
-    qutebrowser
-    hyprlock
-    hypridle
-    vscodium
-    # claude-code
-    gnupg
-    pinentry-tty
-    gnome-text-editor
-    chromium
-    tmux
-    just
-    bubblewrap
-    nftables
-    # passt
-    psmisc
-    openbao
-    # steam
-    papirus-icon-theme
-    kdePackages.filelight
-    pinta
-    blender
-    # ddcutil
-    neovim
-    nixd
-    lua-language-server
-    stylua
-    typescript-language-server
-    bash-language-server
-    yaml-language-server
-    marksman
-    pyright
-    texlab
-    tree-sitter-grammars.tree-sitter-nix
-    tree-sitter-grammars.tree-sitter-json
-    tree-sitter-grammars.tree-sitter-toml
-    tree-sitter-grammars.tree-sitter-yaml
-    tree-sitter-grammars.tree-sitter-css
-    tree-sitter-grammars.tree-sitter-bash
-    # wlr-randr
-    # usbutils
-    grim
-    lazygit
-    secretspec
-    docker
-    jdk25
-    gradle_9
-    rofi
-    unzip
-    # lazydocker
-    pandoc
-    (texliveSmall.withPackages (
-      ps: with ps; [
-        latexmk # vimtex's compiler backend
-        tcolorbox # head.tex:23 -- block quote boxes
-        newverbs # head.tex:1
-        enumitem # head.tex:60 -- 9-deep list nesting
-        framed # pandoc's Shaded environment, pulled in by --highlight-style
-        # tcolorbox is loaded as [most], which drags in most of its libraries
-        pgf
-        environ
-        tikzfill
-        pdfcol
-        listings
-        listingsutf8
-        xurl # optional in pandoc's xelatex template
-        selnolig # optional in pandoc's xelatex template
-      ]
-    ))
-    zathura # PDF viewer, SyncTeX source for vimtex
-    hyprshot
-  ]) ++ ( with pkgs-unstable; [
-    claude-code
-    herdr
-  ]);
+      kitty
+      file
+      waybar
+      gnote
+      glib
+      andromeda-gtk-theme
+      lowfi
+      spotify
+      wev
+      mp3gain
+      evtest
+      pcmanfm
+      pass
+      prettier
+      resonance
+      blueman
+      ruff
+      ripgrep
+      fd
+      imv
+      mission-center
+      nwg-displays
+      nwg-look
+      playerctl
+      hyprcursor
+      wlrctl
+      nemo
+      xev
+      keypunch
+      appflowy
+      devtoolbox
+      jq
+      pulseaudio
+      brightnessctl
+      bluez
+      pnpm
+      nodejs
+      (python3.withPackages (
+        python-pkgs: with python-pkgs; [
+          dbus-python
+          standard-imghdr
+          numpy
+          python-lsp-server
+          python-lsp-ruff
+          pynvim
+        ]
+      ))
+      nixfmt
+      git
+      fzf
+      networkmanagerapplet
+      hyprpaper
+      elmPackages.elm-format
+      elmPackages.elm-language-server
+      elmPackages.elm
+      elmPackages.elm-review
+      elm-land
+      typescript
+      wl-clipboard
+      wl-clip-persist
+      sqlite-utils
+      localsend
+      polkit
+      cmd-polkit
+      postman
+      gnome-calculator
+      # qalculate-gtk
+      yazi
+      # wofi
+      # ulauncher
+      walker
+      qutebrowser
+      hyprlock
+      hypridle
+      vscodium
+      # claude-code
+      gnupg
+      pinentry-tty
+      gnome-text-editor
+      chromium
+      tmux
+      just
+      bubblewrap
+      nftables
+      # passt
+      psmisc
+      openbao
+      # steam
+      papirus-icon-theme
+      kdePackages.filelight
+      pinta
+      blender
+      # ddcutil
+      neovim
+      nixd
+      lua-language-server
+      stylua
+      shfmt
+      taplo
+      qt6.qtdeclarative
+      typescript-language-server
+      bash-language-server
+      yaml-language-server
+      marksman
+      pyright
+      texlab
+      tree-sitter-grammars.tree-sitter-nix
+      tree-sitter-grammars.tree-sitter-json
+      tree-sitter-grammars.tree-sitter-toml
+      tree-sitter-grammars.tree-sitter-yaml
+      tree-sitter-grammars.tree-sitter-css
+      tree-sitter-grammars.tree-sitter-bash
+      # wlr-randr
+      # usbutils
+      grim
+      lazygit
+      secretspec
+      docker
+      jdk25
+      gradle_9
+      rofi
+      unzip
+      # lazydocker
+      pandoc
+      (texliveSmall.withPackages (
+        ps: with ps; [
+          latexmk # vimtex's compiler backend
+          tcolorbox # head.tex:23 -- block quote boxes
+          newverbs # head.tex:1
+          enumitem # head.tex:60 -- 9-deep list nesting
+          framed # pandoc's Shaded environment, pulled in by --highlight-style
+          # tcolorbox is loaded as [most], which drags in most of its libraries
+          pgf
+          environ
+          tikzfill
+          pdfcol
+          listings
+          listingsutf8
+          xurl # optional in pandoc's xelatex template
+          selnolig # optional in pandoc's xelatex template
+        ]
+      ))
+      zathura # PDF viewer, SyncTeX source for vimtex
+      hyprshot
+    ])
+    ++ (with pkgs-unstable; [
+      claude-code
+      herdr
+      quickshell
+    ]);
 
   programs.dconf = {
     enable = true;
-    profiles.user.databases = [{
-      settings = {
-        "org/gnome/desktop/interface" = {
-          gtk-theme = "Andromeda";
-          color-scheme = "prefer-dark";
-          monospace-font-name = "JetBrainsMono Nerd Font";
-          icon-theme = "Papirus-Dark";
+    profiles.user.databases = [
+      {
+        settings = {
+          "org/gnome/desktop/interface" = {
+            gtk-theme = "Andromeda";
+            color-scheme = "prefer-dark";
+            monospace-font-name = "JetBrainsMono Nerd Font";
+            icon-theme = "Papirus-Dark";
+          };
+          "org/gnome/TextEditor" = {
+            auto-indent = true;
+            show-line-numbers = true;
+            highlight-current-line = true;
+            spellcheck = false;
+            tab-width = lib.gvariant.mkUint32 4;
+            use-system-font = true;
+            wrap-text = true;
+          };
         };
-        "org/gnome/TextEditor" = {
-          auto-indent = true;
-          show-line-numbers = true;
-          highlight-current-line = true;
-          spellcheck = false;
-          tab-width = lib.gvariant.mkUint32 4;
-          use-system-font = true;
-          wrap-text = true;
-        };
-      };
-    }];
+      }
+    ];
   };
 
   environment.pathsToLink = [

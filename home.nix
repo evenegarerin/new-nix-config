@@ -57,6 +57,7 @@ in
       ln -sfn "${nixConfig}/claude/keybindings.json" "$HOME/.claude/keybindings.json"
       ln -sfn "${nixConfig}/claude/statusline.sh" "$HOME/.claude/statusline.sh"
       ln -sfn "${nixConfig}/walker" "$HOME/.config/walker"
+      ln -sfn "${nixConfig}/quickshell" "$HOME/.config/quickshell"
 
       for profile in "$HOME"/.config/mozilla/firefox/*.default; do
         [ -d "$profile" ] || continue

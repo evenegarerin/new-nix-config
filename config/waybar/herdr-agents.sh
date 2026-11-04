@@ -54,25 +54,15 @@ cmd_status() {
 }
 
 cmd_notify() {
-  local out icon color message
-  out=$(herdr agent list 2>/dev/null | jq -r "$jq_prelude"'
-    agents as $a
-    | ($a | reduce .[] as $x ({}; .[$x.agent_status] += 1)) as $count
-    | ($a | by_urgency | .[0].agent_status // "unknown") as $worst
-    | ( ["blocked","done","working","idle","unknown"]
-        | map(select($count[.] != null) | "\($count[.]) \(.)")
-        | join(", ") ) as $summary
-    | if ($a | length) == 0 then
-        "2\t45475a\therdr: no agents running"
-      else
-        "\($worst | icon)\t\($worst | color | ltrimstr("#"))\therdr: \($summary)"
-      end
-  ' 2>/dev/null)
+  #!/usr/bin/env bash
+# herdr-jump: raise the window running herdr
 
-  [ -n "$out" ] || out=$'2\t45475a\therdr: server not running'
-
-  IFS=$'\t' read -r icon color message <<<"$out"
-  hyprctl notify "$icon" 6000 "rgb($color)" "$message" >/dev/null
+for p in $(pgrep -x herdr); do
+  parent=$(ps -o ppid= -p $p)
+  grand=$(ps -o ppid= -p $parent)
+  addr=$(hyprctl clients -j | jq -r ".[] | select(.pid==$parent or .pid==$grand) | .address")
+  [ -n "$addr" ] && exec hyprctl dispatch "hl.dsp.focus({ window = \"address:$addr\" })"
+done
 }
 
 case "${1:-status}" in
