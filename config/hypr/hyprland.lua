@@ -7,8 +7,8 @@ package.path = package.path .. ";" .. config_dir .. "/hyprland.d/?.lua"
 
 require("env")
 require("autostart")
-require("look")        -- before fullscreen: sets the gaps/rounding it overrides
-require("monitors")    -- before lid: generic monitor rules first
+require("look") -- before fullscreen: sets the gaps/rounding it overrides
+require("monitors") -- before lid: generic monitor rules first
 require("fullscreen")
 require("lid")
 require("focus")
@@ -16,6 +16,7 @@ require("workspaces")
 require("media")
 require("screenshot")
 require("resize")
+require("virtual-mouse")
 require("keybinds")
 require("launcher")
 require("special")
