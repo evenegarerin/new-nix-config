@@ -1,7 +1,6 @@
 -- Processes started once, when the compositor comes up.
 
 hl.on("hyprland.start", function()
-    hl.exec_cmd("hyprlock --immediate-render --no-fade-in")
     hl.exec_cmd("hyprpaper")
     hl.exec_cmd("hypridle")
     hl.exec_cmd("kitty")
