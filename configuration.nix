@@ -91,8 +91,12 @@
     };
   };
 
-  programs.hyprland.enable = true;
-  programs.hyprland.withUWSM = true;
+  programs.hyprland = {
+    enable = true;
+    withUWSM = true;
+    package = pkgs-unstable.hyprland;
+    portalPackage = pkgs-unstable.xdg-desktop-portal-hyprland;
+  };
   services.udisks2.enable = true;
   services.gvfs.enable = true;
   services.dbus.enable = true;
@@ -205,7 +209,6 @@
     git
     fzf
     networkmanagerapplet
-    hyprpolkitagent
     hyprpaper
     elmPackages.elm-format
     elmPackages.elm-language-server
@@ -298,6 +301,7 @@
   ]) ++ ( with pkgs-unstable; [
     claude-code
     herdr
+    hyprpolkitagent
   ]);
 
   programs.dconf = {
@@ -342,7 +346,6 @@
     };
 
     extraPortals = with pkgs; [
-      xdg-desktop-portal-hyprland
       xdg-desktop-portal-gtk
     ];
   };
