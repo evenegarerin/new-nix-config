@@ -481,6 +481,21 @@ local plugin_specs = {
   -- uses it so far; Stage 4's `:LspAttached` popup wants it too.
   { "MunifTanjim/nui.nvim", lazy = true },
 
+  -- Format on save. Runs the external formatter binaries directly (nixfmt,
+  -- stylua, ruff, ...) with prettier as the catch-all for everything else, so
+  -- formatting no longer depends on an LSP being attached. The exemption lists
+  -- -- by filetype and by file name -- live in lua/config/conform.lua.
+  {
+    "stevearc/conform.nvim",
+    -- Save-only setup, so the plugin does not need to load before the first
+    -- write. `cmd` lets lazy.nvim stub the escape-hatch commands until then.
+    event = { "BufWritePre" },
+    cmd = { "ConformInfo", "FormatDisable", "FormatEnable" },
+    config = function()
+      require("config.conform")
+    end,
+  },
+
   -- file explorer
   {
     "nvim-tree/nvim-tree.lua",

@@ -20,7 +20,15 @@ keymap.set("i", "<c-t>", "<Esc>b~lea")
 keymap.set("n", "<leader>p", "m`o<ESC>p``", { desc = "paste below current line" })
 keymap.set("n", "<leader>P", "m`O<ESC>p``", { desc = "paste above current line" })
 
-keymap.set("n", "<leader>w", "<cmd>update<cr>", { silent = true, desc = "save buffer" })
+-- Save file if there were no changes format manually as there wont be a format on save without changes
+keymap.set("n", "<leader>w", function()
+  local ok, conform_conf = pcall(require, "config.conform")
+  if ok then
+    conform_conf.write()
+  else
+    vim.cmd("update")
+  end
+end, { silent = true, desc = "save buffer" })
 keymap.set("n", "<leader>q", "<cmd>x<cr>", { silent = true, desc = "quit current window" })
 keymap.set("n", "<leader>Q", "<cmd>qa!<cr>", { silent = true, desc = "quit nvim" })
 
