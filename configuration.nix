@@ -221,6 +221,7 @@
     sqlite-utils
     localsend
     polkit
+    cmd-polkit # polkit agent that delegates the prompt to a command (walker)
     postman
     gnome-calculator
     # qalculate-gtk
@@ -301,7 +302,6 @@
   ]) ++ ( with pkgs-unstable; [
     claude-code
     herdr
-    hyprpolkitagent
   ]);
 
   programs.dconf = {

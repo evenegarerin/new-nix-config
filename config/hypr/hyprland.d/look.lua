@@ -33,7 +33,7 @@ hl.config({
     },
 
     input = {
-        -- kb_layout = "de",
+        kb_layout = "us",
         numlock_by_default = true
     },
 
