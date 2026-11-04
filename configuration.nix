@@ -6,10 +6,6 @@
   inputs,
   ...
 }:
-
-let
-  herdr = inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default;
-in
 {
   imports = [
     /etc/nixos/hardware-configuration.nix
@@ -271,7 +267,6 @@ in
     # usbutils
     grim
     lazygit
-    herdr
     secretspec
     docker
     jdk25
@@ -302,6 +297,7 @@ in
     hyprshot
   ]) ++ ( with pkgs-unstable; [
     claude-code
+    herdr
   ]);
 
   programs.dconf = {
