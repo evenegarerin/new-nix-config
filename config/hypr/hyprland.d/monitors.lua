@@ -8,10 +8,19 @@ local common = require("common")
 local mainMod          = common.mainMod
 local monitor_defaults = common.monitor_defaults
 local merge            = common.merge
+local panel            = common.panel
+local lid_closed       = common.lid_closed
 
 for _, monitor in ipairs(hl.get_monitors()) do
     hl.monitor(merge(monitor_defaults, { output = monitor.name }))
 end
+
+hl.on("monitor.added", function(monitor)
+    if monitor == nil or monitor.name == nil then return end
+    if monitor.name == panel and lid_closed() then return end
+
+    hl.monitor(merge(monitor_defaults, { output = monitor.name }))
+end)
 
 hl.bind(mainMod .. " + H", hl.dsp.focus({ monitor = "-1" }), { description = "Focus monitor down" })
 
