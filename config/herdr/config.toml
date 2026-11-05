@@ -4,47 +4,47 @@ onboarding = false
 prefix = ["ctrl+space", "ctrl+b"]
 
 # Tabs
-new_tab      = "prefix+shift+l"
+new_tab = "prefix+shift+l"
 previous_tab = "prefix+h"
-next_tab     = "prefix+l"
-close_tab    = "prefix+shift+q"
-rename_tab   = "prefix+shift+t"
-switch_tab   = ""
+next_tab = "prefix+l"
+close_tab = "prefix+shift+q"
+rename_tab = "prefix+shift+t"
+switch_tab = ""
 
 # Panes
-split_vertical   = "prefix+v"
+split_vertical = "prefix+v"
 split_horizontal = "prefix+c"
-cycle_pane_next  = "prefix+n"
-close_pane       = "prefix+q"
-swap_pane_left   = "prefix+shift+v"
-swap_pane_down   = "prefix+shift+c"
+cycle_pane_next = "prefix+n"
+close_pane = "prefix+q"
+swap_pane_left = "prefix+shift+v"
+swap_pane_down = "prefix+shift+c"
 # swap_pane_up     = "prefix+shift+c"
 # swap_pane_right  = "prefix+shift+v"
 
 # Workspaces
-new_workspace      = "prefix+shift+k"
+new_workspace = "prefix+shift+j"
 previous_workspace = "prefix+k"
-next_workspace     = "prefix+j"
-close_workspace    = "prefix+shift+d"
+next_workspace = "prefix+j"
+close_workspace = "prefix+shift+d"
 
 # Agents
 previous_agent = ""
-next_agent     = ""
+next_agent = ""
 focus_agent = "prefix+1..9"
 
 # herdr
-detach        = "prefix+shift+e"
-help          = "prefix+?"
+detach = "prefix+shift+e"
+help = "prefix+?"
 reload_config = "prefix+shift+r"
-goto          = "prefix+g"
+goto = "prefix+g"
 
 # Navigate-mode movement            (only reachable via `goto`)
-navigate_workspace_up   = "up"
+navigate_workspace_up = "up"
 navigate_workspace_down = "down"
-navigate_pane_left      = "h"
-navigate_pane_down      = "j"
-navigate_pane_up        = "k"
-navigate_pane_right     = "l"
+navigate_pane_left = "h"
+navigate_pane_down = "j"
+navigate_pane_up = "k"
+navigate_pane_right = "l"
 
 
 # ---------------------------------------------------------------------------
@@ -54,42 +54,42 @@ navigate_pane_right     = "l"
 # ---------------------------------------------------------------------------
 
 # herdr / UI
-settings                 = ""   # was prefix+s
-open_notification_target = ""   # was prefix+o
-toggle_sidebar           = ""   # was prefix+b
-workspace_picker         = ""   # was prefix+w
-remote_image_paste       = ""   # was ctrl+v (only active in herdr --remote)
+settings = ""                 # was prefix+s
+open_notification_target = "" # was prefix+o
+toggle_sidebar = ""           # was prefix+b
+workspace_picker = ""         # was prefix+w
+remote_image_paste = ""       # was ctrl+v (only active in herdr --remote)
 
 # Workspaces / worktrees
-new_worktree     = ""   # was prefix+shift+g
-rename_workspace = ""   # was prefix+shift+w
+new_worktree = ""     # was prefix+shift+g
+rename_workspace = "" # was prefix+shift+w
 switch_workspace = ""
-open_worktree    = ""
-remove_worktree  = ""
+open_worktree = ""
+remove_worktree = ""
 
 # Tabs
 move_tab_previous = ""
-move_tab_next     = ""
+move_tab_next = ""
 
 # Panes
-rename_pane         = ""   # was prefix+shift+p
-edit_scrollback     = ""   # was prefix+e
-copy_mode           = ""   # was prefix+[
-cycle_pane_previous = ""   # was prefix+shift+tab
-zoom                = ""   # was prefix+z
-resize_mode         = ""   # was prefix+r
-clear_pane          = ""
-last_pane           = ""
-resize_pane_left    = ""
-resize_pane_down    = ""
-resize_pane_up      = ""
-resize_pane_right   = ""
+rename_pane = ""         # was prefix+shift+p
+edit_scrollback = ""     # was prefix+e
+copy_mode = ""           # was prefix+[
+cycle_pane_previous = "" # was prefix+shift+tab
+zoom = ""                # was prefix+z
+resize_mode = ""         # was prefix+r
+clear_pane = ""
+last_pane = ""
+resize_pane_left = ""
+resize_pane_down = ""
+resize_pane_up = ""
+resize_pane_right = ""
 
 
 [keys.indexed]
-tabs       = ""
+tabs = ""
 workspaces = ""
-agents     = ""
+agents = ""
 
 [ui.sound]
 enabled = false
