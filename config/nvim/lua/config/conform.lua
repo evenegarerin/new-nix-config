@@ -47,6 +47,54 @@ local exempt_filenames = {
 -- Formatting a huge file blocks the write for as long as the formatter runs.
 local max_filesize = 1024 * 1024 -- unit in bytes, so 1MB
 
+local stylua_base = require("conform.formatters.stylua")
+
+-- Relative to $XDG_CONFIG_HOME; stylua accepts the file both in a stylua/
+-- subdirectory and directly.
+local stylua_global_config = {
+  "stylua/stylua.toml",
+  "stylua/.stylua.toml",
+  "stylua.toml",
+  ".stylua.toml",
+}
+
+--- @param ctx conform.Context
+--- @return boolean
+local function stylua_has_config(ctx)
+  if vim.fs.find({ "stylua.toml", ".stylua.toml" }, { path = ctx.dirname, upward = true })[1] then
+    return true
+  end
+
+  local xdg = vim.env.XDG_CONFIG_HOME
+  if not xdg or xdg == "" then
+    xdg = vim.fs.joinpath(vim.fn.expand("~"), ".config")
+  end
+
+  for _, rel in ipairs(stylua_global_config) do
+    if vim.uv.fs_stat(vim.fs.joinpath(xdg, rel)) then
+      return true
+    end
+  end
+
+  return false
+end
+
+--- @param ctx conform.Context
+--- @param args string[] the stock conform args for this invocation
+--- @return string[]
+local function stylua_args(ctx, args)
+  if stylua_has_config(ctx) then
+    return args
+  end
+
+  return vim.list_extend({
+    "--indent-type",
+    "Spaces",
+    "--indent-width",
+    tostring(vim.bo[ctx.buf].shiftwidth),
+  }, args)
+end
+
 -- `["_"] = { "prettier" }` below makes prettier the formatter for *every*
 -- filetype without a dedicated one. Prettier only knows a fixed set of parsers
 -- though, and exits with "No parser could be inferred for file" on anything
@@ -155,6 +203,21 @@ require("conform").setup {
   },
 
   formatters = {
+    stylua = {
+      -- `args`/`range_args` rather than `prepend_args`: conform's
+      -- util.extend_args assigns the call result back onto its own `extra_args`
+      -- parameter, which is an upvalue of the closure it returns. A
+      -- function-valued prepend_args is therefore evaluated exactly once and the
+      -- first buffer's answer reused for every later one.
+      args = function(_, ctx)
+        return stylua_args(ctx, vim.deepcopy(stylua_base.args))
+      end,
+
+      range_args = function(self, ctx)
+        return stylua_args(ctx, stylua_base.range_args(self, ctx))
+      end,
+    },
+
     qmlformat = {
       -- Qt defaults to 4 spaces; the rest of this repo indents with 2.
       prepend_args = { "--indent-width", "2" },
