@@ -78,3 +78,5 @@ use the last characters (seperator chracter of the statuscolumn) color to convey
 
 maybes:
 use concy for system monitoring and waybar widgets
+
+on format it adds tabs at least on lua

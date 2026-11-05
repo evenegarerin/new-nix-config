@@ -15,10 +15,13 @@ Singleton {
 
   // .modules-left/right padding 0 10px + per-module padding 0 5px
   readonly property int sectionPadding: 15
-  // .modules-center padding 0 15px + per-module padding 0 5px
-  readonly property int centerPadding: 20
+  // waybar's .modules-center 15px + per-module 5px would give 20; widened to
+  // 30px on each side by preference (a deliberate departure from waybar)
+  readonly property int centerPadding: 30
   // two adjacent modules each contribute 5px of padding
   readonly property int moduleGap: 10
+  // ...plus 5px of extra breathing room, in the center section only
+  readonly property int centerGap: 15
   readonly property int rounding: 15
 
   // --- typography -----------------------------------------------------

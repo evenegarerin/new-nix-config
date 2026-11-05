@@ -13,7 +13,7 @@ RowLayout {
 
   readonly property var hyprMonitor: Hyprland.monitorFor(screen)
 
-  spacing: Theme.moduleGap
+  spacing: Theme.centerGap
 
   Repeater {
     model: ScriptModel {

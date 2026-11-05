@@ -5,22 +5,30 @@ import QtQuick
 ShellRoot {
   id: root
 
-  // waybar: "start_hidden": true. Toggled from hyprland with
-  //   qs ipc call bar toggle
-  // (waybar used `pkill -SIGUSR1 waybar` for the same thing).
-  property bool barVisible: false
-
   IpcHandler {
+    id: ipc
+
     target: "bar"
 
-    function toggle(): void {
-      root.barVisible = !root.barVisible;
-    }
+    // The bar starts hidden, like waybar's "start_hidden": true.
+    //
+    //   qs ipc call -- bar show    (the `--` is required: `qs ipc` has its own
+    //                              `show` subcommand that otherwise swallows it)
+    //   qs ipc call bar hide
+    //   qs ipc call bar toggle
+    //   qs ipc prop get bar shown  -> "true" / "false"
+    //
+    // waybar could only ever offer `toggle`, because SIGUSR1 carries no state.
+    property bool shown: false
+
     function show(): void {
-      root.barVisible = true;
+      ipc.shown = true;
     }
     function hide(): void {
-      root.barVisible = false;
+      ipc.shown = false;
+    }
+    function toggle(): void {
+      ipc.shown = !ipc.shown;
     }
   }
 
@@ -33,7 +41,7 @@ ShellRoot {
       required property var modelData
 
       screen: modelData
-      visible: root.barVisible
+      visible: ipc.shown
 
       anchors {
         top: true

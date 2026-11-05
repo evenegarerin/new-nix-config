@@ -15,7 +15,7 @@ Rectangle {
 
   property int edge: Section.Edge.Center
   property real padding: edge === Section.Edge.Center ? Theme.centerPadding : Theme.sectionPadding
-  property real gap: Theme.moduleGap
+  property real gap: edge === Section.Edge.Center ? Theme.centerGap : Theme.moduleGap
 
   // anything you put inside Section {} goes into the row
   default property alias content: row.data
