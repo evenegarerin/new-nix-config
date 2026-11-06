@@ -58,6 +58,7 @@ in
       ln -sfn "${nixConfig}/claude/statusline.sh" "$HOME/.claude/statusline.sh"
       ln -sfn "${nixConfig}/walker" "$HOME/.config/walker"
       ln -sfn "${nixConfig}/quickshell" "$HOME/.config/quickshell"
+      ln -sfn "${nixConfig}/keyd" "$HOME/.config/keyd"
 
       for profile in "$HOME"/.config/mozilla/firefox/*.default; do
         [ -d "$profile" ] || continue
