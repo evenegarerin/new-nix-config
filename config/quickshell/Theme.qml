@@ -32,6 +32,11 @@ Singleton {
   readonly property color bg: Qt.rgba(0, 0, 0, 0.8)
   readonly property color fg: "whitesmoke"
 
+  // Tray icons arrive in whatever colors their apps ship; they get
+  // desaturated and pulled down a little so they sit at the same visual
+  // weight as the rest of the bar instead of competing with it.
+  readonly property real trayBrightness: -0.2
+
   readonly property color logo: Qt.rgba(250 / 255, 95 / 255, 95 / 255, 0.6)
   readonly property color clock: Qt.rgba(95 / 255, 209 / 255, 250 / 255, 0.6)
   readonly property color disk: Qt.rgba(95 / 255, 250 / 255, 147 / 255, 0.6)

@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell.Widgets
 import Quickshell.Services.SystemTray
@@ -13,14 +14,31 @@ RowLayout {
   Repeater {
     model: SystemTray.items
 
-    IconImage {
+    Item {
       required property var modelData
 
-      source: modelData.icon
-      implicitSize: 14
+      implicitWidth: trayIcon.implicitWidth
+      implicitHeight: trayIcon.implicitHeight
       // SNI "passive" items are the ones waybar hides.
       visible: modelData.status !== SystemTrayItem.Passive
       Layout.alignment: Qt.AlignVCenter
+
+      // the real icon, kept hidden: MultiEffect draws it instead
+      IconImage {
+        id: trayIcon
+
+        source: modelData.icon
+        implicitSize: 14
+        visible: false
+      }
+
+      // black and white: drop all color, keep luminance
+      MultiEffect {
+        anchors.fill: trayIcon
+        source: trayIcon
+        saturation: -1.0
+        brightness: Theme.trayBrightness
+      }
     }
   }
 }
