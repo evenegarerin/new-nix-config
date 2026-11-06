@@ -123,7 +123,15 @@
 
   programs.virt-manager.enable = true;
 
-  services.keyd.enable = true;
+  services.keyd = {
+    enable = true;
+    keyboards.default = {
+      ids = [ "*" ];
+      settings = { };
+    };
+  };
+
+  users.groups.keyd = { }; # maybe needed dont remember anymore
 
   programs.zoxide = {
     enable = true;
@@ -177,6 +185,7 @@
       playerctl
       hyprcursor
       wlrctl
+      keyd
       nemo
       xev
       keypunch
