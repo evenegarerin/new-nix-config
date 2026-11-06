@@ -9,16 +9,19 @@ local special_ws = "utils"
 -- add utility apps here:
 local utility_apps = {
   { exec = "gnome-calculator", class = [[^org\.gnome\.Calculator$]] },
+  { exec = "gnome-text-editor", class = [[^org\.gnome\.TextEditor$]] },
   { exec = "devtoolbox", class = [[^me\.iepure\.devtoolbox$]] },
   { exec = "chromium", class = [[^chromium\-browser$]] },
   { exec = "localsend", class = [[^localsend\_app$]] },
   { exec = "pcmanfm", class = [[^pcmanfm$]] },
+  { exec = "blueman-manager", class = [[^\.blueman\-manager\-wrapped$]] },
 }
 
 local large_apps = {
   [[^chromium\-browser$]],
   [[^localsend\_app$]],
   [[^pcmanfm$]],
+  [[^\.blueman\-manager\-wrapped$]],
 }
 
 local function to_lua_pattern(re)
@@ -59,9 +62,9 @@ for _, class in ipairs(large_apps) do
   })
 end
 
-hl.bind(mainMod .. " + Z", hl.dsp.workspace.toggle_special(special_ws), { description = "Toggle special ws" })
+hl.bind(mainMod .. " + Y", hl.dsp.workspace.toggle_special(special_ws), { description = "Toggle special ws" })
 
-hl.bind(mainMod .. " + SHIFT + Z", function()
+hl.bind(mainMod .. " + SHIFT + Y", function()
   local w = hl.get_active_window()
   local ws = hl.get_active_workspace()
   local sws = hl.get_active_special_workspace()

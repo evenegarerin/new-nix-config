@@ -188,8 +188,8 @@
       fd
       imv
       mission-center
-      nwg-displays
-      nwg-look
+      # nwg-displays
+      # nwg-look
       playerctl
       hyprcursor
       wlrctl
