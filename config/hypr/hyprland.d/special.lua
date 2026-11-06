@@ -35,9 +35,11 @@ function M.matches_utility_app(str)
 end
 
 -- utility windows are overlays wherever they end up
-for _, app in ipairs(utility_apps) do
+-- (index in the name, not app.exec: several entries share an exec, and a repeated
+-- rule name silently replaces the earlier rule instead of adding a second one)
+for i, app in ipairs(utility_apps) do
   hl.window_rule({
-    name = "utility-" .. app.exec,
+    name = "utility-" .. i .. "-" .. app.exec,
     match = { class = app.class },
     workspace = "special:" .. special_ws,
     float = true,
