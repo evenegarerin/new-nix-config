@@ -18,8 +18,11 @@ RowLayout {
   Repeater {
     model: ScriptModel {
       // Hyprland hands workspaces back in creation order; sort by id so the
-      // bar does not reshuffle itself when a workspace is recreated.
-      values: [...Hyprland.workspaces.values].sort((a, b) => a.id - b.id)
+      // bar does not reshuffle itself when a workspace is recreated. Special
+      // workspaces (scratchpads) carry negative ids and are not shown.
+      values: [...Hyprland.workspaces.values]
+        .filter(w => w.id > 0)
+        .sort((a, b) => a.id - b.id)
     }
 
     BarText {

@@ -6,22 +6,19 @@ local M = {}
 -- instead of getting a workspace of their own (see hyprland.d/launcher.lua).
 local special_ws = "utils"
 
--- add utility apps here:
 local utility_apps = {
   { exec = "gnome-calculator", class = [[^org\.gnome\.Calculator$]] },
   { exec = "gnome-text-editor", class = [[^org\.gnome\.TextEditor$]] },
   { exec = "devtoolbox", class = [[^me\.iepure\.devtoolbox$]] },
-  { exec = "chromium", class = [[^chromium\-browser$]] },
-  { exec = "localsend", class = [[^localsend\_app$]] },
-  { exec = "pcmanfm", class = [[^pcmanfm$]] },
-  { exec = "blueman-manager", class = [[^\.blueman\-manager\-wrapped$]] },
-}
-
-local large_apps = {
-  [[^chromium\-browser$]],
-  [[^localsend\_app$]],
-  [[^pcmanfm$]],
-  [[^\.blueman\-manager\-wrapped$]],
+  { exec = "chromium", class = [[^chromium\-browser$]], size = { "monitor_w * 0.8", "monitor_h * 0.8" } },
+  { exec = "localsend", class = [[^localsend\_app$]], size = { "monitor_w * 0.8", "monitor_h * 0.8" } },
+  { exec = "pcmanfm", class = [[^pcmanfm$]], size = { "monitor_w * 0.8", "monitor_h * 0.8" } },
+  {
+    exec = "blueman-manager",
+    class = [[^\.blueman\-manager\-wrapped$]],
+    size = { "monitor_w * 0.8", "monitor_h * 0.8" },
+  },
+  { exec = "pcmanfm", class = [[^xdg\-desktop\-portal\-gtk$]], size = { "monitor_w * 0.8", "monitor_h * 0.8" } },
 }
 
 local function to_lua_pattern(re)
@@ -44,7 +41,7 @@ for _, app in ipairs(utility_apps) do
     match = { class = app.class },
     workspace = "special:" .. special_ws,
     float = true,
-    size = "50% 50%",
+    size = app.size or "50% 50%",
     center = true,
   })
 end
@@ -54,13 +51,6 @@ hl.window_rule({
   match = { workspace = "special:" .. special_ws },
   opacity = "1.0 0.0",
 })
-
-for _, class in ipairs(large_apps) do
-  hl.window_rule({
-    match = { class = class },
-    size = { "monitor_w * 0.8", "monitor_h * 0.8" },
-  })
-end
 
 hl.bind(mainMod .. " + Y", hl.dsp.workspace.toggle_special(special_ws), { description = "Toggle special ws" })
 
