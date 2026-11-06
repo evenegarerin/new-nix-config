@@ -8,76 +8,96 @@ local special_ws = "utils"
 
 -- add utility apps here:
 local utility_apps = {
-    { exec = "gnome-calculator", class = [[^org\.gnome\.Calculator$]] }, 
-    { exec = "devtoolbox", class = [[^me\.iepure\.devtoolbox$]]},
-    { exec = "chromium", class = [[^chromium\-browser$]]},
+  { exec = "gnome-calculator", class = [[^org\.gnome\.Calculator$]] },
+  { exec = "devtoolbox", class = [[^me\.iepure\.devtoolbox$]] },
+  { exec = "chromium", class = [[^chromium\-browser$]] },
+  { exec = "localsend", class = [[^localsend\_app$]] },
+  { exec = "pcmanfm", class = [[^pcmanfm$]] },
+}
+
+local large_apps = {
+  [[^chromium\-browser$]],
+  [[^localsend\_app$]],
+  [[^pcmanfm$]],
 }
 
 local function to_lua_pattern(re)
-    return (re:gsub("\\(.)", "%%%1"))
+  return (re:gsub("\\(.)", "%%%1"))
 end
 
 function M.matches_utility_app(str)
-    for _, app in ipairs(utility_apps) do
-        if str:match(to_lua_pattern(app.class)) then
-            return app  -- or return true
-        end
+  for _, app in ipairs(utility_apps) do
+    if str:match(to_lua_pattern(app.class)) then
+      return app -- or return true
     end
-    return nil
+  end
+  return nil
 end
 
 -- utility windows are overlays wherever they end up
 for _, app in ipairs(utility_apps) do
-    hl.window_rule({
-        name      = "utility-" .. app.exec,
-        match     = { class = app.class },
-        workspace = "special:" .. special_ws,
-        float     = true,
-        size      = "50% 50%",
-        center    = true,
-    })
+  hl.window_rule({
+    name = "utility-" .. app.exec,
+    match = { class = app.class },
+    workspace = "special:" .. special_ws,
+    float = true,
+    size = "50% 50%",
+    center = true,
+  })
 end
 
 hl.window_rule({
-    name    = "utility-dim-unfocused",
-    match   = { workspace = "special:" .. special_ws },
-    opacity = "1.0 0.0",
+  name = "utility-dim-unfocused",
+  match = { workspace = "special:" .. special_ws },
+  opacity = "1.0 0.0",
 })
 
-hl.window_rule({
-  match = { class = [[^chromium\-browser$]] },
-  size  = { "monitor_w * 0.8", "monitor_h * 0.8" },
-})
+for _, class in ipairs(large_apps) do
+  hl.window_rule({
+    match = { class = class },
+    size = { "monitor_w * 0.8", "monitor_h * 0.8" },
+  })
+end
 
 hl.bind(mainMod .. " + Z", hl.dsp.workspace.toggle_special(special_ws), { description = "Toggle special ws" })
 
 hl.bind(mainMod .. " + SHIFT + Z", function()
-    local w = hl.get_active_window()
-    local ws = hl.get_active_workspace()
-    local sws = hl.get_active_special_workspace()
+  local w = hl.get_active_window()
+  local ws = hl.get_active_workspace()
+  local sws = hl.get_active_special_workspace()
 
-    if (w == nil) then return end
-    if (ws == nil) then return end
+  if w == nil then
+    return
+  end
+  if ws == nil then
+    return
+  end
 
-    if (sws and sws.name == "special:" .. special_ws) then
-        hl.dispatch(hl.dsp.window.move({ window = w, workspace = ws, follow = true }))
-        hl.dispatch(hl.dsp.window.float({ window = w, action = "unset" }))
-    else
-        hl.dispatch(hl.dsp.window.float({ window = w, action = "set" }))
-        hl.dispatch(hl.dsp.window.center({ window = w }))
-        hl.dispatch(hl.dsp.window.move({ window = w, workspace = "special:" .. special_ws }))
-    end
+  if sws and sws.name == "special:" .. special_ws then
+    hl.dispatch(hl.dsp.window.move({ window = w, workspace = ws, follow = true }))
+    hl.dispatch(hl.dsp.window.float({ window = w, action = "unset" }))
+  else
+    hl.dispatch(hl.dsp.window.float({ window = w, action = "set" }))
+    hl.dispatch(hl.dsp.window.center({ window = w }))
+    hl.dispatch(hl.dsp.window.move({ window = w, workspace = "special:" .. special_ws }))
+  end
 end, { description = "Moves current window into/out of special ws" })
 
 hl.on("window.open_early", function(w)
-    if not w or not w.workspace or not w.class then return end
-    if w.workspace.name ~= "special:" .. special_ws then return end
-    if M.matches_utility_app(w.class) then return end
+  if not w or not w.workspace or not w.class then
+    return
+  end
+  if w.workspace.name ~= "special:" .. special_ws then
+    return
+  end
+  if M.matches_utility_app(w.class) then
+    return
+  end
 
-    local ws = hl.get_active_workspace()
-    if ws then
-        hl.dispatch(hl.dsp.window.move({ window = w, workspace = ws }))
-    end
+  local ws = hl.get_active_workspace()
+  if ws then
+    hl.dispatch(hl.dsp.window.move({ window = w, workspace = ws }))
+  end
 end)
 
 return M
