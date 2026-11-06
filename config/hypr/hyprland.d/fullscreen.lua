@@ -7,8 +7,6 @@ local mainMod = common.mainMod
 local read_state = common.read_state
 local write_state = common.write_state
 
-local M = {}
-
 hl.window_rule({
   match = {
     fullscreen_state_client = 1,
@@ -65,7 +63,3 @@ hl.bind(
   hl.dsp.window.fullscreen({ mode = "fullscreen" }),
   { description = "Toggle true fullscreen for current window" }
 )
-
-M.set_fullscreen = set_fullscreen
-
-return M

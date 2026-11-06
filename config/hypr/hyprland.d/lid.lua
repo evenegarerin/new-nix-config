@@ -3,23 +3,23 @@
 local common = require("common")
 
 local monitor_defaults = common.monitor_defaults
-local panel            = common.panel
-local lid_closed       = common.lid_closed
-local merge            = common.merge
-
-local set_fullscreen = require("fullscreen").set_fullscreen
+local panel = common.panel
+local lid_closed = common.lid_closed
+local merge = common.merge
 
 local monitors = hl.get_monitors()
 
 local function other_monitor_present()
-    for _, m in ipairs(monitors) do
-        if m.name ~= panel then return true end
+  for _, m in ipairs(monitors) do
+    if m.name ~= panel then
+      return true
     end
-    return false
+  end
+  return false
 end
 
 if lid_closed() and other_monitor_present() then
-    hl.monitor(merge(monitor_defaults, { output = panel, disabled = true }))
+  hl.monitor(merge(monitor_defaults, { output = panel, disabled = true }))
 end
 
 -- handle laptop monitor close and open
@@ -36,7 +36,5 @@ hl.bind("switch:on:Lid Switch", function()
 end, { description = "Turn of monitor on lid close" })
 
 hl.bind("switch:off:Lid Switch", function()
-  set_fullscreen(true)
-
   hl.monitor(merge(monitor_defaults, { output = panel, disabled = false }))
 end, { description = "Turn on monitor on lid open" })

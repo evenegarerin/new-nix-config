@@ -55,3 +55,11 @@ hl.animation({ leaf = "windows", enabled = true, speed = 6, bezier = "default" }
 hl.animation({ leaf = "fade", enabled = true, speed = 6, bezier = "default" })
 hl.animation({ leaf = "workspaces", enabled = true, speed = 6, bezier = "default" })
 hl.animation({ leaf = "specialWorkspace", enabled = false })
+
+-- hyprpaper re-creates its layer surfaces whenever the output set changes (e.g.
+-- the panel being disabled on lid close). Without this the wallpaper on the
+-- remaining monitor slides back in, since the default layer animation is `slide`.
+hl.layer_rule({
+    match = { namespace = "hyprpaper" },
+    no_anim = true
+})
