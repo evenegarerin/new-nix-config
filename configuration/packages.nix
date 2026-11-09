@@ -152,6 +152,7 @@
       hyprshot
       posting
       superfile
+      udiskie
     ])
     ++ (with pkgs-unstable; [
       claude-code
