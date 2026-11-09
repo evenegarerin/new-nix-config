@@ -62,15 +62,9 @@ function! utils#SwitchLine(src_line_idx, direction) abort
   endif
 endfunction
 
+" Move the lines spanned by the last visual selection up or down.
+" Works for every visual mode (v, V and CTRL-V); charwise and blockwise
 function! utils#MoveSelection(direction) abort
-  " only do this if previous mode is visual line mode. Once we press some keys in
-  " visual line mode, we will leave this mode. So the output of `mode()` will be
-  " `n` instead of `V`. We can use `visualmode()` instead to check the previous
-  " mode, see also https://stackoverflow.com/a/61486601/6064933
-  if visualmode() !=# 'V'
-    return
-  endif
-
   let l:start_line = line("'<")
   let l:end_line = line("'>")
   let l:num_line = l:end_line - l:start_line + 1

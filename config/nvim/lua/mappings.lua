@@ -201,13 +201,20 @@ keymap.set(
   { desc = "move line down" }
 )
 
--- Move the current visual-line selection up and down
-keymap.set("x", "<A-k>", '<cmd>call utils#MoveSelection("up")<cr>', { desc = "move selection up" })
+-- Move the current visual selection up and down. `:<C-u>` and not `<Cmd>`:
+-- MoveSelection reads the '< / '> marks, which are only set once visual mode is
+-- left -- see the note in autoload/utils.vim.
+keymap.set(
+  "x",
+  "<A-k>",
+  ':<C-u>call utils#MoveSelection("up")<cr>',
+  { silent = true, desc = "move selection up" }
+)
 keymap.set(
   "x",
   "<A-j>",
-  '<cmd>call utils#MoveSelection("down")<cr>',
-  { desc = "move selection down" }
+  ':<C-u>call utils#MoveSelection("down")<cr>',
+  { silent = true, desc = "move selection down" }
 )
 
 -- Go to a certain buffer by count, e.g. `3gb`

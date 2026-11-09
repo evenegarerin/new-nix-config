@@ -19,6 +19,7 @@ local utility_apps = {
     size = { "monitor_w * 0.8", "monitor_h * 0.8" },
   },
   { exec = "pcmanfm", class = [[^xdg\-desktop\-portal\-gtk$]], size = { "monitor_w * 0.8", "monitor_h * 0.8" } },
+  { exec = "superfile", class = [[^superfile$]], size = { "monitor_w * 0.5", "monitor_h * 0.5" } },
 }
 
 local function to_lua_pattern(re)
