@@ -382,6 +382,20 @@ local plugin_specs = {
     end,
   },
 
+  {
+    "nvim-treesitter/nvim-treesitter-context",
+    main = "treesitter-context",
+    event = "VeryLazy",
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    opts = {
+      mode = "cursor",
+      max_lines = 1,
+      trim_scope = "outer",
+      multiline_threshold = 1,
+      separator = "─",
+    },
+  },
+
   -- Modern matchit: % matching, and the reason globals.lua disables
   -- matchit/matchparen.
   {
@@ -399,8 +413,7 @@ local plugin_specs = {
         " Whether to enable matching inside comment or string
         let g:matchup_delim_noskips = 0
 
-        " Show offscreen match pair in popup window
-        let g:matchup_matchparen_offscreen = {'method': 'popup'}
+        let g:matchup_matchparen_offscreen = {}
       ]])
     end,
     event = "BufRead",
