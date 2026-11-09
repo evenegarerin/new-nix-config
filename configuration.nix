@@ -131,7 +131,8 @@
     };
   };
 
-  users.groups.keyd = { }; # maybe needed dont remember anymore
+  users.groups.keyd = { };
+  systemd.services.keyd.serviceConfig.CapabilityBoundingSet = [ "CAP_SETGID" ];
 
   programs.zoxide = {
     enable = true;

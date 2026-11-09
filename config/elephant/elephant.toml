@@ -1,3 +1,5 @@
 ignored_providers = ["archlinuxpkgs", "dnfpackages"]
 
+terminal_cmd = "kitty"
+
 launch_prefix = "sh $HOME/.config/elephant/launch-tagged.sh"

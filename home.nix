@@ -26,6 +26,17 @@ in
     desktop = "$HOME/Desktop";
   };
 
+  xdg.desktopEntries.herdr = {
+    categories = [
+      "Development"
+      "ConsoleOnly"
+    ];
+    exec = "kitty herdr --class herdr";
+    genericName = "Multiplexer";
+    name = "Herdr";
+    terminal = false;
+  };
+
   home.activation.createConfigSymlinks =
     let
       value = "true";
@@ -36,6 +47,7 @@ in
       mkdir -p "$HOME/.gnupg"
       mkdir -p "$HOME/.config/herdr"
       mkdir -p "$HOME/.claude"
+      mkdir -p "$HOME/.config/keyd"
 
       ln -sfn "${nixConfig}/elephant" "$HOME/.config/elephant"
       ln -sfn "${nixConfig}/gtk-3.0" "$HOME/.config/gtk-3.0"
@@ -58,7 +70,7 @@ in
       ln -sfn "${nixConfig}/claude/statusline.sh" "$HOME/.claude/statusline.sh"
       ln -sfn "${nixConfig}/walker" "$HOME/.config/walker"
       ln -sfn "${nixConfig}/quickshell" "$HOME/.config/quickshell"
-      ln -sfn "${nixConfig}/keyd" "$HOME/.config/keyd"
+      ln -sfn "${nixConfig}/keyd/app.conf" "$HOME/.config/keyd/app.conf"
 
       for profile in "$HOME"/.config/mozilla/firefox/*.default; do
         [ -d "$profile" ] || continue
