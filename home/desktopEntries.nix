@@ -17,6 +17,12 @@
   xdg.desktopEntries.nvim =
     let
       nvim-zi = pkgs.writeShellScript "nvim-zi" ''
+        # Opened with files (xdg-open, file manager): just edit them
+        if [ "$#" -gt 0 ]; then
+          exec nvim "$@"
+        fi
+
+        # Launched from an app launcher: pick a directory with zoxide
         dir=$(zoxide query -i) && cd "$dir"
         exec nvim "''${dir:-.}"
       '';
@@ -28,7 +34,7 @@
         "TextEditor"
         "ConsoleOnly"
       ];
-      exec = "kitty --class nvim -- ${nvim-zi}";
+      exec = "kitty --class nvim -- ${nvim-zi} %F";
       genericName = "Text Editor";
       name = "Neovim";
       icon = "nvim";
@@ -75,6 +81,21 @@
     name = "Vimnm";
     icon = "kitty";
     settings.StartupWMClass = "vimnm";
+    terminal = false;
+  };
+
+  xdg.desktopEntries.superfile = {
+    categories = [
+      "System"
+      "FileTools"
+      "FileManager"
+      "ConsoleOnly"
+    ];
+    exec = "kitty --class superfile -- spf %F";
+    genericName = "File Manager";
+    name = "superfile";
+    icon = "system-file-manager";
+    settings.StartupWMClass = "superfile";
     terminal = false;
   };
 }

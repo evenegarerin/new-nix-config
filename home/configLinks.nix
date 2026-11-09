@@ -27,14 +27,16 @@ in
         "pcmanfm"
         "walker"
         "quickshell"
+        "herdr/config.toml"
+        "keyd/app.conf"
+        "superfile/config.toml"
+        "superfile/hotkeys.toml"
       ]
       (name: {
         source = link name;
       })
     // {
       "VSCodium/User/settings.json".source = link "vscodium/settings.json";
-      "herdr/config.toml".source = link "herdr/config.toml";
-      "keyd/app.conf".source = link "keyd/app.conf";
     };
 
   home.file = {

@@ -151,12 +151,12 @@
       zathura # PDF viewer, SyncTeX source for vimtex
       hyprshot
       posting
-      superfile
       udiskie
     ])
     ++ (with pkgs-unstable; [
       claude-code
       herdr
       quickshell
+      superfile
     ]);
 }
