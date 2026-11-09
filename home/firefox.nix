@@ -6,6 +6,7 @@ let
 in
 {
   # Firefox and its chrome link live together: the link's target path is derived from the home-manager-managed profile.
+  # The system side (fx-autoconfig, which makes chrome/ take effect, plus policies) is in configuration/firefox.nix.
   programs.firefox = {
     enable = true;
     profiles.default = {
