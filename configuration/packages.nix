@@ -150,6 +150,8 @@
       ))
       zathura # PDF viewer, SyncTeX source for vimtex
       hyprshot
+      posting
+      superfile
     ])
     ++ (with pkgs-unstable; [
       claude-code
