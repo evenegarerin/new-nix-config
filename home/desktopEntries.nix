@@ -97,5 +97,6 @@
     icon = "system-file-manager";
     settings.StartupWMClass = "superfile";
     terminal = false;
+    mimeType = [ "inode/directory" ];
   };
 }

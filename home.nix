@@ -3,6 +3,7 @@
 {
   imports = [
     ./home/desktopEntries.nix
+    ./home/mimeApps.nix
     ./home/configLinks.nix
     ./home/firefox.nix
   ];
