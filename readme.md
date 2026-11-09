@@ -79,8 +79,4 @@ use the last characters (seperator chracter of the statuscolumn) color to convey
 maybes:
 use concy for system monitoring and waybar widgets
 
-on format it adds tabs at least on lua
-
-i want the alt j and alt k also to work on selected blocks
-
 configure what programs open what kind of file
