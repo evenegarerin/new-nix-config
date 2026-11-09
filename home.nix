@@ -39,21 +39,27 @@ in
     terminal = false;
   };
 
-  xdg.desktopEntries.neovim = {
-    categories = [
-      "Development"
-      "IDE"
-      "TextEditor"
-      "ConsoleOnly"
-    ];
-    exec = "kitty --class nvim -- nvim";
-    genericName = "Text Editor";
-    name = "Neovim";
-    icon = "nvim";
-    settings.StartupWMClass = "nvim";
-    terminal = false;
-  };
-
+  xdg.desktopEntries.nvim =
+    let
+      nvim-zi = pkgs.writeShellScript "nvim-zi" ''
+        dir=$(zoxide query -i) && cd "$dir"
+        exec nvim "''${dir:-.}"
+      '';
+    in
+    {
+      categories = [
+        "Development"
+        "IDE"
+        "TextEditor"
+        "ConsoleOnly"
+      ];
+      exec = "kitty --class nvim -- ${nvim-zi}";
+      genericName = "Text Editor";
+      name = "Neovim";
+      icon = "nvim";
+      settings.StartupWMClass = "nvim";
+      terminal = false;
+    };
   xdg.desktopEntries.yazi = {
     categories = [
       "System"
@@ -80,6 +86,19 @@ in
     name = "Vtop";
     icon = "kitty";
     settings.StartupWMClass = "vtop";
+    terminal = false;
+  };
+
+  xdg.desktopEntries.vimnm = {
+    categories = [
+      "Network"
+      "ConsoleOnly"
+    ];
+    exec = "kitty --class vimnm -- vimnm";
+    genericName = "Wlan Manager";
+    name = "Vimnm";
+    icon = "kitty";
+    settings.StartupWMClass = "vimnm";
     terminal = false;
   };
 

@@ -190,6 +190,7 @@
       nemo
       xev
       (callPackage ./selfBuild/vtop.nix { })
+      (callPackage ./selfBuild/vimnm.nix { })
       keypunch
       appflowy
       devtoolbox

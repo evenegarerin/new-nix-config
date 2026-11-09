@@ -12,11 +12,15 @@ buildNpmPackage rec {
     owner = "MrRio";
     repo = "vtop";
     rev = "v${version}";
-    hash = lib.fakeHash; # build once, copy the real hash from the error
+    hash = "sha256-pl3vepIJli5uleXb9hZx5EwK5WjcKVmwCdvw6+7mx9A=";
   };
 
-  npmDepsHash = lib.fakeHash; # same trick
-  dontNpmBuild = true; # plain JS, no build step
+  postPatch = ''
+    cp --no-preserve=mode ${./vtop/package-lock.json} package-lock.json
+  '';
+
+  npmDepsHash = "sha256-EaaBAGfATMprjYx+TFJtElZJ4qj8iqTbUy7VVVmlwbg=";
+  dontBuild = true; # plain JS, no build step
 
   meta.mainProgram = "vtop";
 }
