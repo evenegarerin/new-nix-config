@@ -91,7 +91,7 @@
       "FileManager"
       "ConsoleOnly"
     ];
-    exec = "kitty --class superfile -- spf %F";
+    exec = "kitty --class superfile -- superfile %F";
     genericName = "File Manager";
     name = "superfile";
     icon = "system-file-manager";
