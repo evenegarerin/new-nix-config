@@ -1,7 +1,9 @@
+local tabout = require("config.tabout")
+
 require("blink.cmp").setup {
   keymap = {
     preset = "default",
-    ["<Tab>"] = { "select_next", "fallback" },
+    ["<Tab>"] = { "select_next", tabout.forward, "fallback" },
     ["<S-Tab>"] = { "select_prev", "fallback" },
     ["<A-k>"] = { "select_next", "fallback" },
     ["<A-j>"] = { "select_prev", "fallback" },
