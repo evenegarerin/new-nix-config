@@ -13,7 +13,7 @@
  * the `walker --gapplication-service` daemon restarted.
  *
  * The blur itself is NOT produced here — it comes from the compositor, via
- * hl.layer_rule in config/hypr/hyprland.d/launcher.lua, tuned globally in
+ * hl.layer_rule in config/hypr/hyprland/launcher.lua, tuned globally in
  * hyprland.lua (decoration.blur). What this file contributes to the frosted
  * look is the milky veil layered over the blur: frosted glass is not merely
  * transparent, it scatters light, so the fill stays fairly light and the

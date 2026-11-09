@@ -1,4 +1,4 @@
--- Values and helpers shared across hyprland.lua and the hyprland.d modules.
+-- Values and helpers shared across hyprland.lua and the hyprland/ modules.
 
 local M = {
   mainMod = "SUPER",

@@ -1,6 +1,6 @@
 -- Laptop lid handling: disable the built in panel while the lid is shut.
 
-local common = require("common")
+local common = require("hyprland.common")
 
 local monitor_defaults = common.monitor_defaults
 local panel = common.panel
@@ -33,7 +33,7 @@ hl.bind("switch:on:Lid Switch", function()
   end
 
   hl.monitor(merge(monitor_defaults, { output = panel, disabled = true }))
-end, { description = "Turn of monitor on lid close" })
+end, { description = "Turn off monitor on lid close" })
 
 hl.bind("switch:off:Lid Switch", function()
   hl.monitor(merge(monitor_defaults, { output = panel, disabled = false }))

@@ -1,7 +1,7 @@
 -- Fake fullscreen: strips gaps and rounding system wide, and keeps that choice
 -- across config reloads. Also stops clients from forcing real fullscreen.
 
-local common = require("common")
+local common = require("hyprland.common")
 
 local mainMod = common.mainMod
 local read_state = common.read_state
@@ -33,7 +33,7 @@ local function apply_layout(state)
 end
 
 local function set_fullscreen(state)
-  local active_state = read_state("fullscreen", false)
+  local active_state = read_state("fullscreen", true)
 
   if state ~= active_state then
     if state then
@@ -55,7 +55,7 @@ end)
 apply_layout(read_state("fullscreen", true))
 
 hl.bind(mainMod .. " + F", function()
-  set_fullscreen(not read_state("fullscreen", false))
+  set_fullscreen(not read_state("fullscreen", true))
 end, { description = "Toggle fake fullscreen for entire system" })
 
 hl.bind(

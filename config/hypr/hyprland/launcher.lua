@@ -1,13 +1,13 @@
 -- Application launcher (walker).
 
-local common = require("common")
+local common = require("hyprland.common")
 
 local mainMod = common.mainMod
 local read_file = common.read_file
 
-local matches_utility_app = require("special").matches_utility_app
+local matches_utility_app = require("hyprland.special").matches_utility_app
 
-local runtime_dir = os.getenv("XDG_RUNTIME_DIR")
+local runtime_dir = os.getenv("XDG_RUNTIME_DIR") or "/tmp"
 local mode_file = runtime_dir .. "/launcher-mode"
 
 -- opens the selected app in a workspace of its own

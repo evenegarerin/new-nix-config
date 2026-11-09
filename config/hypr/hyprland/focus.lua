@@ -1,6 +1,6 @@
 -- Window focus: follow the focus history and move around within a workspace.
 
-local common = require("common")
+local common = require("hyprland.common")
 
 local mainMod             = common.mainMod
 local last_focused_window = common.last_focused_window
@@ -49,5 +49,5 @@ hl.bind(mainMod .. " + SHIFT + N", function()
     hl.dispatch(hl.dsp.window.swap({ window = wins[n], target = wins[i] }))
   end
 
-  if active then hl.dispatch(hl.dsp.focus({ window = active })) end
+  hl.dispatch(hl.dsp.focus({ window = active }))
 end, { description = "Rearrange windows in current ws" })

@@ -1,7 +1,7 @@
 -- Keybinds that do not belong to a feature module of their own:
 -- terminal, window close, lockscreen and the bind cheatsheet.
 
-local mainMod = require("common").mainMod
+local mainMod = require("hyprland.common").mainMod
 
 hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd("kitty"), { description = "Launch kitty" })
 
@@ -16,9 +16,7 @@ end, { description = "Close active window" })
 
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock --grace 3"), { description = "Activate lockscreen" })
 
-hl.bind(
-  mainMod .. " + SHIFT + ssharp",
-  hl.dsp.exec_cmd([[
+local show_binds = hl.dsp.exec_cmd([[
 hyprctl binds -j |
   jq -r 'def getbit($position; $n):
     fmod($n/($position|exp2)|floor;2) | fabs;
@@ -29,9 +27,10 @@ def mod($position; $name):
 .[] | .description + "|" + mod(6; "SUPER") + mod(2; "Ctrl") + mod(3; "Alt") + mod(0; "Shift") + .key
 ' | column -t -s "|" |
   rofi -dmenu -i -sync -p "Bind" -format e -case-smart -l 40 -theme-str "window {width: 90%;} listview {columns: 4; scrollbar: false;}"
-]]),
-  { description = "Show keybind cheatsheet" }
-)
+]])
+
+hl.bind(mainMod .. " + SHIFT + ssharp", show_binds, { description = "Show keybind cheatsheet (de layout)" })
+hl.bind(mainMod .. " + SHIFT + slash", show_binds, { description = "Show keybind cheatsheet (us layout)" })
 
 local function zoom(delta)
   local current = hl.get_config("cursor.zoom_factor")
@@ -40,8 +39,8 @@ local function zoom(delta)
 end
 
 hl.bind(mainMod .. " + mouse_down", function()
-  zoom(-5)
+  zoom(-0.5)
 end)
 hl.bind(mainMod .. " + mouse_up", function()
-  zoom(5)
+  zoom(0.5)
 end)

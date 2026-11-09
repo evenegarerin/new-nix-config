@@ -1,7 +1,7 @@
 -- Submaps: SUPER+R resizes the active window with hjkl,
 -- SUPER+SHIFT+M moves the mouse with hjkl.
 
-local mainMod = require("common").mainMod
+local mainMod = require("hyprland.common").mainMod
 
 local defaultBorder = 0xffffffff
 local submapBorders = {

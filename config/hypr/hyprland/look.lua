@@ -1,7 +1,7 @@
 -- Look & feel: global appearance, input and animation settings.
 --
 -- Note: the gaps/rounding values here are the fullscreen-layout defaults;
--- hyprland.d/fullscreen.lua overrides them at load, so it must be required later.
+-- hyprland/fullscreen.lua overrides them at load, so it must be required later.
 
 hl.config({
   general = {

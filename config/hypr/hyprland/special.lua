@@ -1,9 +1,9 @@
-local mainMod = require("common").mainMod
+local mainMod = require("hyprland.common").mainMod
 
 local M = {}
 
 -- Utility apps toggle over the current workspace on one shared special workspace
--- instead of getting a workspace of their own (see hyprland.d/launcher.lua).
+-- instead of getting a workspace of their own (see hyprland/launcher.lua).
 local special_ws = "utils"
 
 local utility_apps = {

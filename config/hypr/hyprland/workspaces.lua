@@ -1,6 +1,6 @@
 -- Workspace navigation.
 
-local common = require("common")
+local common = require("hyprland.common")
 
 local mainMod = common.mainMod
 local standard_workspaces = common.standard_workspaces
