@@ -1,7 +1,13 @@
-{ config, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
-  nixConfig = "/home/castle/nix-config/config";
+  configDir = "${config.home.homeDirectory}/nix-config/config";
+  link = path: config.lib.file.mkOutOfStoreSymlink "${configDir}/${path}";
 in
 {
   home.pointerCursor = {
@@ -102,44 +108,49 @@ in
     terminal = false;
   };
 
-  home.activation.createConfigSymlinks =
-    let
-      value = "true";
-    in
-    config.lib.dag.entryAfter [ "writeBoundary" ] ''
-      mkdir -p "$HOME/.config"
-      mkdir -p "$HOME/.config/VSCodium/User"
-      mkdir -p "$HOME/.gnupg"
-      mkdir -p "$HOME/.config/herdr"
-      mkdir -p "$HOME/.claude"
-      mkdir -p "$HOME/.config/keyd"
+  programs.firefox = {
+    enable = true;
+    profiles.default = {
+      id = 0;
+      isDefault = true;
+    };
+  };
 
-      ln -sfn "${nixConfig}/elephant" "$HOME/.config/elephant"
-      ln -sfn "${nixConfig}/gtk-3.0" "$HOME/.config/gtk-3.0"
-      ln -sfn "${nixConfig}/gtk-4.0" "$HOME/.config/gtk-4.0"
-      ln -sfn "${nixConfig}/hypr" "$HOME/.config/hypr"
-      ln -sfn "${nixConfig}/kitty" "$HOME/.config/kitty"
-      ln -sfn "${nixConfig}/nvim" "$HOME/.config/nvim"
-      ln -sfn "${nixConfig}/qutebrowser" "$HOME/.config/qutebrowser"
-      ln -sfn "${nixConfig}/swaync" "$HOME/.config/swaync"
-      ln -sfn "${nixConfig}/vscodium/settings.json" "$HOME/.config/VSCodium/User/settings.json"
-      ln -sfn "${nixConfig}/waybar" "$HOME/.config/waybar"
-      ln -sfn "${nixConfig}/yazi" "$HOME/.config/yazi"
-      ln -sfn "${nixConfig}/wallpapers" "$HOME/.config/wallpapers"
-      ln -sfn "${nixConfig}/zsh/.zshrc" "$HOME/.zshrc"
-      ln -sfn "${nixConfig}/gnupg/gpg-agent.conf" "$HOME/.gnupg/gpg-agent.conf"
-      ln -sfn "${nixConfig}/tmux/.tmux.conf" "$HOME/.tmux.conf"
-      ln -sfn "${nixConfig}/pcmanfm" "$HOME/.config/pcmanfm"
-      ln -sfn "${nixConfig}/herdr/config.toml" "$HOME/.config/herdr/config.toml"
-      ln -sfn "${nixConfig}/claude/keybindings.json" "$HOME/.claude/keybindings.json"
-      ln -sfn "${nixConfig}/claude/statusline.sh" "$HOME/.claude/statusline.sh"
-      ln -sfn "${nixConfig}/walker" "$HOME/.config/walker"
-      ln -sfn "${nixConfig}/quickshell" "$HOME/.config/quickshell"
-      ln -sfn "${nixConfig}/keyd/app.conf" "$HOME/.config/keyd/app.conf"
+  xdg.configFile =
+    # Directories that share the same name in this configuration and in ~/.config
+    lib.genAttrs
+      [
+        "elephant"
+        "gtk-3.0"
+        "gtk-4.0"
+        "hypr"
+        "kitty"
+        "nvim"
+        "qutebrowser"
+        "swaync"
+        "waybar"
+        "yazi"
+        "wallpapers"
+        "pcmanfm"
+        "walker"
+        "quickshell"
+      ]
+      (name: {
+        source = link name;
+      })
+    // {
+      "VSCodium/User/settings.json".source = link "vscodium/settings.json";
+      "herdr/config.toml".source = link "herdr/config.toml";
+      "keyd/app.conf".source = link "keyd/app.conf";
+    };
 
-      for profile in "$HOME"/.config/mozilla/firefox/*.default; do
-        [ -d "$profile" ] || continue
-        ln -sfn "${nixConfig}/firefox/chrome" "$profile/chrome"
-      done
-    '';
+  home.file = {
+    ".zshrc".source = link "zsh/.zshrc";
+    ".tmux.conf".source = link "tmux/.tmux.conf";
+    ".gnupg/gpg-agent.conf".source = link "gnupg/gpg-agent.conf";
+    ".claude/keybindings.json".source = link "claude/keybindings.json";
+    ".claude/statusline.sh".source = link "claude/statusline.sh";
+    "${config.programs.firefox.configPath}/${config.programs.firefox.profiles.default.path}/chrome".source =
+      link "firefox/chrome";
+  };
 }
