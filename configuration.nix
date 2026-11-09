@@ -189,6 +189,7 @@
       keyd
       nemo
       xev
+      (callPackage ./selfBuild/vtop.nix { })
       keypunch
       appflowy
       devtoolbox
