@@ -112,12 +112,6 @@
       marksman
       pyright
       texlab
-      tree-sitter-grammars.tree-sitter-nix
-      tree-sitter-grammars.tree-sitter-json
-      tree-sitter-grammars.tree-sitter-toml
-      tree-sitter-grammars.tree-sitter-yaml
-      tree-sitter-grammars.tree-sitter-css
-      tree-sitter-grammars.tree-sitter-bash
       # wlr-randr
       # usbutils
       grim

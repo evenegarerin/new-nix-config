@@ -1,3 +1,5 @@
+vim.opt.runtimepath:append(vim.fn.stdpath("data") .. "/lazy/nvim-treesitter/runtime")
+
 local enabled_filetypes = {
   "nix",
   "lua",
