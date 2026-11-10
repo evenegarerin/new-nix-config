@@ -23,7 +23,7 @@ in
   boot.loader.grub.enable = true;
   boot.loader.grub.efiSupport = true;
   boot.loader.grub.device = "nodev"; # important for UEFI
-  boot.loader.grub.configurationLimit = 20;
+  boot.loader.grub.configurationLimit = 10;
 
   boot.loader.efi.canTouchEfiVariables = true;
 

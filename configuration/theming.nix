@@ -32,9 +32,12 @@
     plus-jakarta-sans
   ];
 
-  environment.etc."xdg/kdeglobals".source = pkgs.runCommand "kdeglobals" { } ''
-    cat ${pkgs.dracula-theme}/share/color-schemes/Dracula.colors > $out
-  '';
+  # environment.etc."xdg/kdeglobals".source = pkgs.runCommand "kdeglobals" { } ''
+  #   cat ${pkgs.dracula-theme}/share/color-schemes/Dracula.colors > $out
+  # '';
+
+  environment.etc."xdg/kdeglobals".source =
+    "${pkgs.dracula-theme}/share/color-schemes/Dracula.colors";
 
   environment.pathsToLink = [
     "/share/glib-2.0/schemas"

@@ -1,4 +1,9 @@
-{ pkgs, pkgs-unstable, inputs, ... }:
+{
+  pkgs,
+  pkgs-unstable,
+  inputs,
+  ...
+}:
 
 {
   # Accounts and how they authenticate, plus the home-manager entry point.
@@ -32,6 +37,7 @@
     };
 
     backupFileExtension = "backup";
+    overwriteBackup = true;
 
     users.castle =
       { pkgs, inputs, ... }:
