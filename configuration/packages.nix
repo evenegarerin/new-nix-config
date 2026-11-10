@@ -147,6 +147,7 @@
       posting
       udiskie
       swaynotificationcenter
+      nvd
     ])
     ++ (with pkgs-unstable; [
       claude-code

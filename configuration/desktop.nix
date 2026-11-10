@@ -27,6 +27,8 @@
   services.gvfs.enable = true;
   services.dbus.enable = true;
 
+  services.upower.enable = true;
+
   services.blueman.enable = true;
 
   services.elephant.enable = true;
