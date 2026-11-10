@@ -3,7 +3,15 @@
 {
   # ThinkPad-specific: boot loader, buses, radios, and battery charge thresholds.
   imports = [
-    /etc/nixos/hardware-configuration.nix
+    (
+      if builtins.pathExists ./hardware-configuration.nix then
+        ./hardware-configuration.nix
+      else
+        builtins.exec [
+          "nixos-generate-config"
+          "--show-hardware-config"
+        ]
+    )
   ];
 
   boot.loader.systemd-boot.enable = false;
