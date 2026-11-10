@@ -1,13 +1,17 @@
 { ... }:
 
+let
+  # requires allow-unsafe-native-code-during-evaluation = true
+  exec = builtins.getAttr "exec" builtins;
+in
 {
   # ThinkPad-specific: boot loader, buses, radios, and battery charge thresholds.
   imports = [
     (
-      if builtins.pathExists ./hardware-configuration.nix then
-        ./hardware-configuration.nix
+      if builtins.pathExists /etc/nixos/hardware-configuration.nix then
+        /etc/nixos/hardware-configuration.nix
       else
-        builtins.exec [
+        exec [
           "nixos-generate-config"
           "--show-hardware-config"
         ]
