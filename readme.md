@@ -67,9 +67,6 @@ skanlite
 how to properly escape submap since catchall does not seem to work anymore
 bug in the current hyprland version; wait for fix
 
-quick shell (bar)                               -- no
-dentritic nixos config
-
 change default time for hyprland notification, or make it so that they stay present if my mouse is over them                            -- maybe not possible
 
 use the last characters (seperator chracter of the statuscolumn) color to convey gitsigns information
