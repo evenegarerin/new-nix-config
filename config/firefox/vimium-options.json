@@ -1,6 +1,9 @@
 {
   "exclusionRules": [],
   "grabBackFocus": true,
+  "keyMappings": "# Insert your preferred key mappings here.\n\nunmap J\nmap J nextTab\n\nunmap K\nmap K previousTab\n\n# only properly work on the us keyboard layout\nmap ! firstTab count=1\nmap @ firstTab count=2\nmap # firstTab count=3\nmap $ firstTab count=4\nmap % firstTab count=5\nmap ^ firstTab count=6\nmap & firstTab count=7\nmap * firstTab count=8\nmap ( firstTab count=9\nmap ) firstTab count=10",
+  "newTabCustomUrl": "https://www.google.com/",
+  "newTabDestination": "customUrl",
   "searchEngines": "go: https://www.google.com/search?q=%s Google\nyt: https://www.youtube.com/results?search_query=%s Youtube\ngm: https://www.google.com/maps?q=%s Google maps\n\nnix: https://search.nixos.org/packages?query=%s\nhome: https://home-manager-options.extranix.com/?query=%s&release=release-25.11",
   "settingsVersion": "2.4.2"
 }
