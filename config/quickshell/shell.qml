@@ -5,30 +5,29 @@ import QtQuick
 ShellRoot {
   id: root
 
+  // the persistent property allows the barState to survive config reloads, without reapplying shown = false
+  PersistentProperties {
+    id: barState
+
+    reloadableId: "barState"
+
+    // start hidden on app start
+    property bool shown: false
+  }
+
   IpcHandler {
     id: ipc
 
     target: "bar"
 
-    // The bar starts hidden, like waybar's "start_hidden": true.
-    //
-    //   qs ipc call -- bar show    (the `--` is required: `qs ipc` has its own
-    //                              `show` subcommand that otherwise swallows it)
-    //   qs ipc call bar hide
-    //   qs ipc call bar toggle
-    //   qs ipc prop get bar shown  -> "true" / "false"
-    //
-    // waybar could only ever offer `toggle`, because SIGUSR1 carries no state.
-    property bool shown: false
-
     function show(): void {
-      ipc.shown = true;
+      barState.shown = true;
     }
     function hide(): void {
-      ipc.shown = false;
+      barState.shown = false;
     }
     function toggle(): void {
-      ipc.shown = !ipc.shown;
+      barState.shown = !barState.shown;
     }
   }
 
@@ -41,7 +40,7 @@ ShellRoot {
       required property var modelData
 
       screen: modelData
-      visible: ipc.shown
+      visible: barState.shown
 
       anchors {
         top: true
@@ -59,7 +58,11 @@ ShellRoot {
         y: bar.sectionY
         anchors.left: parent.left
 
-        Logo {}
+        BarText {
+          text: ">>"
+          color: Theme.logo
+        }
+
         Clock {}
         Disk {}
         Memory {}
@@ -84,7 +87,12 @@ ShellRoot {
         anchors.right: parent.right
 
         Tray {}
-        Herdr {}
+
+        BarText {
+          text: HerdrService.text
+          color: Theme.herdr[HerdrService.agentClass] !== undefined ? Theme.herdr[HerdrService.agentClass] : Theme.herdr["unknown"]
+        }
+
         BluetoothIndicator {}
         Volume {}
         NetworkIndicator {}
