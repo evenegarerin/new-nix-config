@@ -59,6 +59,8 @@ is a guide to install the this configuration, on a fresh system
 the recipes already carry the flake output and the --impure, so none of that has to be typed
 below are only the few i actually use all the time
 
+in case just is not installed it can be run like this `nix run nixpkgs#just -- [arguments]`.
+
 **just switch**
 builds the configuration and activates it right away, this is the normal rebuild
 run it after adding a program, after changing anything in ./configuration or ./home, and after an update
