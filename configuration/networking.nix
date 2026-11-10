@@ -9,5 +9,8 @@
     allowedTCPPorts = [
       53317 # localsend
     ];
+    allowedUDPPorts = [
+      53317 # localsend
+    ];
   };
 }

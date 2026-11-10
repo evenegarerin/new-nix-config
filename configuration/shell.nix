@@ -28,5 +28,5 @@
 
   environment.variables.EDITOR = "nvim";
   environment.variables.BROWSER = "firefox";
-  environment.variables.Term = "kitty";
+  environment.variables.TERMINAL = "kitty";
 }
