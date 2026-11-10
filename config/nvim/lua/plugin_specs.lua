@@ -150,7 +150,11 @@ local plugin_specs = {
   },
 
   -- ga -> what character is this
-  { "chrisbra/unicode.vim", cmd = { "UnicodeName", "UnicodeTable", "UnicodeSearch" }, keys = { "ga" } },
+  {
+    "chrisbra/unicode.vim",
+    cmd = { "UnicodeName", "UnicodeTable", "UnicodeSearch" },
+    keys = { "ga" },
+  },
 
   -- Highlights trailing space, and provides :StripTrailingWhitespace, which is
   -- what unblocks <leader><space> parked in mappings.lua since Stage 1.
@@ -389,10 +393,10 @@ local plugin_specs = {
     dependencies = { "nvim-treesitter/nvim-treesitter" },
     opts = {
       mode = "cursor",
-      max_lines = 1,
+      max_lines = 2,
       trim_scope = "outer",
       multiline_threshold = 1,
-      separator = "─",
+      separator = nil,
     },
   },
 
