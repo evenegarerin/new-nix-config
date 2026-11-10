@@ -1,4 +1,10 @@
 require("fzf-lua").setup {
+  keymap = {
+    fzf = {
+      ["alt-j"] = "down",
+      ["alt-k"] = "up",
+    },
+  },
   defaults = {
     file_icons = "mini",
   },
