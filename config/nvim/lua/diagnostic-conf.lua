@@ -44,6 +44,35 @@ vim.keymap.set("n", "<leader>db", function()
   set_qflist(0)
 end, { desc = "buffer diagnostics to qf" })
 
+vim.keymap.set("n", "yd", function()
+  local float_win = vim.b.lsp_floating_preview
+
+  if not float_win or not api.nvim_win_is_valid(float_win) then
+    return
+  end
+
+  if
+    not pcall(api.nvim_win_get_var, float_win, "line")
+    and not pcall(api.nvim_win_get_var, float_win, "cursor")
+  then
+    return
+  end
+
+  local items = diagnostic.get(0, { lnum = api.nvim_win_get_cursor(0)[1] - 1 })
+
+  if #items == 0 then
+    return
+  end
+
+  local messages = {}
+
+  for _, item in ipairs(items) do
+    table.insert(messages, item.message)
+  end
+
+  vim.fn.setreg(vim.v.register, table.concat(messages, "\n"))
+end, { desc = "yank diagnostic from popup" })
+
 api.nvim_create_autocmd("CursorHold", {
   pattern = "*",
   callback = function()
