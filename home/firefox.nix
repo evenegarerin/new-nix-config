@@ -9,6 +9,8 @@ in
   # The system side (fx-autoconfig, which makes chrome/ take effect, plus policies) is in configuration/firefox.nix.
   programs.firefox = {
     enable = true;
+    # The NixOS-built Firefox carries the fx-autoconfig mozilla.cfg; a home-manager-built one would shadow it on PATH without it.
+    package = null;
     profiles.default = {
       id = 0;
       isDefault = true;
