@@ -143,7 +143,6 @@
         ]
       ))
       zathura # PDF viewer, SyncTeX source for vimtex
-      hyprshot
       posting
       udiskie
       swaynotificationcenter
@@ -152,6 +151,7 @@
     ++ (with pkgs-unstable; [
       claude-code
       herdr
+      hyprshot
       quickshell
       superfile
     ]);
