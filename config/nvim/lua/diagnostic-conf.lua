@@ -58,19 +58,13 @@ local yank_diagnostic = function()
     return
   end
 
-  local items = diagnostic.get(0, { lnum = api.nvim_win_get_cursor(0)[1] - 1 })
+  local lines = api.nvim_buf_get_lines(api.nvim_win_get_buf(float_win), 0, -1, false)
 
-  if #items == 0 then
+  if #lines == 0 then
     return
   end
 
-  local messages = {}
-
-  for _, item in ipairs(items) do
-    table.insert(messages, item.message)
-  end
-
-  vim.fn.setreg(vim.v.register, table.concat(messages, "\n"))
+  vim.fn.setreg(vim.v.register, table.concat(lines, "\n"))
 end
 
 vim.keymap.set("n", "<leader>dy", yank_diagnostic, { desc = "yank diagnostic from popup" })
