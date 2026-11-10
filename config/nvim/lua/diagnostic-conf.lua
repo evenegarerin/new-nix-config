@@ -44,7 +44,7 @@ vim.keymap.set("n", "<leader>db", function()
   set_qflist(0)
 end, { desc = "buffer diagnostics to qf" })
 
-vim.keymap.set("n", "yd", function()
+local yank_diagnostic = function()
   local float_win = vim.b.lsp_floating_preview
 
   if not float_win or not api.nvim_win_is_valid(float_win) then
@@ -71,7 +71,9 @@ vim.keymap.set("n", "yd", function()
   end
 
   vim.fn.setreg(vim.v.register, table.concat(messages, "\n"))
-end, { desc = "yank diagnostic from popup" })
+end
+
+vim.keymap.set("n", "<leader>dy", yank_diagnostic, { desc = "yank diagnostic from popup" })
 
 api.nvim_create_autocmd("CursorHold", {
   pattern = "*",
