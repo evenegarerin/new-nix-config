@@ -62,7 +62,7 @@ open_current_directory_with_editor = ['ctrl+i', '']
 open_file_with_editor = ['ctrl+e', '']
 
 #-- Other Actions
-change_panel_mode = ['ctrl+p', '']
+change_panel_mode = ['v', '']
 copy_path = ['ctrl+p', '']
 copy_present_working_directory = ['ctrl+y', '']
 open_command_line = ['ctrl+:', '']
