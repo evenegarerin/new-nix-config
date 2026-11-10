@@ -10,16 +10,16 @@
     ./home/neovim.nix
   ];
 
-  # home.pointerCursor = {
-  #   enable = true;
+  home.pointerCursor = {
+    enable = true;
 
-  #   package = pkgs.borealis-cursors;
-  #   name = "Borealis-cursors";
-  #   size = 24;
+    package = pkgs.callPackage ./selfBuild/borealis-cursors-hyprcursor.nix { };
+    name = "Borealis-cursors";
+    size = 24;
 
-  #   hyprcursor.enable = true;
-  #   gtk.enable = true;
-  # };
+    hyprcursor.enable = true;
+    gtk.enable = true;
+  };
 
   xdg.userDirs = {
     enable = true;
