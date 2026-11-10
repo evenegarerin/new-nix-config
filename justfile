@@ -4,7 +4,7 @@ set positional-arguments
 
 # Flake output to build (override with `just host=laptop switch`)
 host := "default"
-rebuild := "sudo nixos-rebuild --flake .#" + host + " --impure --option allow-unsafe-native-code-during-evaluation true"
+rebuild := "sudo nixos-rebuild --flake .#" + host + " --impure"
 
 # List available recipes
 default:
@@ -30,11 +30,11 @@ test *args:
 
 # Build the configuration without activating it
 build *args:
-    nixos-rebuild build --flake .#{{ host }} --impure --option allow-unsafe-native-code-during-evaluation true "$@"
+    nixos-rebuild build --flake .#{{ host }} --impure "$@"
 
 # Show what would be built or fetched, without building
 dry *args:
-    nixos-rebuild dry-build --flake .#{{ host }} --impure --option allow-unsafe-native-code-during-evaluation true "$@"
+    nixos-rebuild dry-build --flake .#{{ host }} --impure "$@"
 
 # --- Update ---
 
@@ -51,7 +51,7 @@ upgrade: update switch
 
 # Check the flake evaluates and its checks pass
 check:
-    nix flake check --impure --option allow-unsafe-native-code-during-evaluation true
+    nix flake check --impure
 
 # --- Generations & cleanup ---
 
