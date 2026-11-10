@@ -72,8 +72,6 @@ dentritic nixos config
 
 change default time for hyprland notification, or make it so that they stay present if my mouse is over them                            -- maybe not possible
 
-claude sesssions close when i start herdr after reboot, for jan this does not happen                                -- migth be fixed
-
 use the last characters (seperator chracter of the statuscolumn) color to convey gitsigns information
 
 maybes:

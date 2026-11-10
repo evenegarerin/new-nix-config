@@ -1,4 +1,4 @@
-{ pkgs, inputs, ... }:
+{ pkgs, pkgs-unstable, inputs, ... }:
 
 {
   # Accounts and how they authenticate, plus the home-manager entry point.
@@ -28,7 +28,7 @@
     useUserPackages = true;
 
     extraSpecialArgs = {
-      inherit inputs;
+      inherit inputs pkgs-unstable;
     };
 
     backupFileExtension = "backup";
