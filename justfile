@@ -5,6 +5,7 @@ set positional-arguments
 # Flake output to build (override with `just host=laptop switch`)
 host := "default"
 rebuild := "sudo nixos-rebuild --flake .#" + host + " --impure"
+profile := "/nix/var/nix/profiles/system"
 
 # List available recipes
 default:
@@ -12,25 +13,36 @@ default:
 
 # --- Rebuild ---
 
-# Build and activate the configuration now (extra flags pass through)
+# Build and activate the configuration now, then show what changed
 switch *args:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    old=$(readlink -f /run/current-system)
     {{ rebuild }} switch "$@"
+    nvd diff "$old" /run/current-system
 
 # Build and activate, with full trace for debugging errors
 switch-debug *args:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    old=$(readlink -f /run/current-system)
     {{ rebuild }} switch --show-trace --verbose "$@"
+    nvd diff "$old" /run/current-system
 
 # Build and make it the boot default, but don't activate until reboot
 boot *args:
+    #!/usr/bin/env bash
+    set -euo pipefail
     {{ rebuild }} boot "$@"
+    nvd diff /run/current-system {{ profile }}
 
 # Activate temporarily without adding a boot entry (reverts on reboot)
 test *args:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    old=$(readlink -f /run/current-system)
     {{ rebuild }} test "$@"
-
-# Build the configuration without activating it
-build *args:
-    nixos-rebuild build --flake .#{{ host }} --impure "$@"
+    nvd diff "$old" /run/current-system
 
 # Show what would be built or fetched, without building
 dry *args:
@@ -57,12 +69,25 @@ check:
 
 # List system generations
 history:
-    sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
+    sudo nix-env --list-generations --profile {{ profile }}
+
+# Show package changes across the last N system generations (default 5)
+changes count="5":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    current=$(readlink {{ profile }} | tr -dc '0-9')
+    first=$(( current - $1 + 1 ))
+    if (( first < 1 )); then first=1; fi
+    nvd history -p {{ profile }} -m "$first"
 
 # Roll back to the previous generation
 [confirm("Roll back to the previous system generation?")]
 rollback:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    old=$(readlink -f /run/current-system)
     sudo nixos-rebuild switch --rollback
+    nvd diff "$old" /run/current-system
 
 # Delete generations older than N days and collect garbage (default 7)
 [confirm("Delete old generations and garbage-collect the Nix store?")]
