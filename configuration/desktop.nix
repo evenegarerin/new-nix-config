@@ -38,7 +38,10 @@
 
     config = {
       common = {
-        default = "gtk";
+        default = [
+          "hyprland"
+          "gtk"
+        ];
       };
     };
 

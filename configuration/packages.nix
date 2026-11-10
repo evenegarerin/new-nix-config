@@ -146,6 +146,7 @@
       hyprshot
       posting
       udiskie
+      swaynotificationcenter
     ])
     ++ (with pkgs-unstable; [
       claude-code
