@@ -79,6 +79,10 @@ activates the build without writing a grub entry, a reboot puts everything back
 good for trying something you are not sure about
 `just boot` is the other way around, it makes the build the boot default but leaves the running system alone
 
+### test it out
+
+the whole thing can maybe be tested out by running this `nix run github.com/something#default --impure --option allow-unsafe-native-code-during-evaluation true` or something
+
 ### nice to know
 super ? shows all hyprland keybinds
 

@@ -8,10 +8,13 @@ Nicht alle der Schritte sind immer erforderlich, z.B. deutsches keyboard layout 
 Für jedes Kapitel gibt es ein Beispiel wie es aus dem Terminal gemacht werden kann, manche sachen wie z.B. das setzen der Partitionen lässt sich auch mit Grafischen Anwendungen machen, nimm was immer du willst.
 
 
-> die konfiguration hat ein paar dinge fest verdrahtet, die vor oder nach der installation angepasst werden sollten:
-> - benutzer `castle` (`configuration.nix`)
-> - hostname `thinkpad` (`configuration.nix`)
-> - `nixConfig = "/home/castle/nix-config/config"` (`home.nix`) — wenn der benutzer umbenannt wird, muss das hier mit umbenannt werden
+> die konfiguration hat nur noch zwei dinge fest verdrahtet, die vor oder nach der installation angepasst werden sollten:
+> - benutzer `castle` (`configuration/users.nix`, und `configuration/desktop.nix` wo greetd die session für genau diesen benutzer startet)
+> - hostname `thinkpad` (`configuration/networking.nix`)
+>
+> der pfad zur config steht nirgends mehr absolut drin, home-manager setzt ihn aus dem home-verzeichnis des benutzers zusammen (`home/configLinks.nix`).
+> der benutzer kann also umbenannt werden ohne dass in ./home irgendwas angefasst werden muss.
+> was weiterhin zählt ist der verzeichnisname, das repository muss als `nix-config` direkt im home-verzeichnis liegen, also `~/nix-config`.
 
 ### 0. Vorbereitung
 
@@ -111,13 +114,14 @@ Fehlt die luks-zeile, dann ist das ein Problem, in dem Fall ein trusted adult um
 
 * Falls git nicht installiert ist, git so hohlen `nix-shell -p git`
 * Die config so clonen `git clone https://github.com/evenegarerin/new-nix-config`
-* Umbenennen `mv new-nix-config nix-config`
+* Umbenennen `mv new-nix-config nix-config`, der name ist nicht kosmetik, home-manager sucht die configs später unter `~/nix-config/config`
 
 * Falls die config schon vorhanden ist muss git vor dem installieren trotzem hinzugefügt werden.
 
 * In das Configurations Verzeichniss gehen `cd nix-config`.
 * Erste Installation `nixos-install --flake .#default --impure --root /mnt --no-root-password`
 * Die config in das Home Verzeichnis kopieren `cp -r ../nix-config /mnt/home/castle/nix-config`, change castle wenn der username anders ist.
+* Die kopie dem benutzer geben `chown -R 1000:100 /mnt/home/castle/nix-config`, sonst gehört sie root und die configs lassen sich später nicht ohne sudo bearbeiten.
 
 ### 9. Erster Start
 
@@ -137,4 +141,4 @@ beide konten haben noch das initiale passwort `password`, das sollte jetzt geän
 
 * Prüfe ob die sym links funktioniert haben `ls -l ~/.config/hypr`
 * Falls der link in leere zeigt, füre die folgenden beiden befehle aus `cd ~/nix-config`
-* `sudo nixos-rebuild switch --flake .#default --impure`
+* `just switch`, das ist ab jetzt der normale rebuild, die flags stecken schon im justfile (siehe readme.md)
