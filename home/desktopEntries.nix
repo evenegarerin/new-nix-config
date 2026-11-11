@@ -103,4 +103,20 @@ in
     terminal = false;
     mimeType = [ "inode/directory" ];
   };
+
+  xdg.desktopEntries.rmpc = {
+    categories = [
+      "Audio"
+      "Music"
+      "Player"
+      "ConsoleOnly"
+    ];
+    exec = "${terminal} --class rmpc -- rmpc";
+    genericName = "Music Player Interface";
+    name = "Rmpc";
+    icon = terminal;
+    settings.StartupWMClass = "rmpc";
+    terminal = false;
+  };
+
 }
