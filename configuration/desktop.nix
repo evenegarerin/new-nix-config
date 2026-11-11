@@ -1,4 +1,4 @@
-{ pkgs, pkgs-unstable, ... }:
+{ config, pkgs, pkgs-unstable, ... }:
 
 {
   # Wayland session stack: compositor, greeter, portals, and the desktop auth/service agents.
@@ -11,7 +11,7 @@
     settings = {
       default_session = {
         command = "uwsm start -e -D Hyprland -- hyprland.desktop -- --locked-cmd hyprlock";
-        user = "castle";
+        user = config.my.user;
       };
     };
   };

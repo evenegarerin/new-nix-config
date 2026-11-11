@@ -8,12 +8,15 @@ Nicht alle der Schritte sind immer erforderlich, z.B. deutsches keyboard layout 
 Für jedes Kapitel gibt es ein Beispiel wie es aus dem Terminal gemacht werden kann, manche sachen wie z.B. das setzen der Partitionen lässt sich auch mit Grafischen Anwendungen machen, nimm was immer du willst.
 
 
-> die konfiguration hat nur noch zwei dinge fest verdrahtet, die vor oder nach der installation angepasst werden sollten:
-> - benutzer `castle` (`configuration/users.nix`, und `configuration/desktop.nix` wo greetd die session für genau diesen benutzer startet)
-> - hostname `thinkpad` (`configuration/networking.nix`)
+> die konfiguration hat nur noch zwei dinge fest verdrahtet, die am besten vor der installation angepasst werden:
+> - benutzer `castle` — `my.user` in `configuration/users.nix`, siehe [benutzernamen ändern](#benutzernamen-ändern)
+> - hostname `thinkpad` — `networking.hostName` in `configuration/networking.nix`
+>
+> der benutzername steht an genau dieser einen stelle. das konto selbst, der home-manager-zweig,
+> der greetd-login (`configuration/desktop.nix`) und mpd (`configuration/audio.nix`) leiten ihn von dort ab.
 >
 > der pfad zur config steht nirgends mehr absolut drin, home-manager setzt ihn aus dem home-verzeichnis des benutzers zusammen (`home/configLinks.nix`).
-> der benutzer kann also umbenannt werden ohne dass in ./home irgendwas angefasst werden muss.
+> in `./home` muss beim umbenennen also nichts angefasst werden.
 > was weiterhin zählt ist der verzeichnisname, das repository muss als `nix-config` direkt im home-verzeichnis liegen, also `~/nix-config`.
 
 ### 0. Vorbereitung
@@ -120,14 +123,29 @@ Fehlt die luks-zeile, dann ist das ein Problem, in dem Fall ein trusted adult um
 
 * In das Configurations Verzeichniss gehen `cd nix-config`.
 * Erste Installation `nixos-install --flake .#default --impure --root /mnt --no-root-password`
-* Die config in das Home Verzeichnis kopieren `cp -r ../nix-config /mnt/home/castle/nix-config`, change castle wenn der username anders ist.
-* Die kopie dem benutzer geben `chown -R 1000:100 /mnt/home/castle/nix-config`, sonst gehört sie root und die configs lassen sich später nicht ohne sudo bearbeiten.
+* Die config in das Home Verzeichnis kopieren `cp -r ../nix-config /mnt/home/castle/nix-config`, `castle` durch den wert aus `my.user` ersetzen falls er geändert wurde.
+* Die kopie dem benutzer geben `chown -R 1000:100 /mnt/home/castle/nix-config`, sonst gehört sie root und die configs lassen sich später nicht ohne sudo bearbeiten. uid 1000 ist in `configuration/users.nix` fest vergeben, die gilt also auch bei anderem benutzernamen.
 
 ### 9. Erster Start
 
 * `reboot`
 * wenn hyprland nicht started dann kann mit alt ctrl F2 in eine andere tty gewächselt werden.
 * von hier kann die diagnose selbst versucht werden, sonnst ein trusted adult um hilfe bitten.
+
+### benutzernamen ändern
+
+der benutzername steht an genau einer stelle, `my.user` in `configuration/users.nix`.
+alles andere leitet sich davon ab: das konto, der home-manager-zweig, der greetd-login
+und mpd samt musikverzeichnis.
+
+**vor der installation**, der einfache fall: den wert ändern, mehr nicht.
+in schritt 8 dann den neuen namen in den pfaden unter `/mnt/home/` benutzen.
+
+**nach der installation**: nixos benennt ein bestehendes konto nicht um, es legt ein zweites an.
+`users.mutableUsers` steht auf `true`, das alte konto bleibt also bestehen und belegt uid 1000
+weiter — genau die uid, die das neue konto haben will. ein nachträglicher wechsel heisst deshalb:
+altes konto und sein home-verzeichnis von hand entfernen, oder dem neuen konto eine andere uid geben.
+im zweifel ist eine neuinstallation der kürzere weg.
 
 ### nach der installation
 

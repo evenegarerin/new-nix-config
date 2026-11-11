@@ -1,50 +1,66 @@
 {
+  config,
+  lib,
   pkgs,
   pkgs-unstable,
   inputs,
   ...
 }:
 
+let
+  user = config.my.user;
+in
+
 {
-  # Accounts and how they authenticate, plus the home-manager entry point.
-  users.users.castle = {
-    initialPassword = "password"; # remember to change using "passwd"
-    isNormalUser = true;
-    description = "castle";
-    shell = pkgs.zsh;
-    extraGroups = [
-      "networkmanager"
-      "wheel"
-      "i2c"
-      "docker"
-      "libvirtd"
-      "keyd"
-    ];
+  options.my.user = lib.mkOption {
+    type = lib.types.str;
+    description = "Primary user of this machine.";
   };
 
-  users.users.root.initialPassword = "password"; # change this!!!
+  config = {
+    my.user = "castle";
 
-  security.sudo.extraConfig = ''
-    Defaults rootpw, pwfeedback
-  '';
-
-  home-manager = {
-    useGlobalPkgs = true;
-    useUserPackages = true;
-
-    extraSpecialArgs = {
-      inherit inputs pkgs-unstable;
+    # Accounts and how they authenticate, plus the home-manager entry point.
+    users.users.${user} = {
+      uid = 1000;
+      initialPassword = "password"; # remember to change using "passwd"
+      isNormalUser = true;
+      description = user;
+      shell = pkgs.zsh;
+      extraGroups = [
+        "networkmanager"
+        "wheel"
+        "i2c"
+        "docker"
+        "libvirtd"
+        "keyd"
+      ];
     };
 
-    backupFileExtension = "backup";
-    overwriteBackup = true;
+    users.users.root.initialPassword = "password"; # change this!!!
 
-    users.castle =
-      { pkgs, inputs, ... }:
-      {
-        home.stateVersion = "26.05";
+    security.sudo.extraConfig = ''
+      Defaults rootpw, pwfeedback
+    '';
 
-        imports = [ ../home.nix ];
+    home-manager = {
+      useGlobalPkgs = true;
+      useUserPackages = true;
+
+      extraSpecialArgs = {
+        inherit inputs pkgs-unstable;
       };
+
+      backupFileExtension = "backup";
+      overwriteBackup = true;
+
+      users.${user} =
+        { pkgs, inputs, ... }:
+        {
+          home.stateVersion = "26.05";
+
+          imports = [ ../home.nix ];
+        };
+    };
   };
 }
