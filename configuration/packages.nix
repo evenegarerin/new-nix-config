@@ -147,6 +147,7 @@
       udiskie
       swaynotificationcenter
       nvd
+      rmpc
     ])
     ++ (with pkgs-unstable; [
       claude-code
@@ -154,5 +155,6 @@
       hyprshot
       quickshell
       superfile
+      hyprmod
     ]);
 }
