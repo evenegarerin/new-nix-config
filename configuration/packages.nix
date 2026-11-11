@@ -8,7 +8,6 @@
       waybar
       gnote
       glib
-      andromeda-gtk-theme
       lowfi
       spotify
       wev
@@ -94,7 +93,6 @@
       psmisc
       openbao
       # steam
-      papirus-icon-theme
       kdePackages.filelight
       pinta
       blender

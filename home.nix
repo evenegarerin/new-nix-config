@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, osConfig, ... }:
 
 {
   imports = [
@@ -9,6 +9,21 @@
     ./home/firefox.nix
     ./home/neovim.nix
   ];
+
+  gtk = {
+    enable = true;
+
+    theme = {
+      inherit (osConfig.my.theme.gtk) name package;
+    };
+
+    iconTheme = {
+      inherit (osConfig.my.theme.icons) name package;
+    };
+
+    gtk3.extraConfig.gtk-application-prefer-dark-theme = 1;
+    gtk4.extraConfig.gtk-application-prefer-dark-theme = 1;
+  };
 
   home.pointerCursor = {
     enable = true;

@@ -1,15 +1,19 @@
 { pkgs, ... }:
 
+let
+  terminal = "kitty";
+in
+
 {
   xdg.desktopEntries.herdr = {
     categories = [
       "Development"
       "ConsoleOnly"
     ];
-    exec = "kitty --class herdr -- herdr";
+    exec = "${terminal} --class herdr -- herdr";
     genericName = "Multiplexer";
     name = "Herdr";
-    icon = "kitty";
+    icon = terminal;
     settings.StartupWMClass = "herdr";
     terminal = false;
   };
@@ -34,7 +38,7 @@
         "TextEditor"
         "ConsoleOnly"
       ];
-      exec = "kitty --class nvim -- ${nvim-zi} %F";
+      exec = "${terminal} --class nvim -- ${nvim-zi} %F";
       genericName = "Text Editor";
       name = "Neovim";
       icon = "nvim";
@@ -48,10 +52,10 @@
       "FileManager"
       "ConsoleOnly"
     ];
-    exec = "kitty --class yazi -- yazi";
+    exec = "${terminal} --class yazi -- yazi";
     genericName = "File Manager";
     name = "Yazi";
-    icon = "kitty";
+    icon = terminal;
     settings.StartupWMClass = "yazi";
     terminal = false;
   };
@@ -63,10 +67,10 @@
       "Monitor"
       "ConsoleOnly"
     ];
-    exec = "kitty --class vtop -- vtop";
+    exec = "${terminal} --class vtop -- vtop";
     genericName = "System Monitor";
     name = "Vtop";
-    icon = "kitty";
+    icon = terminal;
     settings.StartupWMClass = "vtop";
     terminal = false;
   };
@@ -76,10 +80,10 @@
       "Network"
       "ConsoleOnly"
     ];
-    exec = "kitty --class vimnm -- vimnm";
+    exec = "${terminal} --class vimnm -- vimnm";
     genericName = "Wlan Manager";
     name = "Vimnm";
-    icon = "kitty";
+    icon = terminal;
     settings.StartupWMClass = "vimnm";
     terminal = false;
   };
@@ -91,7 +95,7 @@
       "FileManager"
       "ConsoleOnly"
     ];
-    exec = "kitty --class superfile -- superfile %F";
+    exec = "${terminal} --class superfile -- superfile %F";
     genericName = "File Manager";
     name = "superfile";
     icon = "system-file-manager";
