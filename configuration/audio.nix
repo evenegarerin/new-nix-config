@@ -13,13 +13,17 @@
   services.mpd = {
     enable = true;
     user = "castle";
-    musicDirectory = "/home/castle/Music";
-    extraConfig = ''
-      audio_output {
-        type "pipewire"
-        name "PipeWire"
-      }
-    '';
+    settings = {
+      audio_output = [
+        {
+          type = "pipewire";
+          name = "PipeWire";
+        }
+      ];
+      music_directory = "/home/castle/Music";
+    };
+
+    startWhenNeeded = true;
   };
   # MPD runs as a system service; this lets it reach the user's PipeWire session
   systemd.services.mpd.environment.XDG_RUNTIME_DIR = "/run/user/1000";
