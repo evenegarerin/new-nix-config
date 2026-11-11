@@ -71,6 +71,11 @@ updates flake.lock, which is what actually moves programs to newer versions
 it only changes flake.lock, to get the new programs a `just switch` has to follow
 `just upgrade` does both in one go, `just update-input nixpkgs` moves a single input instead of all of them
 
+**just upgrade-preview**
+shows what a `just upgrade` would change before you do it, without building anything
+first the flake inputs that would move, then how much would be downloaded or built, then the package versions that change
+it only evaluates, flake.lock stays untouched, `just upgrade-preview all` shows the unfiltered diff including sources and patches
+
 **just rollback**
 goes back to the previous generation without a reboot, the quickest way out of a broken rebuild
 it asks before it does it, `just history` lists the generations if you want to look first
@@ -105,3 +110,5 @@ how to properly escape submap since catchall does not seem to work anymore
 bug in the current hyprland version; wait for fix
 
 use the last characters (seperator chracter of the statuscolumn) color to convey gitsigns information
+
+rmpc config

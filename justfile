@@ -61,6 +61,48 @@ update-input input:
 # Update all inputs, then switch to the result
 upgrade: update switch
 
+# Show what `just upgrade` would change, without building (pass "all" for the unfiltered diff)
+upgrade-preview mode="brief":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    tmp=$(mktemp -d)
+    trap 'rm -rf "$tmp"' EXIT
+    toplevel='.#nixosConfigurations.{{ host }}.config.system.build.toplevel'
+    nix flake update --output-lock-file "$tmp/flake.lock"
+    locked() { jq -r '.nodes | to_entries[] | select(.value.locked) | "\(.key) \(.value.locked.rev // .value.locked.narHash) \(.value.locked.lastModified // 0)"' "$1"; }
+    locked flake.lock > "$tmp/old"
+    locked "$tmp/flake.lock" > "$tmp/new"
+    changed=0
+    while read -r name rev stamp; do
+        oldline=$(grep -E "^$name " "$tmp/old" || true)
+        [[ -z "$oldline" ]] && continue
+        read -r _ oldrev oldstamp <<< "$oldline"
+        [[ "$oldrev" == "$rev" ]] && continue
+        changed=1
+        printf '%-20s %s (%s) -> %s (%s)\n' "$name" "${oldrev:0:9}" "$(date -d "@$oldstamp" +%F)" "${rev:0:9}" "$(date -d "@$stamp" +%F)"
+    done < "$tmp/new"
+    if (( ! changed )); then
+        echo "all flake inputs are already up to date"
+        exit 0
+    fi
+    echo
+    old=$(nix path-info --derivation --impure "$toplevel")
+    new=$(nix path-info --derivation --impure --reference-lock-file "$tmp/flake.lock" "$toplevel")
+    if [[ "$old" == "$new" ]]; then
+        echo "inputs moved, but the system would be identical"
+        exit 0
+    fi
+    nix build --dry-run "$new^out" 2>&1 | grep -E 'will be (built|fetched)' || true
+    echo
+    if [[ "{{ mode }}" == "all" ]]; then
+        nix store diff-closures "$old" "$new"
+    else
+        nix store diff-closures "$old" "$new" \
+            | sed 's/\.drv//g' \
+            | grep -vE '\.(tar\.[a-z0-9]+|tgz|zip|patch|diff)\b' \
+            | grep -vE '^[^ :]*(-src|-source|-vendor|-vendor-staging|-bootstrap): '
+    fi
+
 # Check the flake evaluates and its checks pass
 check:
     nix flake check --impure
