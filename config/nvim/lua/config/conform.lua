@@ -48,6 +48,7 @@ local exempt_filenames = {
 local max_filesize = 1024 * 1024 -- unit in bytes, so 1MB
 
 local stylua_base = require("conform.formatters.stylua")
+local latexindent_base = require("conform.formatters.latexindent")
 
 -- Relative to $XDG_CONFIG_HOME; stylua accepts the file both in a stylua/
 -- subdirectory and directly.
@@ -77,6 +78,21 @@ local function stylua_has_config(ctx)
   end
 
   return false
+end
+
+--- @param ctx conform.Context
+--- @param args string[] the stock conform args for this invocation
+--- @return string[]
+local function latexindent_args(ctx, args)
+  local width = vim.bo[ctx.buf].shiftwidth
+
+  if width == 0 then
+    width = vim.bo[ctx.buf].tabstop
+  end
+
+  local indent = vim.bo[ctx.buf].expandtab and ("'" .. string.rep(" ", width) .. "'") or '"\\t"'
+
+  return vim.list_extend({ "-g", "/dev/null", "-y", "defaultIndent: " .. indent }, args)
 end
 
 --- @param ctx conform.Context
@@ -196,6 +212,7 @@ require("conform").setup {
     bash = { "shfmt" },
     toml = { "taplo" },
     qml = { "qmlformat" },
+    tex = { "latexindent" },
 
     -- Catch-all: any filetype not listed above gets prettier, subject to the
     -- condition on the formatter below.
@@ -215,6 +232,16 @@ require("conform").setup {
 
       range_args = function(self, ctx)
         return stylua_args(ctx, stylua_base.range_args(self, ctx))
+      end,
+    },
+
+    latexindent = {
+      args = function(_, ctx)
+        return latexindent_args(ctx, vim.deepcopy(latexindent_base.args))
+      end,
+
+      range_args = function(self, ctx)
+        return latexindent_args(ctx, latexindent_base.range_args(self, ctx))
       end,
     },
 
