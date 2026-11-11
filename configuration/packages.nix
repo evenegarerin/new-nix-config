@@ -138,6 +138,7 @@
           listingsutf8
           xurl # optional in pandoc's xelatex template
           selnolig # optional in pandoc's xelatex template
+          latexindent
         ]
       ))
       zathura # PDF viewer, SyncTeX source for vimtex
