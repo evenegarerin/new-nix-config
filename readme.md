@@ -75,6 +75,7 @@ it only changes flake.lock, to get the new programs a `just switch` has to follo
 shows what a `just upgrade` would change before you do it, without building anything
 first the flake inputs that would move, then how much would be downloaded or built, then the package versions that change
 it only evaluates, flake.lock stays untouched, `just upgrade-preview all` shows the unfiltered diff including sources and patches
+packages marked insecure upstream are allowed inside the preview so the diff still appears, they are listed by name and a real `just upgrade` still refuses them
 
 **just rollback**
 goes back to the previous generation without a reboot, the quickest way out of a broken rebuild

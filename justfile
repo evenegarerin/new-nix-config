@@ -66,28 +66,58 @@ upgrade-preview mode="brief":
     #!/usr/bin/env bash
     set -euo pipefail
     tmp=$(mktemp -d)
-    trap 'rm -rf "$tmp"' EXIT
+    trap 'pkill -P $$ >/dev/null 2>&1 || true; rm -rf "$tmp"' EXIT
     toplevel='.#nixosConfigurations.{{ host }}.config.system.build.toplevel'
+    instantiate() {
+        local out=$1 insecure=$2
+        shift 2
+        if [[ "$insecure" == allow ]]; then
+            export NIXPKGS_ALLOW_INSECURE=1
+        fi
+        nix path-info --derivation --impure "$@" "$toplevel" > "$out" 2> "$out.err"
+    }
     nix flake update --output-lock-file "$tmp/flake.lock"
     locked() { jq -r '.nodes | to_entries[] | select(.value.locked) | "\(.key) \(.value.locked.rev // .value.locked.narHash) \(.value.locked.lastModified // 0)"' "$1"; }
-    locked flake.lock > "$tmp/old"
-    locked "$tmp/flake.lock" > "$tmp/new"
+    locked flake.lock > "$tmp/oldinputs"
+    locked "$tmp/flake.lock" > "$tmp/newinputs"
     changed=0
     while read -r name rev stamp; do
-        oldline=$(grep -E "^$name " "$tmp/old" || true)
+        oldline=$(grep -E "^$name " "$tmp/oldinputs" || true)
         [[ -z "$oldline" ]] && continue
         read -r _ oldrev oldstamp <<< "$oldline"
         [[ "$oldrev" == "$rev" ]] && continue
         changed=1
         printf '%-20s %s (%s) -> %s (%s)\n' "$name" "${oldrev:0:9}" "$(date -d "@$oldstamp" +%F)" "${rev:0:9}" "$(date -d "@$stamp" +%F)"
-    done < "$tmp/new"
+    done < "$tmp/newinputs"
     if (( ! changed )); then
         echo "all flake inputs are already up to date"
         exit 0
     fi
+    echo "evaluating both systems ..."
+    instantiate "$tmp/old" allow &
+    oldpid=$!
+    instantiate "$tmp/new" allow --reference-lock-file "$tmp/flake.lock" &
+    newpid=$!
+    instantiate "$tmp/probe" strict --reference-lock-file "$tmp/flake.lock" &
+    probepid=$!
+    for job in old:$oldpid new:$newpid; do
+        if ! wait "${job#*:}"; then
+            cat "$tmp/${job%%:*}.err" >&2
+            exit 1
+        fi
+    done
+    old=$(< "$tmp/old")
+    new=$(< "$tmp/new")
     echo
-    old=$(nix path-info --derivation --impure "$toplevel")
-    new=$(nix path-info --derivation --impure --reference-lock-file "$tmp/flake.lock" "$toplevel")
+    if ! wait "$probepid"; then
+        bad=$(sed -n 's/.*Refusing to evaluate package \(.*\) in \/nix\/store.*/\1/p' "$tmp/probe.err" | tr -d "'\`" | sed "s/[‘’]//g" | sort -u)
+        if [[ -n "$bad" ]]; then
+            echo "marked insecure, allowed for this preview only:"
+            sed 's/^/  /' <<< "$bad"
+            echo "a real just upgrade stops here until nixpkgs.config.permittedInsecurePackages allows them"
+            echo
+        fi
+    fi
     if [[ "$old" == "$new" ]]; then
         echo "inputs moved, but the system would be identical"
         exit 0
