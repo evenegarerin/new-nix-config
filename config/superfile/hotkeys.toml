@@ -54,8 +54,8 @@ paste_items = ['p', 'ctrl+w', '']
 permanently_delete_items = ['d', '']
 
 #-- Archive Manipulation
-compress_file = ['c', '']
-extract_file = ['e', '']
+compress_file = ['shift+c', '']
+extract_file = ['shift+e', '']
 
 #-- Editor Actions
 open_current_directory_with_editor = ['ctrl+i', '']
