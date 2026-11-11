@@ -20,6 +20,14 @@ keymap.set("i", "<c-t>", "<Esc>b~lea")
 keymap.set("n", "<leader>p", "m`o<ESC>p``", { desc = "paste below current line" })
 keymap.set("n", "<leader>P", "m`O<ESC>p``", { desc = "paste above current line" })
 
+keymap.set("n", "<CR>", function()
+  if vim.bo.buftype ~= "" then
+    return "<CR>"
+  end
+
+  return '@="m`o<C-V><Esc>``"<CR>'
+end, { expr = true, desc = "insert blank line below" })
+
 -- Save file if there were no changes format manually as there wont be a format on save without changes
 keymap.set("n", "<leader>w", function()
   local ok, conform_conf = pcall(require, "config.conform")
