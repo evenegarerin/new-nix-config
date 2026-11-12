@@ -76,7 +76,7 @@
       # wofi
       # ulauncher
       walker
-      qutebrowser
+      # qutebrowser
       hyprlock
       hypridle
       vscodium
