@@ -1,37 +1,37 @@
 #tabs-newtab-button,
 #vertical-tabs-newtab-button {
-    display: none !important;
+  display: none !important;
 }
 
 .buttons-wrapper:has(.tools-and-extensions) {
-    visibility: hidden !important;
-    height: 0 !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
 }
 
 #sidebar-main,
 #sidebar-main[sidebar-launcher-expanded] {
-    width: fit-content !important;
-    min-width: 0 !important;
-    max-width: 56px !important;
-    overflow: hidden !important;
+  width: fit-content !important;
+  min-width: 0 !important;
+  max-width: 56px !important;
+  overflow: hidden !important;
 }
 
 .tab-close-button {
-    display: none !important;
+  display: none !important;
 }
 
 #tabbrowser-tabs[orient="vertical"][expanded] .tab-label-container {
-    display: none !important;
+  display: none !important;
 }
 
 #tabbrowser-tabs[orient="vertical"][expanded] .tab-content {
-    justify-content: center !important;
+  justify-content: center !important;
 }
 
 #sidebar-launcher-splitter {
-    display: none !important;
+  display: none !important;
 }
 
 #sidebar-button {
@@ -67,5 +67,111 @@
 }
 
 #nav-bar-customization-target {
-    padding-inline-start: 220px !important; /* padding to offset removed icons on the left, magic number, might brake */
+  padding-inline-start: 220px !important; /* padding to offset removed icons on the left, magic number, might brake */
+}
+
+#tabbrowser-tabs[orient="vertical"],
+#tabbrowser-tabs[orient="vertical"] #tabbrowser-arrowscrollbox {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+#tabbrowser-tabs[orient="vertical"] tab-group {
+  display: flex !important;
+  flex-direction: column !important;
+  margin: 4px 4px !important;
+  padding: 3px 0 !important;
+  border: 2px solid var(--tab-group-color) !important;
+  border-radius: 14px !important;
+  background-color: color-mix(in srgb, var(--tab-group-color) 10%, transparent) !important;
+}
+
+#tabbrowser-tabs[orient="vertical"] tab-group > .tabbrowser-tab {
+  margin-inline: 0 !important;
+  padding-inline: 0 !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+#tabbrowser-tabs[orient="vertical"] tab-group > .tabbrowser-tab .tab-stack,
+#tabbrowser-tabs[orient="vertical"] tab-group > .tabbrowser-tab .tab-content {
+  width: 100% !important;
+  min-width: 0 !important;
+  padding-inline: 0 !important;
+  margin-inline: 0 !important;
+  justify-content: center !important;
+}
+#tabbrowser-tabs[orient="vertical"] tab-group > .tabbrowser-tab .tab-background {
+  margin-inline: 3px !important;
+}
+
+#tabbrowser-tabs[orient="vertical"] tab-group .tab-group-line {
+  display: none !important;
+}
+
+#tabbrowser-tabs[orient="vertical"] tab-group:not([collapsed]) > .tab-group-label-container {
+  display: none !important;
+}
+
+#tabbrowser-tabs[orient="vertical"] tab-group[collapsed] {
+  border-color: transparent !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+}
+#tabbrowser-tabs[orient="vertical"] tab-group[collapsed] > .tab-group-label-container {
+  width: 100% !important;
+  margin-inline: 0 !important;
+  padding-inline: 0 !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+#tabbrowser-tabs[orient="vertical"] tab-group {
+  counter-reset: grouptabs;
+}
+#tabbrowser-tabs[orient="vertical"] tab-group > .tabbrowser-tab {
+  counter-increment: grouptabs;
+}
+#tabbrowser-tabs[orient="vertical"] tab-group:not([collapsed]):not(:has(> .tabbrowser-tab[selected])) > .tabbrowser-tab:not(:first-of-type) {
+  order: 2;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin-block: 0 !important;
+  padding-block: 0 !important;
+  overflow: hidden !important;
+}
+#tabbrowser-tabs[orient="vertical"] tab-group:not([collapsed]):not(:has(> .tabbrowser-tab[selected])):has(> .tabbrowser-tab:nth-of-type(2))::after {
+  order: 1;
+  content: counter(grouptabs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  min-width: 20px;
+  height: 20px;
+  margin-block: 6px 7px;
+  padding-inline: 4px;
+  border-radius: 10px;
+  background-color: var(--tab-group-background-color);
+  color: var(--tab-group-text-color);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+#tabbrowser-tabs[orient="vertical"] #tabbrowser-arrowscrollbox::part(items-wrapper) {
+  flex-shrink: 1 !important;
+  min-height: 0 !important;
+}
+#tabbrowser-tabs[orient="vertical"] #tabbrowser-arrowscrollbox > * {
+  flex-shrink: 0 !important;
+}
+#tabbrowser-tabs[orient="vertical"] #tabbrowser-arrowscrollbox > tab-group:not([collapsed]):has(> .tabbrowser-tab[selected]) {
+  flex: 0 1 auto !important;
+  min-height: 120px !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  scrollbar-width: none;
 }
