@@ -17,6 +17,10 @@
 
   const { KeyHandler, BROWSER_COMMANDS, session, eventTarget, windowOf, consume, isEditable, deepActiveElement } =
     ChromeUtils.importESModule("chrome://userscripts/content/vimkeys/core.sys.mjs");
+  const { Omnibar } =
+    ChromeUtils.importESModule("chrome://userscripts/content/vimkeys/omnibar.sys.mjs");
+
+  const omnibar = new Omnibar(window);
 
   // ---- Browser commands ----------------------------------------------------
   // `browser` is the tab's <browser> the key came from.
@@ -31,6 +35,11 @@
     goForward: (browser) => browser.canGoForward && browser.goForward(),
     nextTab: () => gBrowser.tabContainer.advanceSelectedTab(1, true),
     previousTab: () => gBrowser.tabContainer.advanceSelectedTab(-1, true),
+    openOmnibar: () => omnibar.open(),
+    openOmnibarNewTab: () => omnibar.open({ newTab: true }),
+    openOmnibarBookmarks: () => omnibar.open({ sources: "bookmarks" }),
+    openOmnibarBookmarksNewTab: () => omnibar.open({ sources: "bookmarks", newTab: true }),
+    openOmnibarTabs: () => omnibar.open({ sources: "tabs" }),
   };
 
   function runBrowserCommand(name, browser = gBrowser.selectedBrowser) {
@@ -158,7 +167,11 @@
     window.addEventListener("keydown", onKeyDown, true);
     // Clicking anywhere in the window or switching tabs ends dialog hints.
     window.addEventListener("mousedown", () => dialogHints.exitHints(), true);
-    gBrowser.tabContainer.addEventListener("TabSelect", () => dialogHints.exitHints());
+    gBrowser.tabContainer.addEventListener("TabSelect", () => {
+      dialogHints.exitHints();
+      omnibar.close();
+    });
+    window.addEventListener("unload", () => omnibar.destroy(), { once: true });
   }
 
   registerPageActor();

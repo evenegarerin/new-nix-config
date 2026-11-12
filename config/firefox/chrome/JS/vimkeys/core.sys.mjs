@@ -24,6 +24,11 @@ export const BINDINGS = {
   k: "scrollUp",
   gg: "scrollToTop",
   G: "scrollToBottom",
+  o: "openOmnibar",
+  O: "openOmnibarNewTab",
+  b: "openOmnibarBookmarks",
+  B: "openOmnibarBookmarksNewTab",
+  T: "openOmnibarTabs",
   t: "newTab",
   x: "closeTab",
   X: "restoreTab",
@@ -31,11 +36,54 @@ export const BINDINGS = {
   L: "goForward",
   J: "nextTab",     // right (Vimium default: K)
   K: "previousTab", // left  (Vimium default: J)
+  "?": "showHelp",
 };
+
+const HELP = [
+  ["Navigating the page", [
+    ["linkHints", "Open a link in the current tab"],
+    ["scrollDown", "Scroll down"],
+    ["scrollUp", "Scroll up"],
+    ["scrollToTop", "Scroll to the top of the page"],
+    ["scrollToBottom", "Scroll to the bottom of the page"],
+  ]],
+  ["Using find", [
+    ["find", "Enter find mode"],
+    ["findNext", "Cycle forward to the next find match"],
+    ["findPrevious", "Cycle backward to the previous find match"],
+  ]],
+  ["Navigating history", [
+    ["goBack", "Go back in history"],
+    ["goForward", "Go forward in history"],
+  ]],
+  ["Opening pages", [
+    ["openOmnibar", "Open a URL, bookmark or history entry"],
+    ["openOmnibarNewTab", "Open a URL, bookmark or history entry in a new tab"],
+    ["openOmnibarBookmarks", "Open a bookmark"],
+    ["openOmnibarBookmarksNewTab", "Open a bookmark in a new tab"],
+  ]],
+  ["Manipulating tabs", [
+    ["newTab", "Create a new tab"],
+    ["closeTab", "Close the current tab"],
+    ["restoreTab", "Restore a closed tab"],
+    ["nextTab", "Go one tab right"],
+    ["previousTab", "Go one tab left"],
+    ["openOmnibarTabs", "Search through your open tabs"],
+  ]],
+  ["Miscellaneous", [
+    ["showHelp", "Show this help"],
+  ]],
+];
+
+function keysFor(command) {
+  return Object.keys(BINDINGS).filter((keys) => BINDINGS[keys] === command);
+}
 
 export const BROWSER_COMMANDS = new Set([
   "find", "findNext", "findPrevious", "newTab", "closeTab", "restoreTab",
   "goBack", "goForward", "nextTab", "previousTab",
+  "openOmnibar", "openOmnibarNewTab", "openOmnibarBookmarks",
+  "openOmnibarBookmarksNewTab", "openOmnibarTabs",
 ]);
 
 // Commands that fire again on key auto-repeat. With smooth scrolling, a held
@@ -127,6 +175,7 @@ function composedParent(el) {
 export class KeyHandler {
   #pending = ""; // typed part of a multi-key binding, e.g. "g"
   #hints = null;
+  #help = null;
   #scroller = new Scroller();
 
   constructor({ hintDocument, runBrowserCommand }) {
@@ -147,7 +196,19 @@ export class KeyHandler {
     return true;
   }
 
+  handleHelpKey(event) {
+    const help = this.#help;
+    if (!help) return false;
+    if (!help.alive) {
+      help.exit();
+      return false;
+    }
+    help.onKey(event);
+    return true;
+  }
+
   onKeyDown(event, ctx) {
+    if (this.handleHelpKey(event)) return;
     if (this.handleHintKey(event)) return;
     if (event.ctrlKey || event.altKey || event.metaKey || event.isComposing) return;
 
@@ -202,6 +263,7 @@ export class KeyHandler {
     this.#scroller.stop();
     this.#pending = "";
     this.exitHints();
+    this.exitHelp();
   }
 
   exitHints() {
@@ -215,11 +277,28 @@ export class KeyHandler {
     });
   }
 
+  exitHelp() {
+    this.#help?.exit();
+  }
+
+  startHelp(doc) {
+    this.exitHelp();
+    this.exitHints();
+    this.#help = startHelp(doc, () => {
+      this.#help = null;
+    });
+  }
+
   #run(name, ctx) {
     switch (name) {
       case "linkHints": {
         const doc = this.hintDocument(ctx);
         if (doc) this.startHints(doc);
+        return undefined;
+      }
+      case "showHelp": {
+        const doc = this.hintDocument(ctx);
+        if (doc) this.startHelp(doc);
         return undefined;
       }
       case "scrollDown":
@@ -593,6 +672,103 @@ function startHints(doc, onExit) {
         return;
       }
       update();
+    },
+  };
+}
+
+const HELP_BACKDROP_CSS =
+  "position:absolute; inset:0; display:flex; align-items:center; justify-content:center;" +
+  "background:rgba(0,0,0,.45);";
+const HELP_PANEL_CSS =
+  "box-sizing:border-box; max-width:min(640px, 92vw); max-height:84vh; overflow:auto;" +
+  "margin:0; padding:18px 22px; border:1px solid #c38a22; border-radius:8px;" +
+  "background:linear-gradient(to bottom, #fffdf3, #fff6d9); color:#302505;" +
+  "font:13px/1.5 Helvetica, Arial, sans-serif; box-shadow:0 8px 28px rgba(0,0,0,.45);";
+const HELP_TITLE_CSS = "margin:0 0 4px; font-weight:bold; font-size:15px;";
+const HELP_GRID_CSS =
+  "display:grid; grid-template-columns:max-content 1fr; gap:3px 14px; align-items:baseline;";
+const HELP_GROUP_CSS =
+  "grid-column:1 / -1; margin:12px 0 2px; font-weight:bold; font-size:11px;" +
+  "text-transform:uppercase; letter-spacing:.08em; color:#8a6a1f;";
+const HELP_KEY_CSS =
+  "justify-self:end; font-family:ui-monospace, Menlo, Consolas, monospace;" +
+  "font-weight:bold; white-space:nowrap; color:#7a4f00;";
+const HELP_DESC_CSS = "color:#302505;";
+
+const HELP_IGNORED_KEYS = new Set(["Shift", "Control", "Alt", "Meta", "CapsLock"]);
+
+function startHelp(doc, onExit) {
+  const win = doc.defaultView;
+  const container = mountOverlay(doc);
+  const shadow = container.attachShadow({ mode: "closed" });
+
+  const backdrop = doc.createElementNS(HTML_NS, "div");
+  backdrop.style.cssText = HELP_BACKDROP_CSS;
+  const panel = doc.createElementNS(HTML_NS, "div");
+  panel.style.cssText = HELP_PANEL_CSS;
+
+  const title = doc.createElementNS(HTML_NS, "div");
+  title.style.cssText = HELP_TITLE_CSS;
+  title.textContent = "vimkeys";
+  panel.append(title);
+
+  const grid = doc.createElementNS(HTML_NS, "div");
+  grid.style.cssText = HELP_GRID_CSS;
+  for (const [group, commands] of HELP) {
+    const rows = commands
+      .map(([command, description]) => [keysFor(command), description])
+      .filter(([keys]) => keys.length);
+    if (!rows.length) continue;
+
+    const heading = doc.createElementNS(HTML_NS, "div");
+    heading.style.cssText = HELP_GROUP_CSS;
+    heading.textContent = group;
+    grid.append(heading);
+
+    for (const [keys, description] of rows) {
+      const keyCell = doc.createElementNS(HTML_NS, "div");
+      keyCell.style.cssText = HELP_KEY_CSS;
+      keyCell.textContent = keys.join(", ");
+      const descCell = doc.createElementNS(HTML_NS, "div");
+      descCell.style.cssText = HELP_DESC_CSS;
+      descCell.textContent = description;
+      grid.append(keyCell, descCell);
+    }
+  }
+  panel.append(grid);
+  backdrop.append(panel);
+  shadow.append(backdrop);
+
+  let done = false;
+  const capture = { capture: true };
+
+  const onVisibility = () => {
+    if (doc.hidden) exit();
+  };
+
+  function exit() {
+    if (done) return;
+    done = true;
+    container.remove();
+    win.removeEventListener("mousedown", exit, capture);
+    win.removeEventListener("pagehide", exit);
+    doc.removeEventListener("visibilitychange", onVisibility);
+    onExit();
+  }
+
+  win.addEventListener("mousedown", exit, capture);
+  win.addEventListener("pagehide", exit);
+  doc.addEventListener("visibilitychange", onVisibility);
+
+  return {
+    get alive() {
+      return !done && container.isConnected;
+    },
+    exit,
+    onKey(event) {
+      if (HELP_IGNORED_KEYS.has(event.key)) return;
+      if (!event.ctrlKey && !event.altKey && !event.metaKey) consume(event);
+      exit();
     },
   };
 }

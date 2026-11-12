@@ -160,7 +160,7 @@
   line-height: 1;
 }
 
-#tabbrowser-tabs[orient="vertical"] #tabbrowser-arrowscrollbox::part(items-wrapper) {
+scrollbox[part="scrollbox"][orient="vertical"][smoothscroll="true"] > slot[part="items-wrapper"] {
   flex-shrink: 1 !important;
   min-height: 0 !important;
 }
