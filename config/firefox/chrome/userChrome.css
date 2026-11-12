@@ -169,9 +169,14 @@
 }
 #tabbrowser-tabs[orient="vertical"] #tabbrowser-arrowscrollbox > tab-group:not([collapsed]):has(> .tabbrowser-tab[selected]) {
   flex: 0 1 auto !important;
-  min-height: 120px !important;
   max-height: none !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
   scrollbar-width: none;
+}
+#tabbrowser-tabs[orient="vertical"] #tabbrowser-arrowscrollbox > tab-group:not([collapsed]):has(> .tabbrowser-tab[selected]):has(> .tabbrowser-tab:nth-of-type(4)) {
+  min-height: 120px !important;
+}
+#tabbrowser-tabs[orient="vertical"] #tabbrowser-arrowscrollbox > tab-group:not([collapsed]):has(> .tabbrowser-tab[selected]):not(:has(> .tabbrowser-tab:nth-of-type(4))) {
+  flex-shrink: 0 !important;
 }
