@@ -18,6 +18,7 @@ function vimiumRunsIn(windowGlobal) {
 
 export class VimkeysActorChild extends JSWindowActorChild {
   #keys = null;
+  #modeRefreshScheduled = false;
 
   // The actor is created on DOMContentLoaded; that's when we decide.
   handleEvent(event) {
@@ -28,14 +29,38 @@ export class VimkeysActorChild extends JSWindowActorChild {
     this.#keys = new KeyHandler({
       hintDocument: () => this.document,
       runBrowserCommand: (name) => this.sendAsyncMessage("Vimkeys:command", { name }),
+      onModeChange: (mode) => this.#reportMode(mode),
     });
 
     win.addEventListener("keydown", (e) => this.#onKeyDown(e), true);
     win.addEventListener("keyup", (e) => this.#keys?.onKeyUp(e), true);
     win.addEventListener("blur", () => this.#keys?.onBlur());
     win.addEventListener("pagehide", () => this.#keys?.stop());
+    win.addEventListener("focusin", () => this.#scheduleModeRefresh(), true);
+    win.addEventListener("focusout", () => this.#scheduleModeRefresh(), true);
     this.document.addEventListener("visibilitychange", () => {
-      if (this.document?.hidden) this.#keys?.stop();
+      if (this.document?.hidden) {
+        this.#keys?.stop();
+      } else {
+        this.#keys?.refreshMode(true);
+      }
+    });
+
+    this.#keys.refreshMode();
+  }
+
+  #reportMode(mode) {
+    try {
+      this.sendAsyncMessage("Vimkeys:mode", { mode });
+    } catch {}
+  }
+
+  #scheduleModeRefresh() {
+    if (this.#modeRefreshScheduled) return;
+    this.#modeRefreshScheduled = true;
+    Services.tm.dispatchToMainThread(() => {
+      this.#modeRefreshScheduled = false;
+      this.#keys?.refreshMode();
     });
   }
 

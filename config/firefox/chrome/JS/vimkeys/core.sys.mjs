@@ -20,6 +20,8 @@ export const BINDINGS = {
   n: "findNext",
   N: "findPrevious",
   f: "linkHints",
+  F: "linkHintsNewTab",
+  v: "visualMode",
   j: "scrollDown",
   k: "scrollUp",
   gg: "scrollToTop",
@@ -29,6 +31,12 @@ export const BINDINGS = {
   b: "openOmnibarBookmarks",
   B: "openOmnibarBookmarksNewTab",
   T: "openOmnibarTabs",
+  ge: "editUrl",
+  r: "reload",
+  R: "reloadHard",
+  yy: "copyUrl",
+  p: "openClipboardUrl",
+  P: "openClipboardUrlNewTab",
   t: "newTab",
   x: "closeTab",
   X: "restoreTab",
@@ -42,6 +50,13 @@ export const BINDINGS = {
 const HELP = [
   ["Navigating the page", [
     ["linkHints", "Open a link in the current tab"],
+    ["linkHintsNewTab", "Open a link in a new tab"],
+    ["visualMode", "Enter visual mode (hjkl selects, y copies, v or Escape exits)"],
+    ["reload", "Reload the page"],
+    ["reloadHard", "Reload the page, ignoring the cache"],
+    ["copyUrl", "Copy the current URL to the clipboard"],
+    ["openClipboardUrl", "Open the clipboard's URL in the current tab"],
+    ["openClipboardUrlNewTab", "Open the clipboard's URL in a new tab"],
     ["scrollDown", "Scroll down"],
     ["scrollUp", "Scroll up"],
     ["scrollToTop", "Scroll to the top of the page"],
@@ -61,6 +76,7 @@ const HELP = [
     ["openOmnibarNewTab", "Open a URL, bookmark or history entry in a new tab"],
     ["openOmnibarBookmarks", "Open a bookmark"],
     ["openOmnibarBookmarksNewTab", "Open a bookmark in a new tab"],
+    ["editUrl", "Edit the current URL"],
   ]],
   ["Manipulating tabs", [
     ["newTab", "Create a new tab"],
@@ -84,6 +100,8 @@ export const BROWSER_COMMANDS = new Set([
   "goBack", "goForward", "nextTab", "previousTab",
   "openOmnibar", "openOmnibarNewTab", "openOmnibarBookmarks",
   "openOmnibarBookmarksNewTab", "openOmnibarTabs",
+  "editUrl", "reload", "reloadHard", "copyUrl",
+  "openClipboardUrl", "openClipboardUrlNewTab",
 ]);
 
 // Commands that fire again on key auto-repeat. With smooth scrolling, a held
@@ -147,10 +165,15 @@ export function deepActiveElement(doc) {
   return el;
 }
 
+function insertTarget(doc) {
+  if (!doc) return null;
+  const active = deepActiveElement(doc);
+  return isEditable(active) ? active : null;
+}
+
 function focusedEditable({ target, win }) {
   if (isEditable(target)) return target;
-  const active = deepActiveElement(win.document);
-  return isEditable(active) ? active : null;
+  return insertTarget(win.document);
 }
 
 // Walks the DOM including (closed) shadow roots, which about: pages use a lot.
@@ -176,11 +199,31 @@ export class KeyHandler {
   #pending = ""; // typed part of a multi-key binding, e.g. "g"
   #hints = null;
   #help = null;
+  #visual = null;
+  #mode = null;
   #scroller = new Scroller();
 
-  constructor({ hintDocument, runBrowserCommand }) {
+  constructor({ hintDocument, runBrowserCommand, onModeChange = null }) {
     this.hintDocument = hintDocument;
     this.runBrowserCommand = runBrowserCommand;
+    this.onModeChange = onModeChange;
+  }
+
+  #setMode(mode, force = false) {
+    if (mode === this.#mode && !force) return;
+    this.#mode = mode;
+    this.onModeChange?.(mode);
+  }
+
+  refreshMode(force = false) {
+    const doc = this.hintDocument({});
+    let mode = null;
+    if (this.#visual) {
+      mode = "visual";
+    } else if (doc?.hasFocus?.() && insertTarget(doc)) {
+      mode = "insert";
+    }
+    this.#setMode(mode, force);
   }
 
   // Returns true if hint mode took the key.
@@ -207,9 +250,21 @@ export class KeyHandler {
     return true;
   }
 
+  handleVisualKey(event) {
+    const visual = this.#visual;
+    if (!visual) return false;
+    if (!visual.alive) {
+      visual.exit();
+      return false;
+    }
+    visual.onKey(event);
+    return true;
+  }
+
   onKeyDown(event, ctx) {
     if (this.handleHelpKey(event)) return;
     if (this.handleHintKey(event)) return;
+    if (this.handleVisualKey(event)) return;
     if (event.ctrlKey || event.altKey || event.metaKey || event.isComposing) return;
 
     const isEscape = event.key === "Escape";
@@ -229,6 +284,7 @@ export class KeyHandler {
       if (isEscape) {
         consume(event);
         editable.blur();
+        this.refreshMode();
       }
       return;
     }
@@ -264,21 +320,36 @@ export class KeyHandler {
     this.#pending = "";
     this.exitHints();
     this.exitHelp();
+    this.exitVisual();
+    this.#setMode(null);
   }
 
   exitHints() {
     this.#hints?.exit();
   }
 
-  startHints(doc) {
+  startHints(doc, newTab = false) {
     this.exitHints();
     this.#hints = startHints(doc, () => {
       this.#hints = null;
-    });
+    }, newTab);
   }
 
   exitHelp() {
     this.#help?.exit();
+  }
+
+  exitVisual() {
+    this.#visual?.exit();
+  }
+
+  startVisual(doc) {
+    this.exitVisual();
+    this.#visual = startVisual(doc, () => {
+      this.#visual = null;
+      this.refreshMode();
+    });
+    this.refreshMode();
   }
 
   startHelp(doc) {
@@ -294,6 +365,16 @@ export class KeyHandler {
       case "linkHints": {
         const doc = this.hintDocument(ctx);
         if (doc) this.startHints(doc);
+        return undefined;
+      }
+      case "linkHintsNewTab": {
+        const doc = this.hintDocument(ctx);
+        if (doc) this.startHints(doc, true);
+        return undefined;
+      }
+      case "visualMode": {
+        const doc = this.hintDocument(ctx);
+        if (doc) this.startVisual(doc);
         return undefined;
       }
       case "showHelp": {
@@ -555,7 +636,24 @@ function mountOverlay(doc) {
   return container;
 }
 
-function activate(el) {
+function linkHrefOf(el) {
+  if (el.localName !== "a" && el.localName !== "area") return null;
+  const attr = el.getAttribute("href");
+  if (!attr || attr.startsWith("#")) return null;
+  return el.href || null;
+}
+
+function activate(el, newTab) {
+  if (newTab && linkHrefOf(el)) {
+    const win = windowOf(el);
+    el.dispatchEvent(new win.MouseEvent("click", {
+      bubbles: true,
+      cancelable: true,
+      view: win,
+      ctrlKey: true,
+    }));
+    return;
+  }
   if (el.localName === "select") {
     el.focus();
     try {
@@ -580,7 +678,7 @@ function activate(el) {
 
 // Shows hints in doc. Returns null if there is nothing to click. onExit runs
 // once, however hint mode ends.
-function startHints(doc, onExit) {
+function startHints(doc, onExit, newTab = false) {
   const win = doc.defaultView;
   const targets = [];
   collectTargets(doc, 0, 0, targets, new Set());
@@ -668,7 +766,7 @@ function startHints(doc, onExit) {
       typed += ch;
       if (matches.length === 1) {
         exit();
-        activate(matches[0].el);
+        activate(matches[0].el, newTab);
         return;
       }
       update();
@@ -769,6 +867,85 @@ function startHelp(doc, onExit) {
       if (HELP_IGNORED_KEYS.has(event.key)) return;
       if (!event.ctrlKey && !event.altKey && !event.metaKey) consume(event);
       exit();
+    },
+  };
+}
+
+const SHOW_TEXT = 0x4;
+const DOCUMENT_POSITION_FOLLOWING = 0x4;
+const MIN_ANCHOR_TEXT = 50;
+
+const VISUAL_MOVEMENTS = {
+  h: ["backward", "character"],
+  l: ["forward", "character"],
+  k: ["backward", "line"],
+  j: ["forward", "line"],
+};
+
+const VISUAL_IGNORED_KEYS = new Set(["Shift", "Control", "Alt", "Meta", "CapsLock"]);
+
+function startVisual(doc, onExit) {
+  const win = doc.defaultView;
+  const selection = win?.getSelection();
+  if (!selection) return null;
+
+  if (!selection.rangeCount || selection.isCollapsed) {
+    const range = firstTextAnchor(doc);
+    if (!range) return null;
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+
+  let done = false;
+
+  const onVisibility = () => {
+    if (doc.hidden) exit();
+  };
+
+  function exit() {
+    if (done) return;
+    done = true;
+    win.removeEventListener("pagehide", exit);
+    doc.removeEventListener("visibilitychange", onVisibility);
+    onExit();
+  }
+
+  win.addEventListener("pagehide", exit);
+  doc.addEventListener("visibilitychange", onVisibility);
+
+  return {
+    get alive() {
+      return !done;
+    },
+    exit,
+    onKey(event) {
+      if (VISUAL_IGNORED_KEYS.has(event.key)) return;
+      if (event.ctrlKey || event.altKey || event.metaKey) {
+        exit();
+        return;
+      }
+      consume(event);
+
+      const key = event.key;
+      if (key === "Escape" || key === "v") {
+        collapseSelection(selection);
+        exit();
+        return;
+      }
+      if (key === "y") {
+        copySelection(doc, selection);
+        collapseSelection(selection);
+        exit();
+        return;
+      }
+
+      const movement = VISUAL_MOVEMENTS[key];
+      if (!movement) return;
+      try {
+        selection.modify("extend", movement[0], movement[1]);
+      } catch (err) {
+        console.error(LOG_PREFIX, err);
+      }
     },
   };
 }

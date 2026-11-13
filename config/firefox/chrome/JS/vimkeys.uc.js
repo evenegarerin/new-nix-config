@@ -22,6 +22,56 @@
 
   const omnibar = new Omnibar(window);
 
+  const HTML_NS = "http://www.w3.org/1999/xhtml";
+  const BADGE_ID = "vimkeys-mode-indicator";
+  const BADGE_CSS =
+    "position:fixed; margin:0; inset:auto auto 14px 14px; width:max-content; height:max-content;" +
+    "box-sizing:border-box; padding:3px 9px; overflow:visible; pointer-events:none;" +
+    "font:bold 11px/1.4 Helvetica, Arial, sans-serif; letter-spacing:.09em; text-transform:uppercase;" +
+    "color:#302505; white-space:nowrap; border:1px solid #c38a22; border-radius:4px;" +
+    "background:linear-gradient(to bottom, #fff785, #ffc542); box-shadow:0 2px 6px rgba(0,0,0,.35);";
+
+  let badge = null;
+  let modeOwner = null;
+
+  function ensureBadge() {
+    if (badge?.isConnected) return badge;
+    badge = document.createElementNS(HTML_NS, "div");
+    badge.id = BADGE_ID;
+    badge.setAttribute("popover", "manual");
+    badge.style.cssText = BADGE_CSS;
+    document.documentElement.append(badge);
+    return badge;
+  }
+
+  function hideBadge() {
+    if (!badge?.isConnected) return;
+    try {
+      badge.hidePopover();
+    } catch {}
+  }
+
+  function clearMode() {
+    modeOwner = null;
+    hideBadge();
+  }
+
+  function setMode(mode, contextId) {
+    if (!mode) {
+      if (modeOwner !== null && modeOwner !== contextId) return;
+      clearMode();
+      return;
+    }
+    modeOwner = contextId;
+    try {
+      const el = ensureBadge();
+      el.textContent = mode;
+      el.showPopover();
+    } catch (err) {
+      console.error("[vimkeys]", err);
+    }
+  }
+
   // ---- Browser commands ----------------------------------------------------
   // `browser` is the tab's <browser> the key came from.
   const COMMANDS = {
@@ -40,6 +90,16 @@
     openOmnibarBookmarks: () => omnibar.open({ sources: "bookmarks" }),
     openOmnibarBookmarksNewTab: () => omnibar.open({ sources: "bookmarks", newTab: true }),
     openOmnibarTabs: () => omnibar.open({ sources: "tabs" }),
+    editUrl: () => omnibar.open({ prefill: gBrowser.currentURI?.displaySpec ?? "" }),
+    reload: (browser) => browser.reload(),
+    reloadHard: (browser) =>
+      browser.reloadWithFlags(
+        Ci.nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE |
+          Ci.nsIWebNavigation.LOAD_FLAGS_BYPASS_PROXY
+      ),
+    copyUrl: () => copyCurrentUrl(),
+    openClipboardUrl: () => openClipboardUrl(false),
+    openClipboardUrlNewTab: () => openClipboardUrl(true),
   };
 
   function runBrowserCommand(name, browser = gBrowser.selectedBrowser) {
@@ -51,7 +111,7 @@
   }
 
   // Used by VimkeysActorParent for keys pressed in pages.
-  window.vimkeys = { runBrowserCommand };
+  window.vimkeys = { runBrowserCommand, setMode };
 
   function tabFor(browser) {
     return gBrowser.getTabForBrowser(browser) ?? gBrowser.selectedTab;
@@ -69,6 +129,65 @@
     } else {
       window.BrowserOpenTab();
     }
+  }
+
+  function copyCurrentUrl() {
+    const url = gBrowser.currentURI?.displaySpec;
+    if (!url) return;
+    Cc["@mozilla.org/widget/clipboardhelper;1"]
+      .getService(Ci.nsIClipboardHelper)
+      .copyString(url);
+  }
+
+  function readClipboardText() {
+    const xferable = Cc["@mozilla.org/widget/transferable;1"].createInstance(Ci.nsITransferable);
+    xferable.init(null);
+    xferable.addDataFlavor("text/plain");
+    const windowContext = window.browsingContext?.currentWindowContext;
+    if (windowContext) {
+      Services.clipboard.getData(xferable, Ci.nsIClipboard.kGlobalClipboard, windowContext);
+    } else {
+      Services.clipboard.getData(xferable, Ci.nsIClipboard.kGlobalClipboard);
+    }
+    const data = {};
+    xferable.getTransferData("text/plain", data);
+    return data.value?.QueryInterface(Ci.nsISupportsString)?.data ?? "";
+  }
+
+  function openClipboardUrl(newTab) {
+    let text;
+    try {
+      text = readClipboardText().trim();
+    } catch (err) {
+      console.error("[vimkeys]", err);
+      return;
+    }
+    if (!text) return;
+
+    let info;
+    try {
+      info = Services.uriFixup.getFixupURIInfo(
+        text,
+        Ci.nsIURIFixup.FIXUP_FLAG_FIX_SCHEME_TYPOS |
+          Ci.nsIURIFixup.FIXUP_FLAG_ALLOW_KEYWORD_LOOKUP
+      );
+    } catch (err) {
+      console.error("[vimkeys]", err);
+      return;
+    }
+
+    const url = info.preferredURI?.spec;
+    if (!url) return;
+    const scheme = info.preferredURI.scheme;
+    if (scheme === "javascript" || scheme === "data") {
+      console.warn("[vimkeys] refusing to open", url);
+      return;
+    }
+
+    openTrustedLinkIn(url, newTab ? "tab" : "current", {
+      postData: info.postData,
+      allowInheritPrincipal: false,
+    });
   }
 
   function restoreTab() {
@@ -170,8 +289,12 @@
     gBrowser.tabContainer.addEventListener("TabSelect", () => {
       dialogHints.exitHints();
       omnibar.close();
+      clearMode();
     });
-    window.addEventListener("unload", () => omnibar.destroy(), { once: true });
+    window.addEventListener("unload", () => {
+      omnibar.destroy();
+      badge?.remove();
+    }, { once: true });
   }
 
   registerPageActor();

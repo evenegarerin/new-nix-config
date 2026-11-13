@@ -101,17 +101,17 @@ export class Omnibar {
     this.win = win;
   }
 
-  open({ sources = null, newTab = false } = {}) {
+  open({ sources = null, newTab = false, prefill = "" } = {}) {
     this.#sources = sources;
     this.#newTab = newTab;
     this.#ensurePanel();
     this.#results = [];
-    this.#input.value = "";
+    this.#input.value = prefill;
     this.#renderRows();
 
     if (this.#panel.state === "open" || this.#panel.state === "showing") {
-      this.#input.focus();
-      this.#search("");
+      this.#focusInput();
+      this.#search(prefill);
       return;
     }
 
@@ -119,7 +119,13 @@ export class Omnibar {
     const available = anchor.getBoundingClientRect().width;
     const x = Math.max(0, Math.round((available - Math.min(PANEL_WIDTH, available)) / 2));
     this.#panel.openPopup(anchor, "overlap", x, PANEL_TOP, false, false);
-    this.#search("");
+    this.#search(prefill);
+  }
+
+  #focusInput() {
+    this.#input.focus();
+    const end = this.#input.value.length;
+    this.#input.setSelectionRange(end, end);
   }
 
   close() {
@@ -163,7 +169,7 @@ export class Omnibar {
     panel.append(box);
     (doc.getElementById("mainPopupSet") ?? doc.documentElement).append(panel);
 
-    panel.addEventListener("popupshown", () => input.focus());
+    panel.addEventListener("popupshown", () => this.#focusInput());
     panel.addEventListener("popuphidden", () => this.#cancel());
     panel.addEventListener("keydown", (event) => this.#onKeyDown(event), true);
     input.addEventListener("input", () => this.#search(input.value));
