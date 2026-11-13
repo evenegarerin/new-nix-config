@@ -15,12 +15,14 @@
 
   if (location.href !== "chrome://browser/content/browser.xhtml") return;
 
-  const { KeyHandler, BROWSER_COMMANDS, session, eventTarget, windowOf, consume, isEditable, deepActiveElement } =
+  const { KeyHandler, session, eventTarget, windowOf, consume, isEditable, deepActiveElement } =
     ChromeUtils.importESModule("chrome://userscripts/content/vimkeys/core.sys.mjs");
-  const { Omnibar } =
-    ChromeUtils.importESModule("chrome://userscripts/content/vimkeys/omnibar.sys.mjs");
+  const { BROWSER_COMMANDS } =
+    ChromeUtils.importESModule("chrome://userscripts/content/bindings.sys.mjs");
+  const { omnibarFor } =
+    ChromeUtils.importESModule("chrome://userscripts/content/omnibar.sys.mjs");
 
-  const omnibar = new Omnibar(window);
+  const omnibar = omnibarFor(window);
 
   const HTML_NS = "http://www.w3.org/1999/xhtml";
   const BADGE_ID = "vimkeys-mode-indicator";
@@ -83,8 +85,8 @@
     restoreTab: () => restoreTab(),
     goBack: (browser) => browser.canGoBack && browser.goBack(),
     goForward: (browser) => browser.canGoForward && browser.goForward(),
-    nextTab: () => gBrowser.tabContainer.advanceSelectedTab(1, true),
-    previousTab: () => gBrowser.tabContainer.advanceSelectedTab(-1, true),
+    nextTab: () => cycleTabs(1),
+    previousTab: () => cycleTabs(-1),
     openOmnibar: () => omnibar.open(),
     openOmnibarNewTab: () => omnibar.open({ newTab: true }),
     openOmnibarBookmarks: () => omnibar.open({ sources: "bookmarks" }),
@@ -102,16 +104,41 @@
     openClipboardUrlNewTab: () => openClipboardUrl(true),
   };
 
-  function runBrowserCommand(name, browser = gBrowser.selectedBrowser) {
+  function commandFor(name) {
     // Names can come from a page's content process, so only known ones run.
-    if (!BROWSER_COMMANDS.has(name) || !Object.hasOwn(COMMANDS, name)) return;
+    if (!BROWSER_COMMANDS.has(name)) return null;
+    if (Object.hasOwn(COMMANDS, name)) return COMMANDS[name];
+    const extras = window.vimkeysCommands;
+    if (extras && Object.hasOwn(extras, name) && typeof extras[name] === "function") {
+      return extras[name];
+    }
+    return null;
+  }
+
+  function runBrowserCommand(name, browser = gBrowser.selectedBrowser) {
+    const command = commandFor(name);
+    if (!command) return;
     Promise.resolve()
-      .then(() => COMMANDS[name](browser ?? gBrowser.selectedBrowser))
+      .then(() => command(browser ?? gBrowser.selectedBrowser))
       .catch((err) => console.error("[vimkeys]", err));
   }
 
   // Used by VimkeysActorParent for keys pressed in pages.
   window.vimkeys = { runBrowserCommand, setMode };
+
+  function peerTabs(tab) {
+    if (tab.group) return tab.group.tabs;
+    return gBrowser.tabs.filter((other) => !other.group && other.pinned === tab.pinned);
+  }
+
+  function cycleTabs(delta) {
+    const current = gBrowser.selectedTab;
+    if (!current) return;
+    const tabs = peerTabs(current).filter((tab) => !tab.hidden && !tab.closing);
+    const index = tabs.indexOf(current);
+    if (index < 0 || tabs.length < 2) return;
+    gBrowser.selectedTab = tabs[(index + delta + tabs.length) % tabs.length];
+  }
 
   function tabFor(browser) {
     return gBrowser.getTabForBrowser(browser) ?? gBrowser.selectedTab;
@@ -291,10 +318,7 @@
       omnibar.close();
       clearMode();
     });
-    window.addEventListener("unload", () => {
-      omnibar.destroy();
-      badge?.remove();
-    }, { once: true });
+    window.addEventListener("unload", () => badge?.remove(), { once: true });
   }
 
   registerPageActor();

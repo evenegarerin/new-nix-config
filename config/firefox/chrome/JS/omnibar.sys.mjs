@@ -9,10 +9,11 @@ ChromeUtils.defineESModuleGetters(lazy, {
 });
 
 const HTML_NS = "http://www.w3.org/1999/xhtml";
-const LOG_PREFIX = "[vimkeys]";
+const LOG_PREFIX = "[omnibar]";
 const SAP_NAME = "urlbar";
-const PANEL_ID = "vimkeys-omnibar";
+const PANEL_ID = "omnibar";
 const MAX_RESULTS = 12;
+const MENU_MAX_RESULTS = 20;
 const PANEL_WIDTH = 640;
 const PANEL_TOP = 72;
 const DEFAULT_FAVICON = "chrome://global/skin/icons/defaultFavicon.svg";
@@ -22,6 +23,8 @@ const BOX_CSS =
   "display:flex; flex-direction:column; box-sizing:border-box; gap:8px;" +
   `width:${PANEL_WIDTH}px; max-width:90vw; padding:10px;` +
   "font:14px/1.4 system-ui, sans-serif;";
+const PROMPT_CSS =
+  "padding:0 2px; font-size:12px; letter-spacing:.03em; opacity:.7;";
 const INPUT_CSS =
   "box-sizing:border-box; width:100%; padding:8px 10px; border-radius:6px;" +
   "border:1px solid color-mix(in srgb, currentColor 25%, transparent);" +
@@ -87,25 +90,136 @@ function describe(result) {
   return { title: payload.title || prettyUrl(payload.url), detail: prettyUrl(payload.url) };
 }
 
+function entryFromResult(result) {
+  const { title, detail } = describe(result);
+  return {
+    title,
+    detail,
+    kind: kindOf(result),
+    icon: result.icon || DEFAULT_FAVICON,
+    result,
+  };
+}
+
+function entryFromItem(item, index) {
+  const object = item !== null && typeof item === "object";
+  const title = String((object ? item.label ?? item.title ?? item.value : item) ?? "");
+  const detail = object ? String(item.detail ?? item.description ?? "") : "";
+  return {
+    title,
+    detail,
+    kind: object ? String(item.kind ?? "") : "",
+    icon: object && item.icon ? String(item.icon) : null,
+    item,
+    index,
+    titleLower: title.toLowerCase(),
+    haystack: `${title}\n${detail}`.toLowerCase(),
+  };
+}
+
+function isMotion(event, letter) {
+  return (event.ctrlKey || event.altKey) && event.key === letter;
+}
+
+function scoreEntry(entry, query, tokens) {
+  if (!tokens.length) return 0;
+  for (const token of tokens) {
+    if (!entry.haystack.includes(token)) return -1;
+  }
+  if (entry.titleLower.startsWith(query)) return 0;
+  if (entry.titleLower.includes(query)) return 1;
+  return 2;
+}
+
 export class Omnibar {
   #panel = null;
+  #prompt = null;
   #input = null;
   #list = null;
-  #results = [];
+  #entries = [];
+  #items = [];
   #selected = 0;
   #context = null;
   #sources = null;
   #newTab = false;
+  #mode = "urlbar";
+  #maxResults = MAX_RESULTS;
+  #emptyText = "no results";
+  #resolve = null;
+  #choice = null;
 
   constructor(win) {
     this.win = win;
   }
 
   open({ sources = null, newTab = false, prefill = "" } = {}) {
+    this.#settle();
+    this.#mode = "urlbar";
     this.#sources = sources;
     this.#newTab = newTab;
+    this.#items = [];
+    this.#maxResults = MAX_RESULTS;
+    this.#emptyText = "no results";
+    try {
+      this.#show({ prompt: "", placeholder: "", prefill });
+    } catch (err) {
+      console.error(LOG_PREFIX, err);
+    }
+  }
+
+  select({
+    items = [],
+    prompt = "",
+    placeholder = "",
+    prefill = "",
+    maxResults = MENU_MAX_RESULTS,
+  } = {}) {
+    this.#settle();
+    this.#mode = "menu";
+    this.#sources = null;
+    this.#newTab = false;
+    this.#items = Array.from(items, entryFromItem);
+    this.#maxResults = Math.max(1, maxResults);
+    this.#emptyText = "no matches";
+
+    const chosen = new Promise((resolve) => {
+      this.#resolve = resolve;
+    });
+    try {
+      this.#show({ prompt, placeholder, prefill });
+    } catch (err) {
+      console.error(LOG_PREFIX, err);
+      this.#settle();
+    }
+    return chosen;
+  }
+
+  close() {
+    this.#cancel();
+    if (this.#panel?.state === "open" || this.#panel?.state === "showing") {
+      this.#panel.hidePopup();
+      return;
+    }
+    this.#settle();
+  }
+
+  destroy() {
+    this.#cancel();
+    this.#settle();
+    this.#panel?.remove();
+    this.#panel = null;
+    this.#prompt = null;
+    this.#input = null;
+    this.#list = null;
+  }
+
+  #show({ prompt, placeholder, prefill }) {
     this.#ensurePanel();
-    this.#results = [];
+    this.#entries = [];
+    this.#selected = 0;
+    this.#prompt.textContent = prompt;
+    this.#prompt.style.display = prompt ? "block" : "none";
+    this.#input.setAttribute("placeholder", placeholder);
     this.#input.value = prefill;
     this.#renderRows();
 
@@ -128,19 +242,12 @@ export class Omnibar {
     this.#input.setSelectionRange(end, end);
   }
 
-  close() {
-    this.#cancel();
-    if (this.#panel?.state === "open" || this.#panel?.state === "showing") {
-      this.#panel.hidePopup();
-    }
-  }
-
-  destroy() {
-    this.#cancel();
-    this.#panel?.remove();
-    this.#panel = null;
-    this.#input = null;
-    this.#list = null;
+  #settle() {
+    const resolve = this.#resolve;
+    const choice = this.#choice;
+    this.#resolve = null;
+    this.#choice = null;
+    resolve?.(choice ?? null);
   }
 
   #ensurePanel() {
@@ -158,6 +265,10 @@ export class Omnibar {
     const box = doc.createElementNS(HTML_NS, "div");
     box.style.cssText = BOX_CSS;
 
+    const prompt = doc.createElementNS(HTML_NS, "div");
+    prompt.style.cssText = PROMPT_CSS;
+    prompt.style.display = "none";
+
     const input = doc.createElementNS(HTML_NS, "input");
     input.setAttribute("type", "text");
     input.style.cssText = INPUT_CSS;
@@ -165,16 +276,20 @@ export class Omnibar {
     const list = doc.createElementNS(HTML_NS, "div");
     list.style.cssText = LIST_CSS;
 
-    box.append(input, list);
+    box.append(prompt, input, list);
     panel.append(box);
     (doc.getElementById("mainPopupSet") ?? doc.documentElement).append(panel);
 
     panel.addEventListener("popupshown", () => this.#focusInput());
-    panel.addEventListener("popuphidden", () => this.#cancel());
+    panel.addEventListener("popuphidden", () => {
+      this.#cancel();
+      this.#settle();
+    });
     panel.addEventListener("keydown", (event) => this.#onKeyDown(event), true);
     input.addEventListener("input", () => this.#search(input.value));
 
     this.#panel = panel;
+    this.#prompt = prompt;
     this.#input = input;
     this.#list = list;
   }
@@ -193,11 +308,16 @@ export class Omnibar {
     this.#cancel();
     this.#selected = 0;
 
+    if (this.#mode === "menu") {
+      this.#filter(value);
+      return;
+    }
+
     const browser = this.win.gBrowser.selectedBrowser;
     const options = {
       allowAutofill: false,
       isPrivate: lazy.PrivateBrowsingUtils.isWindowPrivate(this.win),
-      maxResults: MAX_RESULTS,
+      maxResults: this.#maxResults,
       sapName: SAP_NAME,
       searchString: value,
       userContextId: parseInt(browser.getAttribute("usercontextid") || 0, 10),
@@ -233,9 +353,22 @@ export class Omnibar {
       .catch((err) => console.error(LOG_PREFIX, err));
   }
 
+  #filter(value) {
+    const query = value.trim().toLowerCase();
+    const tokens = query.split(/\s+/).filter(Boolean);
+    const matched = [];
+    for (const entry of this.#items) {
+      const score = scoreEntry(entry, query, tokens);
+      if (score >= 0) matched.push({ entry, score });
+    }
+    matched.sort((a, b) => a.score - b.score || a.entry.index - b.entry.index);
+    this.#entries = matched.slice(0, this.#maxResults).map((match) => match.entry);
+    this.#renderRows();
+  }
+
   #update(results) {
-    this.#results = results.filter(isUsable).slice(0, MAX_RESULTS);
-    this.#selected = Math.max(0, Math.min(this.#selected, this.#results.length - 1));
+    this.#entries = results.filter(isUsable).slice(0, this.#maxResults).map(entryFromResult);
+    this.#selected = Math.max(0, Math.min(this.#selected, this.#entries.length - 1));
     this.#renderRows();
   }
 
@@ -243,40 +376,41 @@ export class Omnibar {
     const doc = this.win.document;
     this.#list.textContent = "";
 
-    if (!this.#results.length) {
+    if (!this.#entries.length) {
       const empty = doc.createElementNS(HTML_NS, "div");
       empty.style.cssText = EMPTY_CSS;
-      empty.textContent = "no results";
+      empty.textContent = this.#emptyText;
       this.#list.append(empty);
       return;
     }
 
-    this.#results.forEach((result, index) => {
-      const { title, detail } = describe(result);
-
+    this.#entries.forEach((entry, index) => {
       const row = doc.createElementNS(HTML_NS, "div");
       row.style.cssText = ROW_CSS + (index === this.#selected ? ROW_SELECTED_CSS : "");
 
-      const icon = doc.createElementNS(HTML_NS, "img");
-      icon.style.cssText = ICON_CSS;
-      icon.setAttribute("src", result.icon || DEFAULT_FAVICON);
-      icon.addEventListener("error", () => {
-        if (icon.getAttribute("src") !== DEFAULT_FAVICON) icon.setAttribute("src", DEFAULT_FAVICON);
-      });
+      if (entry.icon) {
+        const icon = doc.createElementNS(HTML_NS, "img");
+        icon.style.cssText = ICON_CSS;
+        icon.setAttribute("src", entry.icon);
+        icon.addEventListener("error", () => {
+          if (icon.getAttribute("src") !== DEFAULT_FAVICON) icon.setAttribute("src", DEFAULT_FAVICON);
+        });
+        row.append(icon);
+      }
 
       const titleNode = doc.createElementNS(HTML_NS, "span");
       titleNode.style.cssText = TITLE_CSS;
-      titleNode.textContent = title;
+      titleNode.textContent = entry.title;
 
       const kindNode = doc.createElementNS(HTML_NS, "span");
       kindNode.style.cssText = KIND_CSS;
-      kindNode.textContent = kindOf(result);
+      kindNode.textContent = entry.kind;
 
       const detailNode = doc.createElementNS(HTML_NS, "span");
       detailNode.style.cssText = URL_CSS;
-      detailNode.textContent = detail;
+      detailNode.textContent = entry.detail;
 
-      row.append(icon, titleNode, kindNode, detailNode);
+      row.append(titleNode, kindNode, detailNode);
       row.addEventListener("mouseover", () => this.#select(index));
       row.addEventListener("click", (event) => {
         this.#select(index);
@@ -287,7 +421,7 @@ export class Omnibar {
   }
 
   #select(index) {
-    if (index === this.#selected || !this.#results.length) return;
+    if (index === this.#selected || !this.#entries.length) return;
     this.#selected = index;
     const rows = this.#list.children;
     for (let i = 0; i < rows.length; i++) {
@@ -296,7 +430,7 @@ export class Omnibar {
   }
 
   #move(delta) {
-    const count = this.#results.length;
+    const count = this.#entries.length;
     if (!count) return;
     this.#select((this.#selected + delta + count) % count);
   }
@@ -318,14 +452,14 @@ export class Omnibar {
       return;
     }
 
-    if (key === "ArrowDown" || (event.ctrlKey && key === "j") || (key === "Tab" && !event.shiftKey)) {
+    if (key === "ArrowDown" || isMotion(event, "j") || (key === "Tab" && !event.shiftKey)) {
       event.preventDefault();
       event.stopPropagation();
       this.#move(1);
       return;
     }
 
-    if (key === "ArrowUp" || (event.ctrlKey && key === "k") || (key === "Tab" && event.shiftKey)) {
+    if (key === "ArrowUp" || isMotion(event, "k") || (key === "Tab" && event.shiftKey)) {
       event.preventDefault();
       event.stopPropagation();
       this.#move(-1);
@@ -333,20 +467,27 @@ export class Omnibar {
   }
 
   #activate(invert) {
-    const result = this.#results[this.#selected];
-    if (!result) return;
+    const entry = this.#entries[this.#selected];
+    if (!entry) return;
+
+    if (this.#mode === "menu") {
+      this.#choice = entry.item;
+      this.close();
+      return;
+    }
+
     const newTab = invert ? !this.#newTab : this.#newTab;
     this.close();
 
-    if (result.type === lazy.UrlbarShared.RESULT_TYPE.TAB_SWITCH && !newTab) {
-      this.#switchToTab(result);
+    if (entry.result.type === lazy.UrlbarShared.RESULT_TYPE.TAB_SWITCH && !newTab) {
+      this.#switchToTab(entry.result);
       return;
     }
 
     let url;
     let postData;
     try {
-      ({ url, postData } = lazy.UrlbarUtils.getUrlFromResult(result));
+      ({ url, postData } = lazy.UrlbarUtils.getUrlFromResult(entry.result));
     } catch (err) {
       console.error(LOG_PREFIX, err);
       return;
@@ -377,4 +518,24 @@ export class Omnibar {
       console.warn(LOG_PREFIX, "no open tab for", result.payload.url);
     }
   }
+}
+
+const instances = new WeakMap();
+
+export function omnibarFor(win) {
+  let instance = instances.get(win);
+  if (instance) return instance;
+
+  instance = new Omnibar(win);
+  instances.set(win, instance);
+  win.omnibar = instance;
+  win.addEventListener(
+    "unload",
+    () => {
+      instances.delete(win);
+      instance.destroy();
+    },
+    { once: true }
+  );
+  return instance;
 }

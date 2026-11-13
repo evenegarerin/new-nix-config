@@ -147,6 +147,7 @@
       swaynotificationcenter
       nvd
       rmpc
+      wiremix
     ])
     ++ (with pkgs-unstable; [
       claude-code

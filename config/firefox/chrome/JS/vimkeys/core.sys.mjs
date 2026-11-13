@@ -1,7 +1,14 @@
 // vimkeys core: everything that happens inside a page (keys, link hints,
-// scrolling) plus the settings and key bindings. Shared by vimkeys.uc.js
+// scrolling) plus the settings. Shared by vimkeys.uc.js
 // (about: pages, browser dialogs) and the VimkeysActor child (every page where
 // Vimium can't run), so there is exactly one place to change any of it.
+
+import {
+  HELP,
+  isRepeatable,
+  keysFor,
+  resolveKeys,
+} from "chrome://userscripts/content/bindings.sys.mjs";
 
 // ---- Settings (same meaning as Vimium's options) ---------------------------
 export const SETTINGS = {
@@ -11,115 +18,6 @@ export const SETTINGS = {
   // vimkeys steps aside wherever this extension (Vimium-FF) can run.
   vimiumId: "{d7742d87-e61d-4b78-b8a1-b469842139fa}",
 };
-
-// ---- Key bindings ----------------------------------------------------------
-// Keys -> command names. Page commands run right here; the rest are browser
-// commands that each side carries out its own way (see runBrowserCommand).
-export const BINDINGS = {
-  "/": "find",
-  n: "findNext",
-  N: "findPrevious",
-  f: "linkHints",
-  F: "linkHintsNewTab",
-  v: "visualMode",
-  j: "scrollDown",
-  k: "scrollUp",
-  gg: "scrollToTop",
-  G: "scrollToBottom",
-  o: "openOmnibar",
-  O: "openOmnibarNewTab",
-  b: "openOmnibarBookmarks",
-  B: "openOmnibarBookmarksNewTab",
-  T: "openOmnibarTabs",
-  ge: "editUrl",
-  r: "reload",
-  R: "reloadHard",
-  yy: "copyUrl",
-  p: "openClipboardUrl",
-  P: "openClipboardUrlNewTab",
-  t: "newTab",
-  x: "closeTab",
-  X: "restoreTab",
-  H: "goBack",
-  L: "goForward",
-  J: "nextTab",     // right (Vimium default: K)
-  K: "previousTab", // left  (Vimium default: J)
-  "?": "showHelp",
-};
-
-const HELP = [
-  ["Navigating the page", [
-    ["linkHints", "Open a link in the current tab"],
-    ["linkHintsNewTab", "Open a link in a new tab"],
-    ["visualMode", "Enter visual mode (hjkl selects, y copies, v or Escape exits)"],
-    ["reload", "Reload the page"],
-    ["reloadHard", "Reload the page, ignoring the cache"],
-    ["copyUrl", "Copy the current URL to the clipboard"],
-    ["openClipboardUrl", "Open the clipboard's URL in the current tab"],
-    ["openClipboardUrlNewTab", "Open the clipboard's URL in a new tab"],
-    ["scrollDown", "Scroll down"],
-    ["scrollUp", "Scroll up"],
-    ["scrollToTop", "Scroll to the top of the page"],
-    ["scrollToBottom", "Scroll to the bottom of the page"],
-  ]],
-  ["Using find", [
-    ["find", "Enter find mode"],
-    ["findNext", "Cycle forward to the next find match"],
-    ["findPrevious", "Cycle backward to the previous find match"],
-  ]],
-  ["Navigating history", [
-    ["goBack", "Go back in history"],
-    ["goForward", "Go forward in history"],
-  ]],
-  ["Opening pages", [
-    ["openOmnibar", "Open a URL, bookmark or history entry"],
-    ["openOmnibarNewTab", "Open a URL, bookmark or history entry in a new tab"],
-    ["openOmnibarBookmarks", "Open a bookmark"],
-    ["openOmnibarBookmarksNewTab", "Open a bookmark in a new tab"],
-    ["editUrl", "Edit the current URL"],
-  ]],
-  ["Manipulating tabs", [
-    ["newTab", "Create a new tab"],
-    ["closeTab", "Close the current tab"],
-    ["restoreTab", "Restore a closed tab"],
-    ["nextTab", "Go one tab right"],
-    ["previousTab", "Go one tab left"],
-    ["openOmnibarTabs", "Search through your open tabs"],
-  ]],
-  ["Miscellaneous", [
-    ["showHelp", "Show this help"],
-  ]],
-];
-
-function keysFor(command) {
-  return Object.keys(BINDINGS).filter((keys) => BINDINGS[keys] === command);
-}
-
-export const BROWSER_COMMANDS = new Set([
-  "find", "findNext", "findPrevious", "newTab", "closeTab", "restoreTab",
-  "goBack", "goForward", "nextTab", "previousTab",
-  "openOmnibar", "openOmnibarNewTab", "openOmnibarBookmarks",
-  "openOmnibarBookmarksNewTab", "openOmnibarTabs",
-  "editUrl", "reload", "reloadHard", "copyUrl",
-  "openClipboardUrl", "openClipboardUrlNewTab",
-]);
-
-// Commands that fire again on key auto-repeat. With smooth scrolling, a held
-// j/k is handled by the scroll animation itself, like in Vimium.
-const REPEATABLE = new Set(["findNext", "findPrevious", "nextTab", "previousTab"]);
-if (!SETTINGS.smoothScroll) REPEATABLE.add("scrollDown").add("scrollUp");
-
-// Every unfinished part of a multi-key binding, e.g. "g" for "gg".
-const PREFIXES = new Set();
-for (const keys of Object.keys(BINDINGS)) {
-  for (let i = 1; i < keys.length; i++) PREFIXES.add(keys.slice(0, i));
-}
-
-function resolveKeys(keys) {
-  if (Object.hasOwn(BINDINGS, keys)) return { keys, command: BINDINGS[keys] };
-  if (PREFIXES.has(keys)) return { keys, prefix: true };
-  return null;
-}
 
 const HTML_NS = "http://www.w3.org/1999/xhtml";
 const LOG_PREFIX = "[vimkeys]";
@@ -298,7 +196,7 @@ export class KeyHandler {
       this.#pending = match.keys;
       return;
     }
-    if (event.repeat && !REPEATABLE.has(match.command)) return;
+    if (event.repeat && !isRepeatable(match.command, SETTINGS.smoothScroll)) return;
     Promise.resolve()
       .then(() => this.#run(match.command, ctx))
       .catch((err) => console.error(LOG_PREFIX, err));

@@ -119,4 +119,18 @@ in
     terminal = false;
   };
 
+  xdg.desktopEntries.wiremix = {
+    categories = [
+      "Audio"
+      "Mixer"
+      "ConsoleOnly"
+    ];
+    exec = "${terminal} --class wiremix -- wiremix";
+    genericName = "Volume Controller";
+    name = "Wiremix";
+    icon = terminal;
+    settings.StartupWMClass = "wiremix";
+    terminal = false;
+  };
+
 }
