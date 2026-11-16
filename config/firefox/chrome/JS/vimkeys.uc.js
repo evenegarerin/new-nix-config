@@ -144,8 +144,12 @@
   function runBrowserCommand(name, browser = gBrowser.selectedBrowser) {
     const command = commandFor(name);
     if (!command) return;
+    let target = browser;
+    if (name !== "nextTab" && name !== "previousTab" && commitCycle()) {
+      target = gBrowser.selectedBrowser;
+    }
     Promise.resolve()
-      .then(() => command(browser ?? gBrowser.selectedBrowser))
+      .then(() => command(target ?? gBrowser.selectedBrowser))
       .catch((err) => console.error("[vimkeys]", err));
   }
 
@@ -157,13 +161,120 @@
     return gBrowser.tabs.filter((other) => !other.group && other.pinned === tab.pinned);
   }
 
+  const CYCLE_ID = "vimkeys-tab-cycle";
+  const CYCLE_GAP = 56;
+  const CYCLE_SETTLE_MS = 150;
+  const CYCLE_CSS =
+    "position:fixed; margin:0; width:max-content; max-width:min(520px, 60vw);" +
+    "height:max-content; box-sizing:border-box; padding:7px 13px; overflow:hidden;" +
+    "pointer-events:none; display:flex; align-items:center; gap:9px;" +
+    "font:13px/1.4 Helvetica, Arial, sans-serif; white-space:nowrap;" +
+    "border-radius:9px; box-shadow:0 4px 14px rgba(0,0,0,.45);" +
+    "color:light-dark(#15141a, #fbfbfe);" +
+    "background:light-dark(rgb(249, 249, 251), rgb(43, 42, 51));" +
+    "border:1px solid light-dark(rgba(0, 0, 0, .18), rgba(255, 255, 255, .2));";
+  const CYCLE_FAVICON = "chrome://global/skin/icons/defaultFavicon.svg";
+
+  let cycleOverlay = null;
+  let cycleTarget = null;
+  let cycleSteps = 0;
+  let cycleTimer = null;
+
+  function tabReady(tab) {
+    if (!tab || tab.hasAttribute("pending") || tab.hasAttribute("busy")) return false;
+    return !!tab.linkedBrowser?.browsingContext?.currentWindowGlobal;
+  }
+
+  function ensureCycleOverlay() {
+    if (cycleOverlay?.isConnected) return cycleOverlay;
+    cycleOverlay = document.createElementNS(HTML_NS, "div");
+    cycleOverlay.id = CYCLE_ID;
+    cycleOverlay.setAttribute("popover", "manual");
+    document.documentElement.append(cycleOverlay);
+    return cycleOverlay;
+  }
+
+  function cycleCss() {
+    const rect = contentBox();
+    const viewport = document.documentElement.clientHeight;
+    const centerX = Math.round(rect ? rect.left + rect.width / 2 : window.innerWidth / 2);
+    const bottom = Math.round(rect ? viewport - rect.bottom + CYCLE_GAP : CYCLE_GAP);
+    return (
+      CYCLE_CSS +
+      `inset:auto auto ${Math.max(bottom, 0)}px ${Math.max(centerX, 0)}px;` +
+      "transform:translateX(-50%);"
+    );
+  }
+
+  function showCyclePreview(tab) {
+    const el = ensureCycleOverlay();
+    el.textContent = "";
+
+    const icon = document.createElementNS(HTML_NS, "img");
+    icon.style.cssText = "width:16px; height:16px; flex:0 0 auto; border-radius:3px;";
+    icon.addEventListener("error", () => { icon.src = CYCLE_FAVICON; }, { once: true });
+    icon.src = gBrowser.getIcon(tab) || CYCLE_FAVICON;
+
+    const title = document.createElementNS(HTML_NS, "span");
+    title.style.cssText = "overflow:hidden; text-overflow:ellipsis;";
+    title.textContent = tab.label || tab.linkedBrowser?.currentURI?.displaySpec || "";
+
+    const count = document.createElementNS(HTML_NS, "span");
+    count.style.cssText = "flex:0 0 auto; opacity:.55; font-variant-numeric:tabular-nums;";
+    count.textContent = cycleSteps > 0 ? `+${cycleSteps}` : String(cycleSteps);
+
+    el.append(icon, title, count);
+    el.style.cssText = cycleCss();
+    try {
+      el.showPopover();
+    } catch {}
+  }
+
+  function hideCyclePreview() {
+    if (!cycleOverlay?.isConnected) return;
+    try {
+      cycleOverlay.hidePopover();
+    } catch {}
+  }
+
+  function cancelCycle() {
+    if (cycleTimer) {
+      clearTimeout(cycleTimer);
+      cycleTimer = null;
+    }
+    cycleTarget = null;
+    cycleSteps = 0;
+    hideCyclePreview();
+  }
+
+  function commitCycle() {
+    const target = cycleTarget;
+    cancelCycle();
+    if (!target?.isConnected || target.closing) return false;
+    if (target === gBrowser.selectedTab) return false;
+    gBrowser.selectedTab = target;
+    return true;
+  }
+
   function cycleTabs(delta) {
-    const current = gBrowser.selectedTab;
-    if (!current) return;
-    const tabs = peerTabs(current).filter((tab) => !tab.hidden && !tab.closing);
-    const index = tabs.indexOf(current);
+    const base = cycleTarget?.isConnected ? cycleTarget : gBrowser.selectedTab;
+    if (!base) return;
+    const tabs = peerTabs(base).filter((tab) => !tab.hidden && !tab.closing);
+    const index = tabs.indexOf(base);
     if (index < 0 || tabs.length < 2) return;
-    gBrowser.selectedTab = tabs[(index + delta + tabs.length) % tabs.length];
+    const next = tabs[(index + delta + tabs.length) % tabs.length];
+
+    if (!cycleTarget && tabReady(next)) {
+      cycleSteps = 0;
+      gBrowser.selectedTab = next;
+      return;
+    }
+
+    cycleTarget = next;
+    cycleSteps += delta;
+    if (Math.abs(cycleSteps) >= 2) showCyclePreview(next);
+    if (cycleTimer) clearTimeout(cycleTimer);
+    cycleTimer = setTimeout(commitCycle, CYCLE_SETTLE_MS);
   }
 
   function tabFor(browser) {
@@ -392,8 +503,17 @@
       dialogHints.exitHints();
       omnibar.close();
       clearMode();
+      cancelCycle();
     });
-    window.addEventListener("unload", () => badge?.remove(), { once: true });
+    window.addEventListener(
+      "unload",
+      () => {
+        cancelCycle();
+        badge?.remove();
+        cycleOverlay?.remove();
+      },
+      { once: true }
+    );
   }
 
   registerPageActor();
