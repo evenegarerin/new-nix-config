@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, ... }:
 
 {
   programs.zsh = {
@@ -11,12 +11,15 @@
       enable = true;
       plugins = [
         "git"
-        "sudo"
         "history"
         "command-not-found"
       ];
       theme = "af-magic";
     };
+
+    interactiveShellInit = ''
+      source ${pkgs.zsh-vi-mode}/share/zsh-vi-mode/zsh-vi-mode.plugin.zsh
+    '';
   };
 
   programs.zoxide = {
