@@ -108,6 +108,7 @@
       taplo
       qt6.qtdeclarative
       typescript-language-server
+      vscode-langservers-extracted
       bash-language-server
       yaml-language-server
       marksman
