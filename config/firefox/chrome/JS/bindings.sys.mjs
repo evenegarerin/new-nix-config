@@ -18,6 +18,7 @@ export const BINDINGS = {
   B: "openOmnibarBookmarksNewTab",
   T: "openOmnibarTabs",
   m: "tabGroupMenu",
+  M: "tabGroupToggle",
   ge: "editUrl",
   r: "reload",
   R: "reloadHard",
@@ -50,7 +51,7 @@ export const HELP = [
     ["scrollToBottom", "Scroll to the bottom of the page"],
   ]],
   ["Using find", [
-    ["find", "Enter find mode"],
+    ["find", "Enter find mode (Enter accepts the match, Escape cancels)"],
     ["findNext", "Cycle forward to the next find match"],
     ["findPrevious", "Cycle backward to the previous find match"],
   ]],
@@ -73,6 +74,7 @@ export const HELP = [
     ["previousTab", "Go one tab left inside the current group"],
     ["openOmnibarTabs", "Search through your open tabs"],
     ["tabGroupMenu", "Switch to a tab group"],
+    ["tabGroupToggle", "Move the current tab between the const and let groups"],
   ]],
   ["Miscellaneous", [
     ["showHelp", "Show this help"],
@@ -89,7 +91,7 @@ export const BROWSER_COMMANDS = new Set([
   "openOmnibar", "openOmnibarNewTab", "openOmnibarBookmarks",
   "openOmnibarBookmarksNewTab", "openOmnibarTabs",
   "editUrl", "reload", "reloadHard", "copyUrl",
-  "openClipboardUrl", "openClipboardUrlNewTab", "tabGroupMenu",
+  "openClipboardUrl", "openClipboardUrlNewTab", "tabGroupMenu", "tabGroupToggle",
 ]);
 
 // Commands that fire again on key auto-repeat. With smooth scrolling, a held

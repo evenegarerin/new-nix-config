@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name           vimkeys
-// @description    Vimium-style keys wherever Vimium can't run: about: pages, browser dialogs, file://, …
+// @description    Vimium-style keys everywhere: pages, about: pages, browser dialogs, file://, …
 // @include        main
 // ==/UserScript==
 
 // Settings, key bindings, hints and scrolling live in vimkeys/core.sys.mjs.
-// VimkeysActor brings them to every page Vimium can't reach (about:config,
-// the new tab page, file://, …) and sends browser commands here. This script
+// VimkeysActor brings them to every page (about:config, the new tab page,
+// file://, …) and sends browser commands here. This script
 // covers what only the browser window can do: tab, history and find commands
 // (see runBrowserCommand), browser dialogs, and registering the actor.
 
@@ -259,14 +259,31 @@
   // ---- Browser dialogs -----------------------------------------------------
   // Pages, about:config included, get their keys from VimkeysActor. What's left
   // here are Firefox's own dialogs (confirmations, alerts, …): they sit on top
-  // of any tab, including normal websites where Vimium can't reach them. Only f
-  // is handled there; Enter, Escape and Tab keep their usual dialog behaviour.
+  // of any tab, and the actor does not reach them. Only f is handled there;
+  // Enter, Escape and Tab keep their usual dialog behaviour.
   // Firefox shows them in a <browser class="dialogFrame"> in the browser
   // window (tab-modal and window-modal ones alike).
   const dialogHints = new KeyHandler({ hintDocument: () => null, runBrowserCommand: () => {} });
 
+  function findBarAccepting(event) {
+    if (event.key !== "Enter" || event.ctrlKey || event.altKey || event.metaKey) return null;
+    if (event.isComposing) return null;
+    const target = eventTarget(event);
+    if (!target?.classList?.contains("findbar-textbox")) return null;
+    const findBar = target.closest("findbar");
+    if (!findBar || findBar.hidden || findBar.findMode !== findBar.FIND_NORMAL) return null;
+    return findBar;
+  }
+
   function onKeyDown(event) {
     if (dialogHints.handleHintKey(event)) return;
+
+    const findBar = findBarAccepting(event);
+    if (findBar) {
+      consume(event);
+      findBar.close();
+      return;
+    }
     if (event.key !== "f" || event.ctrlKey || event.altKey || event.metaKey || event.isComposing) return;
     const dialogFrame = dialogFrameOf(windowOf(eventTarget(event)));
     if (!dialogFrame) return;
@@ -291,23 +308,22 @@
     return null;
   }
 
-  // ---- Pages Vimium can't reach --------------------------------------------
-  // The actor comes to every page in a tab; on each one its child asks Firefox
-  // whether Vimium's scripts run there and only takes over if they don't (see
-  // VimkeysActorChild). Registered here rather than with fx-autoconfig's
-  // @WindowActor header, which only allows about:-page processes.
+  // ---- Pages ---------------------------------------------------------------
+  // The actor comes to every page in a tab (see VimkeysActorChild). Registered
+  // here rather than with fx-autoconfig's @WindowActor header, which only
+  // allows about:-page processes.
   const ACTOR_NAME = "VimkeysActor";
   const ACTOR_DIR = "chrome://userscripts/content/vimkeys/";
   const ACTOR_OPTIONS = {
     parent: { esModuleURI: ACTOR_DIR + "VimkeysActorParent.sys.mjs" },
     child: {
       esModuleURI: ACTOR_DIR + "VimkeysActorChild.sys.mjs",
-      events: { DOMContentLoaded: {} },
+      events: { DOMDocElementInserted: {}, DOMContentLoaded: {}, pageshow: {} },
     },
     // No `matches`: every page. Only pages in tabs, though; not sidebars,
     // extension popups or devtools.
     messageManagerGroups: ["browsers"],
-    allFrames: true, // frames are checked on their own, just like Vimium's
+    allFrames: true,
     // Firefox refuses actors in web and file:// processes unless they are
     // declared safe there, i.e. their parent side can't be abused by a
     // compromised page process. Ours only accepts a fixed list of command
@@ -337,9 +353,39 @@
     }
   }
 
+  function attachPageActor(browser) {
+    const global = browser?.browsingContext?.currentWindowGlobal;
+    if (!global) return;
+    try {
+      global.getActor(ACTOR_NAME).sendAsyncMessage("Vimkeys:attach", {});
+    } catch (err) {
+      console.error("[vimkeys] could not reach the page actor:", err);
+    }
+  }
+
+  const progressListener = {
+    QueryInterface: ChromeUtils.generateQI([
+      "nsIWebProgressListener",
+      "nsISupportsWeakReference",
+    ]),
+    onLocationChange(browser, webProgress) {
+      if (webProgress?.isTopLevel) attachPageActor(browser);
+    },
+    onStateChange(browser, webProgress, request, flags) {
+      if (!webProgress?.isTopLevel) return;
+      if (flags & Ci.nsIWebProgressListener.STATE_STOP) attachPageActor(browser);
+    },
+  };
+
   // ---- Startup -------------------------------------------------------------
   function init() {
     window.addEventListener("keydown", onKeyDown, true);
+    gBrowser.addTabsProgressListener(progressListener);
+    window.addEventListener(
+      "unload",
+      () => gBrowser.removeTabsProgressListener(progressListener),
+      { once: true }
+    );
     // Clicking anywhere in the window or switching tabs ends dialog hints.
     window.addEventListener("mousedown", () => dialogHints.exitHints(), true);
     gBrowser.tabContainer.addEventListener("TabSelect", () => {

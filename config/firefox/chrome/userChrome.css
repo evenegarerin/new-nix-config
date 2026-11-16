@@ -77,17 +77,32 @@
 }
 
 #tabbrowser-tabs[orient="vertical"] tab-group {
+  --tab-group-tint: 65%;
+  --tab-group-backdrop: light-dark(rgb(249, 249, 251), rgb(28, 27, 34));
+  --tab-group-subtle: color-mix(
+    in oklab,
+    var(--tab-group-color) var(--tab-group-tint),
+    var(--tab-group-backdrop)
+  );
+
   display: flex !important;
   flex-direction: column !important;
   margin: 4px 4px !important;
   padding: 3px 0 !important;
-  border: 2px solid var(--tab-group-color) !important;
+  border-width: 2px !important;
+  border-style: solid !important;
+  border-color: var(--tab-group-subtle) !important;
   border-radius: 14px !important;
   background-color: color-mix(
-    in srgb,
-    var(--tab-group-color) 10%,
+    in oklab,
+    var(--tab-group-subtle) 22%,
     transparent
   ) !important;
+}
+
+#tabbrowser-tabs[orient="vertical"] tab-group .tab-group-label {
+  background-color: var(--tab-group-subtle) !important;
+  color: inherit !important;
 }
 
 #tabbrowser-tabs[orient="vertical"] tab-group > .tabbrowser-tab {
@@ -167,8 +182,8 @@
   margin-block: 6px 7px;
   padding-inline: 4px;
   border-radius: 10px;
-  background-color: var(--tab-group-background-color);
-  color: var(--tab-group-text-color);
+  background-color: var(--tab-group-subtle);
+  color: inherit;
   font-size: 11px;
   font-weight: 700;
   line-height: 1;

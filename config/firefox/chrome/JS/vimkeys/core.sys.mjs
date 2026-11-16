@@ -1,7 +1,7 @@
 // vimkeys core: everything that happens inside a page (keys, link hints,
 // scrolling) plus the settings. Shared by vimkeys.uc.js
-// (about: pages, browser dialogs) and the VimkeysActor child (every page where
-// Vimium can't run), so there is exactly one place to change any of it.
+// (about: pages, browser dialogs) and the VimkeysActor child (every page),
+// so there is exactly one place to change any of it.
 
 import {
   HELP,
@@ -15,8 +15,6 @@ export const SETTINGS = {
   hintChars: "sadfjklewcmpgh", // "Characters used for link hints"
   scrollStep: 60,              // "Scroll step size" in px
   smoothScroll: true,          // "Use smooth scrolling"
-  // vimkeys steps aside wherever this extension (Vimium-FF) can run.
-  vimiumId: "{d7742d87-e61d-4b78-b8a1-b469842139fa}",
 };
 
 const HTML_NS = "http://www.w3.org/1999/xhtml";
@@ -770,7 +768,6 @@ function startHelp(doc, onExit) {
 }
 
 const SHOW_TEXT = 0x4;
-const DOCUMENT_POSITION_FOLLOWING = 0x4;
 const MIN_ANCHOR_TEXT = 50;
 
 const VISUAL_MOVEMENTS = {
@@ -781,6 +778,27 @@ const VISUAL_MOVEMENTS = {
 };
 
 const VISUAL_IGNORED_KEYS = new Set(["Shift", "Control", "Alt", "Meta", "CapsLock"]);
+
+function firstTextAnchor(doc) {
+  const root = doc.body ?? doc.documentElement;
+  if (!root) return null;
+  const walker = doc.createTreeWalker(root, SHOW_TEXT);
+  let fallback = null;
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    const text = node.data;
+    const trimmed = text.trim();
+    if (!trimmed) continue;
+    const element = node.parentElement;
+    if (!element || isEditable(element) || !visibleRect(element)) continue;
+    const range = doc.createRange();
+    const offset = text.length - text.replace(/^\s+/, "").length;
+    range.setStart(node, offset);
+    range.setEnd(node, offset);
+    if (trimmed.length >= MIN_ANCHOR_TEXT) return range;
+    fallback ??= range;
+  }
+  return fallback;
+}
 
 function collapseSelection(selection) {
   try {

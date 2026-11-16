@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           tabgroup-manager
-// @description    Keeps the "const" and "let" tab groups alive, "let" last and holding every ungrouped new tab
+// @description    Keeps the "const" and "let" tab groups alive, "let" last and holding every new tab
 // @include        main
 // ==/UserScript==
 
@@ -17,6 +17,7 @@
   ];
   const LAST_LABEL = "let";
   const INBOX_LABEL = "let";
+  const KEEP_LABEL = "const";
   const PLACEHOLDER_URL = "about:newtab";
   const RESTORED_TOPIC = "sessionstore-windows-restored";
   const SKIP_PRIVATE = true;
@@ -31,6 +32,7 @@
   let dirty = false;
   let ready = false;
   let clearPending = false;
+  let restoring = false;
   const strays = new Set();
 
   function groupsLabelled(label) {
@@ -51,6 +53,7 @@
 
   function createGroup({ label, color }) {
     const tab = gBrowser.addTrustedTab(PLACEHOLDER_URL, { skipAnimation: true });
+    strays.delete(tab);
     const group = gBrowser.addTabGroup([tab], { label, color });
     if (!group) {
       gBrowser.removeTab(tab, { animate: false });
@@ -87,12 +90,32 @@
   function adoptStrays(group) {
     for (const tab of strays) {
       strays.delete(tab);
-      if (!tab.isConnected || tab.closing || tab.pinned || tab.group) continue;
+      if (!tab.isConnected || tab.closing || tab.pinned) continue;
+      if (tab.group === group) continue;
       try {
         gBrowser.moveTabToExistingGroup(tab, group);
       } catch (err) {
         console.error(LOG_PREFIX, err);
       }
+    }
+  }
+
+  function toggleTabGroup() {
+    const tab = gBrowser.selectedTab;
+    if (!tab || tab.pinned || tab.closing) return;
+    const label = tab.group?.label === KEEP_LABEL ? INBOX_LABEL : KEEP_LABEL;
+    const target = groupsLabelled(label)[0];
+    if (!target) {
+      schedule();
+      return;
+    }
+    strays.delete(tab);
+    if (tab.group === target) return;
+    if (target.collapsed) target.collapsed = false;
+    try {
+      gBrowser.moveTabToExistingGroup(tab, target);
+    } catch (err) {
+      console.error(LOG_PREFIX, err);
     }
   }
 
@@ -102,6 +125,7 @@
       return;
     }
     running = true;
+    restoring = false;
 
     if (clearPending) {
       clearPending = false;
@@ -184,12 +208,13 @@
 
   const extras = (window.vimkeysCommands ??= {});
   extras.tabGroupMenu = openGroupMenu;
+  extras.tabGroupToggle = toggleTabGroup;
 
   if (!maintain) return;
 
   gBrowser.tabContainer.addEventListener("TabOpen", (event) => {
     const tab = event.target;
-    if (!ready || tab.pinned) return;
+    if (!ready || restoring || tab.pinned) return;
     strays.add(tab);
     schedule();
   });
@@ -217,6 +242,10 @@
     { once: true }
   );
 
+  window.addEventListener("SSWindowRestoring", () => {
+    restoring = true;
+    schedule();
+  });
   window.addEventListener("SSWindowRestored", schedule, { once: true });
   SessionStore.promiseInitialized.then(schedule, (err) => console.error(LOG_PREFIX, err));
 })();
