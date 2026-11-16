@@ -40,6 +40,9 @@
       pulseaudio
       brightnessctl
       bluez
+      bluetui
+      typtea
+      llmfit
       pnpm
       nodejs
       (python3.withPackages (
