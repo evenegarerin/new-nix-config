@@ -27,11 +27,17 @@
   const HTML_NS = "http://www.w3.org/1999/xhtml";
   const BADGE_ID = "vimkeys-mode-indicator";
   const BADGE_CSS =
-    "position:fixed; margin:0; inset:auto auto 14px 14px; width:max-content; height:max-content;" +
+    "position:fixed; margin:0; width:max-content; height:max-content;" +
     "box-sizing:border-box; padding:3px 9px; overflow:visible; pointer-events:none;" +
     "font:bold 11px/1.4 Helvetica, Arial, sans-serif; letter-spacing:.09em; text-transform:uppercase;" +
-    "color:#302505; white-space:nowrap; border:1px solid #c38a22; border-radius:4px;" +
-    "background:linear-gradient(to bottom, #fff785, #ffc542); box-shadow:0 2px 6px rgba(0,0,0,.35);";
+    "white-space:nowrap; border-radius:4px; box-shadow:0 2px 6px rgba(0,0,0,.35);";
+  const BADGE_GAP = 14;
+  const CONTENT_BOX_ID = "tabbrowser-tabbox";
+  const MODE_STYLES = {
+    insert: { text: "#1d2a07", border: "#6f941f", top: "#c8ea72", bottom: "#9acd32" },
+    visual: { text: "#35173a", border: "#a05ea8", top: "#efc4ef", bottom: "#dda0dd" },
+  };
+  const FALLBACK_STYLE = { text: "#302505", border: "#c38a22", top: "#fff785", bottom: "#ffc542" };
 
   let badge = null;
   let modeOwner = null;
@@ -41,9 +47,27 @@
     badge = document.createElementNS(HTML_NS, "div");
     badge.id = BADGE_ID;
     badge.setAttribute("popover", "manual");
-    badge.style.cssText = BADGE_CSS;
     document.documentElement.append(badge);
     return badge;
+  }
+
+  function contentBox() {
+    const rect = document.getElementById(CONTENT_BOX_ID)?.getBoundingClientRect();
+    return rect?.width && rect?.height ? rect : null;
+  }
+
+  function badgeCss(mode) {
+    const style = MODE_STYLES[mode] ?? FALLBACK_STYLE;
+    const rect = contentBox();
+    const left = Math.round((rect?.left ?? 0) + BADGE_GAP);
+    const viewport = document.documentElement.clientHeight;
+    const bottom = Math.round(rect ? viewport - rect.bottom + BADGE_GAP : BADGE_GAP);
+    return (
+      BADGE_CSS +
+      `inset:auto auto ${Math.max(bottom, 0)}px ${Math.max(left, 0)}px;` +
+      `color:${style.text}; border:1px solid ${style.border};` +
+      `background:linear-gradient(to bottom, ${style.top}, ${style.bottom});`
+    );
   }
 
   function hideBadge() {
@@ -68,6 +92,7 @@
     try {
       const el = ensureBadge();
       el.textContent = mode;
+      el.style.cssText = badgeCss(mode);
       el.showPopover();
     } catch (err) {
       console.error("[vimkeys]", err);
@@ -89,9 +114,10 @@
     previousTab: () => cycleTabs(-1),
     openOmnibar: () => omnibar.open(),
     openOmnibarNewTab: () => omnibar.open({ newTab: true }),
-    openOmnibarBookmarks: () => omnibar.open({ sources: "bookmarks" }),
-    openOmnibarBookmarksNewTab: () => omnibar.open({ sources: "bookmarks", newTab: true }),
-    openOmnibarTabs: () => omnibar.open({ sources: "tabs" }),
+    openOmnibarBookmarks: () => omnibar.open({ sources: "bookmarks", selectFirst: true }),
+    openOmnibarBookmarksNewTab: () =>
+      omnibar.open({ sources: "bookmarks", newTab: true, selectFirst: true }),
+    openOmnibarTabs: () => omnibar.open({ sources: "tabs", selectFirst: true }),
     editUrl: () => omnibar.open({ prefill: gBrowser.currentURI?.displaySpec ?? "" }),
     reload: (browser) => browser.reload(),
     reloadHard: (browser) =>
@@ -149,9 +175,11 @@
     findBar[method](...args);
   }
 
-  // Same as Ctrl+T: respects your new-tab page setting and focuses the address bar.
+  // Respects your new-tab page setting and focuses the address bar.
   function openNewTab() {
-    if (window.BrowserCommands?.openTab) {
+    if (typeof gBrowser.addAdjacentNewTab === "function") {
+      gBrowser.addAdjacentNewTab(gBrowser.selectedTab);
+    } else if (window.BrowserCommands?.openTab) {
       window.BrowserCommands.openTab();
     } else {
       window.BrowserOpenTab();
@@ -214,6 +242,7 @@
     openTrustedLinkIn(url, newTab ? "tab" : "current", {
       postData: info.postData,
       allowInheritPrincipal: false,
+      relatedToCurrent: newTab,
     });
   }
 

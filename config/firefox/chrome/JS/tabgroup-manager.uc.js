@@ -13,7 +13,7 @@
   const LOG_PREFIX = "[tabgroup-manager]";
   const GROUPS = [
     { label: "const", color: "blue" },
-    { label: "let", color: "gray" },
+    { label: "let", color: "red" },
   ];
   const LAST_LABEL = "let";
   const INBOX_LABEL = "let";

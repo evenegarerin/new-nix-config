@@ -782,6 +782,32 @@ const VISUAL_MOVEMENTS = {
 
 const VISUAL_IGNORED_KEYS = new Set(["Shift", "Control", "Alt", "Meta", "CapsLock"]);
 
+function collapseSelection(selection) {
+  try {
+    selection.removeAllRanges();
+  } catch (err) {
+    console.error(LOG_PREFIX, err);
+  }
+}
+
+function copySelection(selection) {
+  let text;
+  try {
+    text = selection.toString();
+  } catch (err) {
+    console.error(LOG_PREFIX, err);
+    return;
+  }
+  if (!text) return;
+  try {
+    Cc["@mozilla.org/widget/clipboardhelper;1"]
+      .getService(Ci.nsIClipboardHelper)
+      .copyString(text);
+  } catch (err) {
+    console.error(LOG_PREFIX, err);
+  }
+}
+
 function startVisual(doc, onExit) {
   const win = doc.defaultView;
   const selection = win?.getSelection();
@@ -831,7 +857,7 @@ function startVisual(doc, onExit) {
         return;
       }
       if (key === "y") {
-        copySelection(doc, selection);
+        copySelection(selection);
         collapseSelection(selection);
         exit();
         return;

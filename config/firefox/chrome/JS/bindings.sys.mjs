@@ -113,3 +113,39 @@ export function resolveKeys(keys) {
   if (PREFIXES.has(keys)) return { keys, prefix: true };
   return null;
 }
+
+export const SEARCH_ENGINES = `
+go: https://www.google.com/search?q=%s Google
+yt: https://www.youtube.com/results?search_query=%s Youtube
+gm: https://www.google.com/maps?q=%s Google maps
+
+nix: https://search.nixos.org/packages?query=%s
+home: https://home-manager-options.extranix.com/?query=%s&release=release-25.11
+`;
+
+const ENGINE_PROTOCOL = /^[a-z][a-z0-9.+-]*:/i;
+const ENGINE_BLOCKED = /^(javascript|data):/i;
+
+export function parseSearchEngines(text) {
+  const engines = new Map();
+  for (const raw of String(text).replace(/\\\n/g, "").split("\n")) {
+    const line = raw.trim();
+    if (!line || line[0] === "#" || line[0] === '"') continue;
+    const tokens = line.split(/\s+/);
+    if (tokens.length < 2 || !tokens[0].includes(":")) continue;
+    const keyword = tokens[0].split(":")[0];
+    const url = tokens[1];
+    if (!keyword || !ENGINE_PROTOCOL.test(url) || ENGINE_BLOCKED.test(url)) continue;
+    const description = tokens.length > 2 ? tokens.slice(2).join(" ") : `search (${keyword})`;
+    engines.set(keyword, { keyword, url, description });
+  }
+  return engines;
+}
+
+export function buildSearchUrl(terms, template) {
+  let url = template;
+  if (!url.includes("%s") && !url.includes("%S")) url += "%s";
+  url = url.replaceAll("%S", terms);
+  const encoded = terms.split(/\s+/).map(encodeURIComponent).join("%20");
+  return url.replaceAll("%s", encoded);
+}

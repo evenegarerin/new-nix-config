@@ -1,3 +1,9 @@
+import {
+  SEARCH_ENGINES,
+  buildSearchUrl,
+  parseSearchEngines,
+} from "chrome://userscripts/content/bindings.sys.mjs";
+
 const lazy = {};
 
 ChromeUtils.defineESModuleGetters(lazy, {
@@ -17,6 +23,7 @@ const MENU_MAX_RESULTS = 20;
 const PANEL_WIDTH = 640;
 const PANEL_TOP = 72;
 const DEFAULT_FAVICON = "chrome://global/skin/icons/defaultFavicon.svg";
+const SEARCH_ICON = "chrome://global/skin/icons/search-glass.svg";
 const BLOCKED_SCHEMES = ["javascript:", "data:"];
 
 const BOX_CSS =
@@ -51,9 +58,9 @@ export const OMNIBAR_SOURCES = {
 
 function isUsable(result) {
   const types = lazy.UrlbarShared.RESULT_TYPE;
+  if (result.type === types.SEARCH) return !!result.heuristic;
   return (
     result.type === types.TAB_SWITCH ||
-    result.type === types.SEARCH ||
     result.type === types.URL ||
     result.type === types.KEYWORD ||
     result.type === types.REMOTE_TAB
@@ -117,6 +124,27 @@ function entryFromItem(item, index) {
   };
 }
 
+let engines = null;
+
+function engineFor(value) {
+  engines ??= parseSearchEngines(SEARCH_ENGINES);
+  const parts = value.replace(/^\s+/, "").split(/\s+/);
+  if (parts.length < 2) return null;
+  const engine = engines.get(parts[0]);
+  if (!engine) return null;
+  return { engine, terms: parts.slice(1).join(" ") };
+}
+
+function entryFromEngine({ engine, terms }) {
+  return {
+    title: terms || engine.keyword,
+    detail: engine.description,
+    kind: "search",
+    icon: SEARCH_ICON,
+    url: buildSearchUrl(terms, engine.url),
+  };
+}
+
 function isMotion(event, letter) {
   return (event.ctrlKey || event.altKey) && event.key === letter;
 }
@@ -142,6 +170,9 @@ export class Omnibar {
   #context = null;
   #sources = null;
   #newTab = false;
+  #heuristic = null;
+  #engine = null;
+  #selectFirst = false;
   #mode = "urlbar";
   #maxResults = MAX_RESULTS;
   #emptyText = "no results";
@@ -152,11 +183,14 @@ export class Omnibar {
     this.win = win;
   }
 
-  open({ sources = null, newTab = false, prefill = "" } = {}) {
+  open({ sources = null, newTab = false, prefill = "", selectFirst = false } = {}) {
     this.#settle();
     this.#mode = "urlbar";
     this.#sources = sources;
     this.#newTab = newTab;
+    this.#selectFirst = selectFirst;
+    this.#heuristic = null;
+    this.#engine = null;
     this.#items = [];
     this.#maxResults = MAX_RESULTS;
     this.#emptyText = "no results";
@@ -178,6 +212,9 @@ export class Omnibar {
     this.#mode = "menu";
     this.#sources = null;
     this.#newTab = false;
+    this.#selectFirst = true;
+    this.#heuristic = null;
+    this.#engine = null;
     this.#items = Array.from(items, entryFromItem);
     this.#maxResults = Math.max(1, maxResults);
     this.#emptyText = "no matches";
@@ -216,7 +253,7 @@ export class Omnibar {
   #show({ prompt, placeholder, prefill }) {
     this.#ensurePanel();
     this.#entries = [];
-    this.#selected = 0;
+    this.#selected = this.#selectFirst ? 0 : -1;
     this.#prompt.textContent = prompt;
     this.#prompt.style.display = prompt ? "block" : "none";
     this.#input.setAttribute("placeholder", placeholder);
@@ -304,12 +341,32 @@ export class Omnibar {
     this.#context = null;
   }
 
+  #minIndex() {
+    return this.#selectFirst || this.#engine ? 0 : -1;
+  }
+
+  #clampSelection() {
+    const min = this.#minIndex();
+    this.#selected = Math.max(min, Math.min(this.#selected, this.#entries.length - 1));
+  }
+
   #search(value) {
     this.#cancel();
-    this.#selected = 0;
+    this.#heuristic = null;
+    this.#engine = null;
+    this.#selected = this.#selectFirst ? 0 : -1;
 
     if (this.#mode === "menu") {
       this.#filter(value);
+      return;
+    }
+
+    const search = this.#sources ? null : engineFor(value);
+    if (search) {
+      this.#engine = search.engine;
+      this.#selected = 0;
+      this.#entries = [entryFromEngine(search)];
+      this.#renderRows();
       return;
     }
 
@@ -318,6 +375,7 @@ export class Omnibar {
       allowAutofill: false,
       isPrivate: lazy.PrivateBrowsingUtils.isWindowPrivate(this.win),
       maxResults: this.#maxResults,
+      prohibitRemoteResults: true,
       sapName: SAP_NAME,
       searchString: value,
       userContextId: parseInt(browser.getAttribute("usercontextid") || 0, 10),
@@ -363,12 +421,18 @@ export class Omnibar {
     }
     matched.sort((a, b) => a.score - b.score || a.entry.index - b.entry.index);
     this.#entries = matched.slice(0, this.#maxResults).map((match) => match.entry);
+    this.#clampSelection();
     this.#renderRows();
   }
 
   #update(results) {
-    this.#entries = results.filter(isUsable).slice(0, this.#maxResults).map(entryFromResult);
-    this.#selected = Math.max(0, Math.min(this.#selected, this.#entries.length - 1));
+    const usable = results.filter(isUsable);
+    this.#heuristic = usable.find((result) => result.heuristic) ?? null;
+    this.#entries = usable
+      .filter((result) => !result.heuristic)
+      .slice(0, this.#maxResults)
+      .map(entryFromResult);
+    this.#clampSelection();
     this.#renderRows();
   }
 
@@ -421,8 +485,9 @@ export class Omnibar {
   }
 
   #select(index) {
-    if (index === this.#selected || !this.#entries.length) return;
+    if (index === this.#selected) return;
     this.#selected = index;
+    if (!this.#entries.length) return;
     const rows = this.#list.children;
     for (let i = 0; i < rows.length; i++) {
       rows[i].style.cssText = ROW_CSS + (i === this.#selected ? ROW_SELECTED_CSS : "");
@@ -430,9 +495,11 @@ export class Omnibar {
   }
 
   #move(delta) {
-    const count = this.#entries.length;
-    if (!count) return;
-    this.#select((this.#selected + delta + count) % count);
+    const min = this.#minIndex();
+    const span = this.#entries.length - min;
+    if (span <= 0) return;
+    const offset = (((this.#selected - min + delta) % span) + span) % span;
+    this.#select(min + offset);
   }
 
   #onKeyDown(event) {
@@ -467,30 +534,35 @@ export class Omnibar {
   }
 
   #activate(invert) {
-    const entry = this.#entries[this.#selected];
-    if (!entry) return;
+    const entry = this.#selected >= 0 ? this.#entries[this.#selected] : null;
 
     if (this.#mode === "menu") {
+      if (!entry) return;
       this.#choice = entry.item;
       this.close();
       return;
     }
 
+    const result = entry ? entry.result : this.#heuristic;
+    if (!entry?.url && !result) return;
+
     const newTab = invert ? !this.#newTab : this.#newTab;
     this.close();
 
-    if (entry.result.type === lazy.UrlbarShared.RESULT_TYPE.TAB_SWITCH && !newTab) {
-      this.#switchToTab(entry.result);
+    if (result?.type === lazy.UrlbarShared.RESULT_TYPE.TAB_SWITCH && !newTab) {
+      this.#switchToTab(result);
       return;
     }
 
-    let url;
-    let postData;
-    try {
-      ({ url, postData } = lazy.UrlbarUtils.getUrlFromResult(entry.result));
-    } catch (err) {
-      console.error(LOG_PREFIX, err);
-      return;
+    let url = entry?.url ?? null;
+    let postData = null;
+    if (!url) {
+      try {
+        ({ url, postData } = lazy.UrlbarUtils.getUrlFromResult(result));
+      } catch (err) {
+        console.error(LOG_PREFIX, err);
+        return;
+      }
     }
     if (!url) return;
 
@@ -503,6 +575,7 @@ export class Omnibar {
     this.win.openTrustedLinkIn(url, newTab ? "tab" : "current", {
       postData,
       allowInheritPrincipal: false,
+      relatedToCurrent: newTab,
     });
   }
 
