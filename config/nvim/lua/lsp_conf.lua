@@ -102,6 +102,7 @@ local enabled_lsp_servers = {
 
   elmls = { exe = "elm-language-server", optional = true },
   ts_ls = { exe = "typescript-language-server", optional = true },
+  cssls = { exe = "vscode-css-language-server", optional = true },
   bashls = { exe = "bash-language-server", optional = true },
   yamlls = { exe = "yaml-language-server", optional = true },
   marksman = { exe = "marksman", optional = true },

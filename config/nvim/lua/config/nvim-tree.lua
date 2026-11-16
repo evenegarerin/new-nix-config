@@ -64,6 +64,25 @@ require("nvim-tree").setup {
     })
   end,
 
+  view = {
+    side = "right",
+    float = {
+      enable = true,
+      quit_on_focus_loss = true,
+      open_win_config = function()
+        local width = 40
+        return {
+          relative = "editor",
+          border = "rounded",
+          width = width,
+          height = math.max(vim.o.lines - vim.o.cmdheight - 3, 1),
+          row = 0,
+          col = vim.o.columns - width - 2,
+        }
+      end,
+    },
+  },
+
   diagnostics = {
     enable = true,
 

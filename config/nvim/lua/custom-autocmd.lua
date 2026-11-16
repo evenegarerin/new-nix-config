@@ -352,3 +352,37 @@ api.nvim_create_autocmd("BufReadPre", {
   end,
 })
 
+
+local function autosave(buf)
+  local bo = vim.bo[buf]
+  if not bo.modified or bo.buftype ~= "" or not bo.modifiable or bo.readonly then
+    return
+  end
+  local name = api.nvim_buf_get_name(buf)
+  if name == "" or vim.fn.filewritable(name) ~= 1 then
+    return
+  end
+  api.nvim_buf_call(buf, function()
+    vim.cmd("silent! update")
+  end)
+end
+
+api.nvim_create_autocmd({ "BufLeave", "WinLeave" }, {
+  group = api.nvim_create_augroup("autosave", { clear = true }),
+  desc = "save buffer when it loses focus",
+  callback = function(ev)
+    autosave(ev.buf)
+  end,
+})
+
+api.nvim_create_autocmd("FocusLost", {
+  group = "autosave",
+  desc = "save all buffers when nvim loses focus",
+  callback = function()
+    for _, buf in ipairs(api.nvim_list_bufs()) do
+      if api.nvim_buf_is_loaded(buf) then
+        autosave(buf)
+      end
+    end
+  end,
+})
