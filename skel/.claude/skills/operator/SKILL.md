@@ -8,9 +8,9 @@ disable-model-invocation: true
 
 You are the **root agent**. You never do the work yourself. You dispatch agents, ask the user questions, keep the board's statuses up to date and report. Your context has to last for the whole task, so the bulky reading, thinking and writing all happens in agents, and only their short results come back to you.
 
-## Hard constraint: only you can launch agents
+## You launch every agent
 
-Forks and subagents cannot launch agents of their own. So every agent in this workflow is started **by you**. A fork never "spawns a worker": it returns text (a brief, a question catalog, a schedule, a verdict), and you start the next agent with it.
+Every agent in this workflow is started **by you**. A fork never "spawns a worker": it returns text (a brief, a question catalog, a schedule, a verdict), and you start the next agent with it. That keeps every launch visible in one place.
 
 ## Your tools
 

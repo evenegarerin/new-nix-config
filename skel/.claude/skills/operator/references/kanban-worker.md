@@ -1,6 +1,6 @@
 # Kanban Worker
 
-This is the execution loop the **operator root agent runs itself**. Subagents and forks cannot launch further agents, so the root is the only one who can dispatch ticket workers. The root does not implement tickets: it schedules them, hands each one to a worker, checks the result and records the new status on the board. The board file is the single source of truth, so anyone (a human, or the root after an interruption) can see exactly where things stand.
+This is the execution loop the **operator root agent runs itself**. The root does not implement tickets: it schedules them, hands each one to a worker, checks the result and records the new status on the board. The board file is the single source of truth, so anyone (a human, or the root after an interruption) can see exactly where things stand.
 
 ## The one rule about the board file
 
@@ -37,9 +37,9 @@ Workers report back to the root and never touch the board file.
 ### 2. Main loop
 Repeat until nothing is left to start:
 
-1. **Fork a scheduler** with the scheduler prompt below. It re-reads the board, finds every ready ticket (status `todo`, all dependencies `done`), works out which would touch the same files, and returns **lanes**: tickets in one lane run one after another, different lanes run in parallel. The fork only reads and returns text.
+1. **Fork a scheduler** with the scheduler prompt below. It re-reads the board, finds every ready ticket (status `todo`, all dependencies `done`), works out which would touch the same files, and returns **lanes**: tickets in one lane run one after another, different lanes run in parallel. The fork only reads and returns text; it never edits the board or any other file. Doing this in a fork keeps the file inspection out of the root's context.
 2. **Set each ticket to `in_progress` right before its worker starts.** In a multi-ticket lane, the later tickets stay `todo` until their turn.
-3. **Start the first ticket of every lane in the same message**, so the lanes run in parallel, using the ticket prompt template below. At most **4** lanes at once (or what the user asked for). When a ticket finishes, start the next one in its lane.
+3. **Start the first ticket of every lane in the same message**, so the lanes run in parallel, using the ticket prompt template below. At most **4** lanes at once (or what the user asked for); if the scheduler returns more, start the rest as lanes finish. When a ticket finishes, start the next one in its lane.
 4. **Handle each result** as described in step 3.
 5. **Loop.** When every lane is finished, fork a new scheduler; finished tickets may have unlocked new ones.
 
@@ -51,7 +51,7 @@ If the scheduler's answer doesn't follow the format, or lists a ticket that isn'
 Each worker ends with a `RESULT:` block.
 
 - **DONE**: if the ticket's Done-when names a cheap command (tests, build via `just`), fork a quick check or trust the worker's report of having run it; don't pull large output into the root. If it holds up, set the ticket to `done`.
-- **FAILED**, or the check fails: retry **once** with a fresh worker and add the failure reason to its prompt. If the retry also fails, set the ticket to `failed`, keep the reason for the final report, and continue. Its dependents never become ready; everything else carries on.
+- **FAILED**, or the check fails: retry **once** with a fresh worker and add the failure reason to its prompt. If the retry also fails, set the ticket to `failed`, keep the reason for the final report, and continue. Its dependents never become ready; everything else carries on. If the ticket was part of a lane, carry on with the next ticket in that lane: they only shared a lane because of file overlap, not because one needs the other.
 
 Never fix a ticket's work in the root. The root's context has to last for the whole board.
 
