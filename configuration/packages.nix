@@ -33,6 +33,7 @@
       xev
       (callPackage ../selfBuild/vtop.nix { })
       (callPackage ../selfBuild/vimnm.nix { })
+      (callPackage ../selfBuild/visual-keys.nix { })
       keypunch
       appflowy
       devtoolbox

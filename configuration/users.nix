@@ -34,6 +34,7 @@ in
         "docker"
         "libvirtd"
         "keyd"
+        "input"
       ];
     };
 
