@@ -26,6 +26,8 @@ local utility_apps = {
   { exec = "rmpc", class = [[^rmpc$]], size = { "monitor_h * 0.7", "monitor_h * 0.6" } },
   { exec = "imv", class = [[^imv$]], size = { "monitor_w * 0.8", "monitor_h * 0.8" } },
   { exec = "wiremix", class = [[^wiremix$]], size = { "monitor_h * 0.7", "monitor_h * 0.6" } },
+  { exec = "bluetui", class = [[^bluetui$]], size = { "monitor_h * 0.5", "monitor_h * 0.6" } },
+  { exec = "typtea", class = [[^typtea$]], size = { "monitor_h * 0.8", "monitor_h * 0.6" } },
 }
 
 local function to_lua_pattern(re)

@@ -88,6 +88,19 @@ in
     terminal = false;
   };
 
+  xdg.desktopEntries.bluetui = {
+    categories = [
+      "Network"
+      "ConsoleOnly"
+    ];
+    exec = "${terminal} --class bluetui -- bluetui";
+    genericName = "Bluetooth Manager";
+    name = "Bluetui";
+    icon = terminal;
+    settings.StartupWMClass = "bluetui";
+    terminal = false;
+  };
+
   xdg.desktopEntries.superfile = {
     categories = [
       "System"
@@ -102,6 +115,19 @@ in
     settings.StartupWMClass = "superfile";
     terminal = false;
     mimeType = [ "inode/directory" ];
+  };
+
+  xdg.desktopEntries.typtea = {
+    categories = [
+      "Game"
+      "ConsoleOnly"
+    ];
+    exec = "${terminal} --class typtea -- typtea";
+    genericName = "Typing Trainer";
+    name = "Typtea";
+    icon = terminal;
+    settings.StartupWMClass = "typtea";
+    terminal = false;
   };
 
   xdg.desktopEntries.rmpc = {

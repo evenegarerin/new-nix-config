@@ -114,9 +114,6 @@ use the last characters (seperator chracter of the statuscolumn) color to convey
 
 rmpc config
 
-i am unhappy with / and visual mode
-omnibars filtering needs to be improved
-give mode indicator a little left a padding, so it does not overlap with the tabbar and give it different colors based on mode lime for insert and a very bright low saturation purple for visual, inspired by me neovim config
-docker-compose instalieren
-search engines stuff omni bar
-
+zsh vi mode configuration.
+kitty vi mode. ??? goal easy copying of old commands output etc.
+a programm that shows me keypresses
