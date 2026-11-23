@@ -10,12 +10,15 @@ let
   };
 
   parsers = pkgs.runCommand "nvim-treesitter-parsers" { } ''
-    mkdir -p $out/parser
+    mkdir -p $out/share/nvim/site/parser
     ${lib.concatStringsSep "\n" (
-      lib.mapAttrsToList (lang: pkg: "ln -s ${pkg}/parser $out/parser/${lang}.so") grammars
+      lib.mapAttrsToList (
+        lang: pkg: "ln -s ${pkg}/parser $out/share/nvim/site/parser/${lang}.so"
+      ) grammars
     )}
   '';
 in
 {
-  xdg.dataFile."nvim/site/parser".source = "${parsers}/parser";
+  environment.systemPackages = [ parsers ];
+  environment.pathsToLink = [ "/share/nvim" ];
 }

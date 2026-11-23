@@ -8,6 +8,7 @@
     ./configuration/hardware.nix
     ./configuration/keyd.nix
     ./configuration/locale.nix
+    ./configuration/neovim.nix
     ./configuration/networking.nix
     ./configuration/packages.nix
     ./configuration/shell.nix

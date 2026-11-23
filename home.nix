@@ -6,7 +6,6 @@
     ./home/mimeApps.nix
     ./home/configLinks.nix
     ./home/firefox.nix
-    ./home/neovim.nix
   ];
 
   gtk = {

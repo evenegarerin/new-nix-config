@@ -540,6 +540,11 @@ require("lazy").setup {
     enabled = false,
     hererocks = false,
   },
+  performance = {
+    rtp = {
+      paths = { "/run/current-system/sw/share/nvim/site" },
+    },
+  },
 }
 
 -- Short names for the common plugin manager commands. Type `:`, then the alias,
