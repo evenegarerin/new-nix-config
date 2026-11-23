@@ -14,7 +14,7 @@ Singleton {
 
   Process {
     id: proc
-    command: [Quickshell.shellPath("herdr-agents.sh"), "status"]
+    command: [Quickshell.shellPath("Bar/herdr-agents.sh"), "status"]
 
     stdout: StdioCollector {
       onStreamFinished: {

@@ -115,4 +115,3 @@ use the last characters (seperator chracter of the statuscolumn) color to convey
 rmpc config
 
 zsh vi mode configuration.
-a programm that shows me keypresses
