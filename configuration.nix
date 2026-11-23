@@ -3,6 +3,7 @@
   imports = [
     ./configuration/activations.nix
     ./configuration/audio.nix
+    ./configuration/auto-upgrade.nix
     ./configuration/config-links.nix
     ./configuration/desktop.nix
     ./configuration/desktop-files.nix
