@@ -59,7 +59,7 @@ update-input input:
     nix flake update "$1"
 
 # Update all inputs, then switch to the result
-upgrade: update switch
+upgrade: update boot
 
 # Show what `just upgrade` would change, without building (pass "all" for the unfiltered diff)
 upgrade-preview mode="brief":
