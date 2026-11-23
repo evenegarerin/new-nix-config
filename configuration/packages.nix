@@ -25,6 +25,7 @@
       mission-center
       # nwg-displays
       # nwg-look
+      devenv
       playerctl
       hyprcursor
       wlrctl
