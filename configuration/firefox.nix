@@ -1,7 +1,23 @@
-{ ... }:
+{ config, pkgs, ... }:
 
+let
+  user = config.my.user;
+  home = config.users.users.${user}.home;
+  firefoxDir = "${home}/.config/mozilla/firefox";
+
+  profilesIni = pkgs.writeText "profiles.ini" ''
+    [General]
+    StartWithLastProfile=1
+    Version=2
+
+    [Profile0]
+    Default=1
+    IsRelative=1
+    Name=default
+    Path=default
+  '';
+in
 {
-  # System-wide Firefox: fx-autoconfig plus enterprise policies. The profile and its chrome/ symlink are in home/firefox.nix.
   programs.firefox = {
     enable = true;
     autoConfig = builtins.readFile (
@@ -12,4 +28,12 @@
     );
     policies = (builtins.fromJSON (builtins.readFile ../config/firefox/policies.json)).policies;
   };
+
+  systemd.tmpfiles.rules = [
+    "d ${home}/.config/mozilla 0755 ${user} users -"
+    "d ${firefoxDir} 0755 ${user} users -"
+    "d ${firefoxDir}/default 0700 ${user} users -"
+    "L+ ${firefoxDir}/profiles.ini - - - - ${profilesIni}"
+    "L+ ${firefoxDir}/default/chrome - - - - ${home}/nix-config/config/firefox/chrome"
+  ];
 }

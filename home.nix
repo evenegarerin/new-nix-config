@@ -5,7 +5,6 @@
     ./home/activation.nix
     ./home/mimeApps.nix
     ./home/configLinks.nix
-    ./home/firefox.nix
   ];
 
   gtk = {
