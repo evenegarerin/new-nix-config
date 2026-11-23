@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
 let
   terminal = "kitty";
@@ -22,7 +22,7 @@ let
       icon ? terminal,
       mimeTypes ? [ ],
     }:
-    pkgs.makeDesktopItem {
+    lib.hiPrio (pkgs.makeDesktopItem {
       inherit
         name
         desktopName
@@ -34,7 +34,7 @@ let
       exec = "${terminal} --class ${name} -- ${command}";
       startupWMClass = name;
       terminal = false;
-    };
+    });
 in
 
 {
