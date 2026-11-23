@@ -1,12 +1,6 @@
 { pkgs, osConfig, ... }:
 
 {
-  imports = [
-    ./home/activation.nix
-    ./home/mimeApps.nix
-    ./home/configLinks.nix
-  ];
-
   gtk = {
     enable = true;
 
@@ -31,16 +25,5 @@
 
     hyprcursor.enable = true;
     gtk.enable = true;
-  };
-
-  xdg.userDirs = {
-    enable = true;
-    createDirectories = true;
-    documents = "$HOME/Documents";
-    download = "$HOME/Downloads";
-    music = "$HOME/Music";
-    pictures = "$HOME/Pictures";
-    videos = "$HOME/Videos";
-    desktop = "$HOME/Desktop";
   };
 }

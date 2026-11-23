@@ -1,13 +1,17 @@
 { ... }:
 {
   imports = [
+    ./configuration/activations.nix
     ./configuration/audio.nix
+    ./configuration/config-links.nix
     ./configuration/desktop.nix
     ./configuration/desktop-files.nix
     ./configuration/firefox.nix
     ./configuration/hardware.nix
+    ./configuration/home.nix
     ./configuration/keyd.nix
     ./configuration/locale.nix
+    ./configuration/mime-apps.nix
     ./configuration/neovim.nix
     ./configuration/networking.nix
     ./configuration/packages.nix
