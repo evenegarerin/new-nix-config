@@ -3,6 +3,7 @@
   imports = [
     ./configuration/audio.nix
     ./configuration/desktop.nix
+    ./configuration/desktop-files.nix
     ./configuration/firefox.nix
     ./configuration/hardware.nix
     ./configuration/keyd.nix
