@@ -1,4 +1,4 @@
-const MODES = new Set(["visual", "insert"]);
+const MODES = new Set(["visual", "insert", "hints", "help"]);
 
 export class VimkeysActorParent extends JSWindowActorParent {
   receiveMessage(message) {

@@ -97,7 +97,11 @@ export class KeyHandler {
   refreshMode(force = false) {
     const doc = this.hintDocument({});
     let mode = null;
-    if (this.#visual) {
+    if (this.#help) {
+      mode = "help";
+    } else if (this.#hints) {
+      mode = "hints";
+    } else if (this.#visual) {
       mode = "visual";
     } else if (doc?.hasFocus?.() && insertTarget(doc)) {
       mode = "insert";
@@ -183,6 +187,10 @@ export class KeyHandler {
     this.#scroller.release(event.code);
   }
 
+  resetPending() {
+    this.#pending = "";
+  }
+
   onBlur() {
     this.#scroller.release();
     this.#pending = "";
@@ -205,7 +213,9 @@ export class KeyHandler {
     this.exitHints();
     this.#hints = startHints(doc, () => {
       this.#hints = null;
+      this.refreshMode();
     }, newTab);
+    this.refreshMode();
   }
 
   exitHelp() {
@@ -230,7 +240,9 @@ export class KeyHandler {
     this.exitHints();
     this.#help = startHelp(doc, () => {
       this.#help = null;
+      this.refreshMode();
     });
+    this.refreshMode();
   }
 
   #run(name, ctx) {

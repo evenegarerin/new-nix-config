@@ -10,6 +10,7 @@ export class VimkeysActorChild extends JSWindowActorChild {
 
   receiveMessage(message) {
     if (message.name === "Vimkeys:attach") this.#attach();
+    if (message.name === "Vimkeys:resetPending") this.#keys?.resetPending();
   }
 
   #attach() {

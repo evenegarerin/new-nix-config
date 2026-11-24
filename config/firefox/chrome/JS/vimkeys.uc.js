@@ -9,9 +9,10 @@
 
   if (location.href !== "chrome://browser/content/browser.xhtml") return;
 
-  const { KeyHandler, session, eventTarget, windowOf, consume, isEditable, deepActiveElement } =
-    ChromeUtils.importESModule("chrome://userscripts/content/vimkeys/core.sys.mjs");
-  const { BROWSER_COMMANDS } =
+  const {
+    KeyHandler, SETTINGS, session, eventTarget, windowOf, consume, isEditable, deepActiveElement,
+  } = ChromeUtils.importESModule("chrome://userscripts/content/vimkeys/core.sys.mjs");
+  const { BROWSER_COMMANDS, WINDOW_KEYS, isRepeatable, resolveKeys } =
     ChromeUtils.importESModule("chrome://userscripts/content/bindings.sys.mjs");
   const { omnibarFor } =
     ChromeUtils.importESModule("chrome://userscripts/content/omnibar.sys.mjs");
@@ -31,10 +32,10 @@
     insert: { text: "#1d2a07", border: "#6f941f", top: "#c8ea72", bottom: "#9acd32" },
     visual: { text: "#35173a", border: "#a05ea8", top: "#efc4ef", bottom: "#dda0dd" },
   };
-  const FALLBACK_STYLE = { text: "#302505", border: "#c38a22", top: "#fff785", bottom: "#ffc542" };
 
   let badge = null;
   let modeOwner = null;
+  let pageMode = null;
 
   function ensureBadge() {
     if (badge?.isConnected) return badge;
@@ -51,7 +52,7 @@
   }
 
   function badgeCss(mode) {
-    const style = MODE_STYLES[mode] ?? FALLBACK_STYLE;
+    const style = MODE_STYLES[mode];
     const rect = contentBox();
     const left = Math.round((rect?.left ?? 0) + BADGE_GAP);
     const viewport = document.documentElement.clientHeight;
@@ -73,6 +74,7 @@
 
   function clearMode() {
     modeOwner = null;
+    pageMode = null;
     hideBadge();
   }
 
@@ -83,6 +85,11 @@
       return;
     }
     modeOwner = contextId;
+    pageMode = mode;
+    if (!MODE_STYLES[mode]) {
+      hideBadge();
+      return;
+    }
     try {
       const el = ensureBadge();
       el.textContent = mode;
@@ -368,6 +375,40 @@
     return findBar;
   }
 
+  let windowPending = "";
+
+  function windowKeyCommand(event) {
+    const browser = gBrowser.selectedBrowser;
+    const pageKey =
+      !event.ctrlKey && !event.altKey && !event.metaKey && !event.isComposing &&
+      !pageMode && browser?.isRemoteBrowser && eventTarget(event) === browser;
+    if (!pageKey) {
+      windowPending = "";
+      return null;
+    }
+    if (event.key.length !== 1) return null;
+
+    const match =
+      resolveKeys(windowPending + event.key) ??
+      (windowPending ? resolveKeys(event.key) : null);
+    windowPending = "";
+    if (!match) return null;
+    if (match.prefix) {
+      windowPending = match.keys;
+      return null;
+    }
+    return WINDOW_KEYS.has(match.keys) ? match.command : null;
+  }
+
+  function resetPagePending(browser) {
+    const contexts = browser?.browsingContext?.getAllBrowsingContextsInSubtree() ?? [];
+    for (const context of contexts) {
+      try {
+        context.currentWindowGlobal?.getActor(ACTOR_NAME).sendAsyncMessage("Vimkeys:resetPending", {});
+      } catch {}
+    }
+  }
+
   function onKeyDown(event) {
     if (dialogHints.handleHintKey(event)) return;
 
@@ -375,6 +416,17 @@
     if (findBar) {
       consume(event);
       findBar.close();
+      return;
+    }
+
+    const command = windowKeyCommand(event);
+    if (command) {
+      consume(event);
+      const browser = gBrowser.selectedBrowser;
+      resetPagePending(browser);
+      if (!event.repeat || isRepeatable(command, SETTINGS.smoothScroll)) {
+        runBrowserCommand(command, browser);
+      }
       return;
     }
     if (event.key !== "f" || event.ctrlKey || event.altKey || event.metaKey || event.isComposing) return;
@@ -465,6 +517,7 @@
     window.addEventListener("mousedown", () => dialogHints.exitHints(), true);
     gBrowser.tabContainer.addEventListener("TabSelect", () => {
       dialogHints.exitHints();
+      windowPending = "";
       omnibar.close();
       clearMode();
       cancelCycle();

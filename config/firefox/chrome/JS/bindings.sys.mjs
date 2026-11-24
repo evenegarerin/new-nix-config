@@ -91,6 +91,10 @@ export const BROWSER_COMMANDS = new Set([
   "openClipboardUrl", "openClipboardUrlNewTab", "tabGroupMenu", "tabGroupToggle",
 ]);
 
+export const WINDOW_KEYS = new Set([
+  "p", "P", "J", "K", "o", "O", "b", "B", "ge", "t", "x", "T", "m",
+]);
+
 const REPEATABLE = new Set(["findNext", "findPrevious", "nextTab", "previousTab"]);
 const SCROLL_REPEATABLE = new Set(["scrollDown", "scrollUp"]);
 
