@@ -49,6 +49,10 @@
     ],
     "RequestedLocales": ["en-US", "de"],
     "Preferences": {
+      "widget.use-xdg-desktop-portal.file-picker": {
+        "Value": 1,
+        "Status": "locked"
+      },
       "toolkit.legacyUserProfileCustomizations.stylesheets": {
         "Value": true,
         "Status": "locked"

@@ -1,5 +1,41 @@
-{ config, pkgs, pkgs-unstable, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  pkgs-unstable,
+  ...
+}:
 
+let
+  filechooserTerminal = "${lib.getExe pkgs.kitty} --class superfile";
+
+  filechooserWrapper = pkgs.writeShellScript "termfilechooser-wrapper" ''
+    multiple="$1"
+    directory="$2"
+    path="$4"
+    out="$5"
+
+    if [ "$directory" = "1" ]; then
+      ${filechooserTerminal} ${lib.getExe pkgs.yazi} --chooser-file="$out" --cwd-file="$out.1" "$path"
+      if [ ! -s "$out" ] && [ -s "$out.1" ]; then
+        cat "$out.1" > "$out"
+      fi
+      rm -f "$out.1"
+    elif [ "$multiple" = "1" ]; then
+      ${filechooserTerminal} ${lib.getExe pkgs.yazi} --chooser-file="$out" "$path"
+    else
+      ${filechooserTerminal} ${lib.getExe pkgs-unstable.superfile} --chooser-file="$out" "$path"
+    fi
+  '';
+
+  filechooserConfig = pkgs.writeText "termfilechooser-config" ''
+    [filechooser]
+    cmd=${filechooserWrapper}
+    default_dir=$HOME
+    open_mode=suggested
+    save_mode=suggested
+  '';
+in
 {
   # Wayland session stack: compositor, greeter, portals, and the desktop auth/service agents.
   security.polkit.enable = true;
@@ -44,11 +80,18 @@
           "hyprland"
           "gtk"
         ];
+        "org.freedesktop.impl.portal.FileChooser" = [ "termfilechooser" ];
       };
     };
 
     extraPortals = with pkgs; [
       xdg-desktop-portal-gtk
+      xdg-desktop-portal-termfilechooser
     ];
   };
+
+  systemd.user.services.xdg-desktop-portal-termfilechooser.serviceConfig.ExecStart = [
+    ""
+    "${pkgs.xdg-desktop-portal-termfilechooser}/libexec/xdg-desktop-portal-termfilechooser -c ${filechooserConfig}"
+  ];
 }
