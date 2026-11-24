@@ -67,7 +67,7 @@
 }
 
 #nav-bar-customization-target {
-  padding-inline-start: 220px !important; /* padding to offset removed icons on the left, magic number, might brake */
+  padding-inline-start: 220px !important;
 }
 
 #tabbrowser-tabs[orient="vertical"],

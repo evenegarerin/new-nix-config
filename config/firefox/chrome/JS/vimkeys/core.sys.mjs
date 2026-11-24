@@ -1,8 +1,3 @@
-// vimkeys core: everything that happens inside a page (keys, link hints,
-// scrolling) plus the settings. Shared by vimkeys.uc.js
-// (about: pages, browser dialogs) and the VimkeysActor child (every page),
-// so there is exactly one place to change any of it.
-
 import {
   HELP,
   isRepeatable,
@@ -10,26 +5,21 @@ import {
   resolveKeys,
 } from "chrome://userscripts/content/bindings.sys.mjs";
 
-// ---- Settings (same meaning as Vimium's options) ---------------------------
 export const SETTINGS = {
-  hintChars: "sadfjklewcmpgh", // "Characters used for link hints"
-  scrollStep: 60,              // "Scroll step size" in px
-  smoothScroll: true,          // "Use smooth scrolling"
+  hintChars: "sadfjklewcmpgh",
+  scrollStep: 60,
+  smoothScroll: true,
 };
 
 const HTML_NS = "http://www.w3.org/1999/xhtml";
 const LOG_PREFIX = "[vimkeys]";
 
-// Per-session state shared by every browser window (a module is loaded once
-// per process, while vimkeys.uc.js runs once per window).
 export const session = { pageActorRegistered: false };
 
-// ---- DOM helpers -----------------------------------------------------------
 export function eventTarget(event) {
   return event.composedTarget ?? event.originalTarget ?? event.target;
 }
 
-// ownerGlobal isn't exposed on every page's nodes, so fall back to the DOM way.
 export function windowOf(node) {
   if (!node) return null;
   return node.ownerGlobal ?? node.ownerDocument?.defaultView ?? node.defaultView ??
@@ -72,7 +62,6 @@ function focusedEditable({ target, win }) {
   return insertTarget(win.document);
 }
 
-// Walks the DOM including (closed) shadow roots, which about: pages use a lot.
 function* walk(root) {
   for (const el of root.querySelectorAll("*")) {
     yield el;
@@ -85,14 +74,8 @@ function composedParent(el) {
   return el.assignedSlot ?? el.parentElement ?? el.getRootNode().host ?? null;
 }
 
-// ---- Key handling ----------------------------------------------------------
-// One KeyHandler per place that receives keys (a browser window, a file page).
-//   hintDocument(ctx)            -> the document f puts its hints in
-//   runBrowserCommand(name, ctx) -> carries out tab/find/history commands
-// ctx is { win, target, code, ... }: the window the key came from, the event
-// target and the physical key (for detecting key-up while scrolling).
 export class KeyHandler {
-  #pending = ""; // typed part of a multi-key binding, e.g. "g"
+  #pending = "";
   #hints = null;
   #help = null;
   #visual = null;
@@ -122,12 +105,10 @@ export class KeyHandler {
     this.#setMode(mode, force);
   }
 
-  // Returns true if hint mode took the key.
   handleHintKey(event) {
     const hints = this.#hints;
     if (!hints) return false;
     if (!hints.alive) {
-      // Its document went away, e.g. a dialog was closed some other way.
       hints.exit();
       return false;
     }
@@ -164,9 +145,8 @@ export class KeyHandler {
     if (event.ctrlKey || event.altKey || event.metaKey || event.isComposing) return;
 
     const isEscape = event.key === "Escape";
-    if (!isEscape && event.key.length !== 1) return; // Shift, arrows, F-keys, …
+    if (!isEscape && event.key.length !== 1) return;
 
-    // Like Vimium: "g" then "g" is gg; "g" then something else drops the "g".
     const match = isEscape
       ? null
       : resolveKeys(this.#pending + event.key) ?? (this.#pending ? resolveKeys(event.key) : null);
@@ -174,7 +154,6 @@ export class KeyHandler {
     this.#pending = "";
     if (!match && !isEscape) return;
 
-    // "Insert mode": leave typing alone, Escape leaves the field like in Vimium.
     const editable = focusedEditable(ctx);
     if (editable) {
       if (isEscape) {
@@ -204,13 +183,11 @@ export class KeyHandler {
     this.#scroller.release(event.code);
   }
 
-  // Window lost focus: key-ups may never arrive, so stop following held keys.
   onBlur() {
     this.#scroller.release();
     this.#pending = "";
   }
 
-  // Tab switched away or page going away: stop everything.
   stop() {
     this.#scroller.stop();
     this.#pending = "";
@@ -292,7 +269,6 @@ export class KeyHandler {
   }
 }
 
-// ---- Scrolling -------------------------------------------------------------
 function canScroll(el) {
   if (el.scrollHeight <= el.clientHeight + 1) return false;
   const { overflowY } = windowOf(el).getComputedStyle(el);
@@ -300,9 +276,6 @@ function canScroll(el) {
   return overflowY === "auto" || overflowY === "scroll" || overflowY === "overlay";
 }
 
-// Like Vimium: scroll the container around the focused element, else the
-// page, else the largest scrollable element (many about: pages and the PDF
-// viewer scroll an inner container instead of the document).
 function findScrollable(doc) {
   const root = doc.scrollingElement ?? doc.documentElement;
   for (let el = deepActiveElement(doc); el && el !== root; el = composedParent(el)) {
@@ -323,10 +296,6 @@ function findScrollable(doc) {
   return best;
 }
 
-// Vimium's scroller: a key press scrolls its amount at a constant speed over
-// max(100, 20 * ln(amount)) ms (60px -> 100ms), and keeps going at that
-// speed for as long as the key stays held. Pressing again mid-scroll extends
-// it instead of restarting.
 class Scroller {
   #animation = null;
 
@@ -351,7 +320,6 @@ class Scroller {
     this.#animate(el, delta, null);
   }
 
-  // A key went up; with no code given, treat every held key as released.
   release(code) {
     const anim = this.#animation;
     if (anim && (code === undefined || code === anim.heldCode)) anim.held = false;
@@ -383,18 +351,17 @@ class Scroller {
       win,
       direction,
       remaining: distance,
-      speed: distance / Math.max(100, 20 * Math.log(distance)), // px per ms
+      speed: distance / Math.max(100, 20 * Math.log(distance)),
       heldCode,
       held: heldCode !== null,
       lastTime: null,
-      carry: 0, // sub-pixel remainder, so slow frames don't lose distance
+      carry: 0,
       frame: 0,
     };
     this.#animation = anim;
 
     const tick = (now) => {
       if (this.#animation !== anim) return;
-      // Cap the frame time so a stalled frame doesn't cause a jump.
       const elapsed = anim.lastTime === null ? 0 : Math.min(now - anim.lastTime, 50);
       anim.lastTime = now;
 
@@ -410,7 +377,7 @@ class Scroller {
         const before = el.scrollTop;
         el.scrollBy({ top: direction * px, behavior: "instant" });
         if (el.scrollTop === before) {
-          this.stop(); // reached the top or bottom
+          this.stop();
           return;
         }
       }
@@ -425,14 +392,12 @@ class Scroller {
   }
 }
 
-// ---- Link hints ------------------------------------------------------------
 const CLICKABLE = [
   "a[href]", "area[href]", "button", "select", "textarea", "summary",
   "input:not([type=hidden])", "[onclick]", "[contenteditable]:not([contenteditable=false])",
   "[tabindex]:not([tabindex='-1'])",
   "[role=button]", "[role=link]", "[role=checkbox]", "[role=radio]", "[role=switch]",
   "[role=tab]", "[role=menuitem]", "[role=option]", "[role=treeitem]",
-  // XUL widgets still used on some about: pages and in dialogs
   "checkbox", "radio", "menulist", "toolbarbutton", "richlistitem", "label.text-link",
 ].join(",");
 
@@ -443,7 +408,6 @@ const HINT_CSS =
   "border-radius:3px; box-shadow:0 3px 7px rgba(0,0,0,.3); pointer-events:none;";
 const TYPED_CSS = "color:#d4ac3a;";
 
-// Vimium's scheme: prefix-free labels, short ones where possible.
 export function makeLabels(count) {
   const labels = [""];
   let offset = 0;
@@ -510,7 +474,7 @@ function collectTargets(doc, offsetX, offsetY, out, seen) {
     const x = offsetX + rect.left;
     const y = offsetY + rect.top;
     const key = `${Math.round(x)},${Math.round(y)},${Math.round(rect.width)},${Math.round(rect.height)}`;
-    if (seen.has(key)) continue; // custom elements often wrap a same-sized inner button
+    if (seen.has(key)) continue;
     seen.add(key);
     out.push({ el, x, y });
   }
@@ -522,7 +486,6 @@ function mountOverlay(doc) {
     "all:initial; position:fixed; inset:0; width:100%; height:100%; margin:0; padding:0;" +
     "border:0; background:transparent; overflow:visible; pointer-events:none; z-index:2147483647;";
   doc.documentElement.append(container);
-  // The top layer keeps hints above modal dialogs; harmless if unsupported.
   try {
     container.popover = "manual";
     container.showPopover();
@@ -555,7 +518,6 @@ function activate(el, newTab) {
     try {
       el.showPicker();
     } catch {
-      // showPicker isn't allowed everywhere; focus alone is fine
     }
     return;
   }
@@ -572,8 +534,6 @@ function activate(el, newTab) {
   el.click();
 }
 
-// Shows hints in doc. Returns null if there is nothing to click. onExit runs
-// once, however hint mode ends.
 function startHints(doc, onExit, newTab = false) {
   const win = doc.defaultView;
   const targets = [];

@@ -214,7 +214,7 @@ export class Hotkey{
       keySet = createElement(doc,"keyset",{id:"ucKeySet"});
       doc.body.appendChild(keySet);
     }
-    
+
     let key = createElement(doc,"key",details);
     keySet.appendChild(key);
     return
@@ -239,7 +239,7 @@ export class Hotkey{
   static NORMAL_KEY = 1;
   static FUN_KEY = 2;
   static VK_KEY = 4;
-  
+
   static #getKeyCategory(key){
     return (/^[\w-]$/).test(key)
           ? Hotkey.NORMAL_KEY
@@ -249,7 +249,7 @@ export class Hotkey{
               ? Hotkey.FUN_KEY
               : Hotkey.ERR_KEY
   }
-  
+
   static define(desc){
     let keyCategory = Hotkey.#getKeyCategory(desc.key);
     if(keyCategory === Hotkey.ERR_KEY){
@@ -493,7 +493,7 @@ function reloadRegisteredStyleSheet(name) {
   }else{
     let success = loaderModuleLink.scriptDataConstructor.preLoadAuthorStyle(matchingStyle);
     if(success){
-      const styleSheetType = 2; // styleSheetService.AUTHOR_SHEET
+      const styleSheetType = 2;
       let windows = Services.wm.getEnumerator(null);
       while (windows.hasMoreElements()) {
         let win = windows.getNext();
@@ -539,8 +539,6 @@ function reloadStyleSheet(name, type) {
   function recurseImports(sheet,all){
     let z = 0;
     let rule = sheet.cssRules[0];
-    // loop through import rules and check that the "all"
-    // doesn't already contain the same object
     while(rule instanceof CSSImportRule && !all.includes(rule.styleSheet) ){
       all.push(rule.styleSheet);
       recurseImports(rule.styleSheet,all);
@@ -548,14 +546,8 @@ function reloadStyleSheet(name, type) {
     }
     return all
   }
-  
+
   let sheets = recentWindow.InspectorUtils.getAllStyleSheets(recentWindow.document,false).flatMap( x => recurseImports(x,[x]) );
-  
-  // If a sheet is imported multiple times, then there will be
-  // duplicates, because style system does create an object for
-  // each instace but that's OK since sheets.find below will
-  // only find the first instance and reload that which is
-  // "probably" fine.
 
   let target = sheets.find(sheet => sheet.href === fsResult.fileURI);
   if(target){
@@ -681,7 +673,6 @@ class LoaderLink{
   }
 }
 
-// This stores data we need to link from the loader module
 export const loaderModuleLink = new LoaderLink();
 
 export function extractScriptHeader(aFSResult){
@@ -693,7 +684,6 @@ export function extractStyleHeader(aFSResult){
     .match(/^\/\* ==UserScript==\s*[\n\r]+(?:.*[\n\r]+)*?\/\/ ==\/UserScript==\s*\*\//m)?.[0] || ""
 }
 
-// getScriptData() returns these types of objects
 export class ScriptInfo{
   #scriptType;
   constructor(enabled, type = null){
@@ -790,7 +780,7 @@ export class windowUtils{
     return window.document.documentElement.getAttribute("windowtype") === windowUtils.mainWindowType
   }
   static mainWindowType = loaderModuleLink.variant.FIREFOX ? "navigator:browser" : "mail:3pane";
-  
+
   static waitWindowLoading(win){
     if(win && win.isChromeWindow){
       if(!windowUtils.isBrowserWindow(win)){
@@ -805,7 +795,7 @@ export class windowUtils{
         if(win.gBrowserInit?.delayedStartupFinished){
           return Promise.resolve(win);
         }
-      }else{ // APP_VARIANT = THUNDERBIRD
+      }else{
         if(win.gMailInit?.delayedStartupFinished){
           return Promise.resolve(win);
         }
@@ -850,13 +840,10 @@ export function createWidget(desc){
     throw new Error(`custom widget has unsupported type: '${desc.type}'`);
   }
   const CUI = lazy.CustomizableUI;
-  
+
   if(CUI.getWidget(desc.id)?.hasOwnProperty("source")){
-    // very likely means that the widget with this id already exists
-    // There isn't a very reliable way to 'really' check if it exists or not
     throw new Error(`Widget with ID: '${desc.id}' already exists`);
   }
-  // This is pretty ugly but makes onBuild much cleaner.
   let itemStyle = "";
   if(desc.image){
     if(desc.type==="toolbarbutton"){
@@ -890,7 +877,7 @@ export function createWidget(desc){
       for (let p in props){
         toolbaritem.setAttribute(p, props[p]);
       }
-      
+
       if(typeof callback === "function"){
         if(desc.allEvents){
           toolbaritem.addEventListener("click",(ev) => WidgetCallbacks.get(ev.target.id)(ev,ev.target.ownerGlobal))
@@ -1076,8 +1063,6 @@ export function updateStyleSheet(name = "../userChrome.css",type){
   return reloadStyleSheet(name,type)
 }
 
-// Comparison of strings conforming to format that is valid for webextension version strings
-// falling back to string comparison if format doesn't match
 export function compareVersionString(ver1, ver2){
   if(ver1 === ver2){
     return 0

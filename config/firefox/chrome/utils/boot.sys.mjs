@@ -42,7 +42,7 @@ const MODULE_LOADER = new (function(){
   let compiledScript = null;
   let promise = ChromeUtils.compileScript("chrome://userchromejs/content/module_loader.mjs");
   promise.then(s => { compiledScript = s });
-  
+
   this.ready = () => {
     if(compiledScript){
       return Promise.resolve(compiledScript)
@@ -93,7 +93,6 @@ class ScriptData {
       : null;
     this.useFileURI = /\/\/ @usefileuri\b/.test(headerText);
     this.noExec = scriptType === ScriptType.STYLE || noExec;
-    // Looks a bit funky, but we only allow windowActor if matches is also specified
     let windowActor = scriptType === ScriptType.SCRIPT ? headerText.match(/\/\/ @WindowActor\s+(.+)\s*$/im)?.[1] : null;
     this.actorMatches = windowActor
       ? headerText.match(/\/\/ @WindowActorMatches\s+(.+)\s*$/im)?.[1]
@@ -105,7 +104,6 @@ class ScriptData {
       this.regex = null;
       this.loadOrder = -1;
     }else{
-      // Construct regular expression to use to match target document
       let match, rex = {
         include: [],
         exclude: []
@@ -124,7 +122,7 @@ class ScriptData {
       let loadOrder = headerText.match(/\/\/ @loadOrder\s+(\d+)\s*$/im)?.[1];
       this.loadOrder = Number.parseInt(loadOrder) || 10;
     }
-    
+
     Object.freeze(this);
   }
   get isEnabled() {
@@ -167,7 +165,6 @@ class ScriptData {
     }
     let sss = Cc['@mozilla.org/content/style-sheet-service;1'].getService(Ci.nsIStyleSheetService);
     try{
-      // Try to preload the file and store it
       aStyle.#preLoadedStyle = sss.preloadSheet(aStyle.referenceURI, sss.AUTHOR_SHEET);
     }catch(e){
       console.error(`Could not pre-load ${aStyle.filename}: ${e.name}`)
@@ -253,18 +250,14 @@ class ScriptData {
   }
   static fromScriptFile(aFile){
     if(aFile.fileSize < 24){
-      // Smaller files can't possibly have a valid header
-      // This also means that we successfully generate a ScriptData for *folders* named "xx.uc.js"...
       return new ScriptData(aFile.leafName,"",aFile.fileSize === 0,ScriptType.SCRIPT)
     }
     const result = FileSystem.readNSIFileSyncUncheckedWithOptions(aFile,{ metaOnly: true });
     const headerText = extractScriptHeader(result);
-    // If there are less than 2 bytes after the header then we mark the script as non-executable. This means that if the file only has a header then we don't try to inject it to any windows, since it wouldn't do anything.
     return new ScriptData(aFile.leafName, headerText, headerText.length > aFile.fileSize - 2,ScriptType.SCRIPT);
   }
   static fromStyleFile(aFile){
     if(aFile.fileSize < 24){
-      // Smaller files can't possibly have a valid header
       return new ScriptData(aFile.leafName,"",true,ScriptType.STYLE)
     }
     const result = FileSystem.readNSIFileSyncUncheckedWithOptions(aFile,{ metaOnly: true });
@@ -275,7 +268,6 @@ class ScriptData {
 Pref.setIfUnset(PREF_ENABLED,true);
 Pref.setIfUnset(PREF_SCRIPTSDISABLED,"");
 
-// This is called if _previous_ startup was broken
 function showgBrowserNotification(){
   Services.prefs.setBoolPref('userChromeJS.gBrowser_hack.enabled',true);
   showNotification(
@@ -298,7 +290,6 @@ function showgBrowserNotification(){
   )
 }
 
-// This is called if startup somehow takes over 5 seconds
 function maybeShowBrokenNotification(window){
   if(window.isFullyOccluded && "gBrowser" in window){
     console.log("Window was fully occluded, no need to panic")
@@ -402,19 +393,17 @@ class UserChrome_js{
       return
     }
     loaderModuleLink.setup(this,AppConstants.MOZ_APP_DISPLAYNAME_DO_NOT_USE,APP_VARIANT,ScriptData.createDummyScript,ScriptType);
-    
+
     if(!this.IS_ENABLED){
       Services.obs.addObserver(this, 'domwindowopened', false);
       this.initialized = true;
       return
     }
-    // gBrowserHack setup
     this.GBROWSERHACK_ENABLED = 
       (Services.prefs.getBoolPref("userChromeJS.gBrowser_hack.required",false) ? 2 : 0)
     + (Services.prefs.getBoolPref("userChromeJS.gBrowser_hack.enabled",false) ? 1 : 0);
     this.PERSISTENT_DOMCONTENT_CALLBACK = Services.prefs.getBoolPref("userChromeJS.persistent_domcontent_callback",false);
     const disabledScripts = getDisabledScripts();
-    // load script data
     const scriptDir = FileSystem.getScriptDir();
     const windowActorDefinitions = new Map();
     if(scriptDir.isDirectory()){
@@ -422,7 +411,7 @@ class UserChrome_js{
         if (/^[A-Za-z0-9]+.*(\.uc\.js|\.uc\.mjs|\.sys\.mjs)$/i.test(entry.leafName)) {
           let script = ScriptData.fromScriptFile(entry);
           if(this.registerScript(script,disabledScripts.includes(script.filename),windowActorDefinitions)){
-            continue // script is disabled
+            continue
           }
           if(script.inbackground){
             try{
@@ -462,7 +451,6 @@ class UserChrome_js{
     }
 
     this.initialized = true;
-
   }
   addAgentStyles(agentStyles){
     if(agentStyles.length > 0){
@@ -480,7 +468,6 @@ class UserChrome_js{
   onDOMContent(document){
     const window = document.defaultView;
     if(!(/^chrome:(?!\/\/global\/content\/(commonDialog|alerts\/alert)\.xhtml)|about:(?!blank)/i).test(window.location.href)){
-      // Don't inject scripts to modal prompt windows or notifications
       if(this.IS_ENABLED && this.styles.length > 0){
         const disabledScripts = getDisabledScripts();
         for(let style of this.styles){
@@ -495,11 +482,8 @@ class UserChrome_js{
       ChromeUtils.importESModule("chrome://userchromejs/content/uc_api.sys.mjs")
     )
     if(this.IS_ENABLED){
-      document.allowUnsafeHTML = false; // https://bugzilla.mozilla.org/show_bug.cgi?id=1432966
-      
-      // This is a hack to make gBrowser available for scripts.
-      // Without it, scripts would need to check if gBrowser exists and deal
-      // with it somehow. See bug 1443849
+      document.allowUnsafeHTML = false;
+
       const _gb = APP_VARIANT.FIREFOX && "_gBrowser" in window;
       if(this.GBROWSERHACK_ENABLED && _gb){
         window.gBrowser = window._gBrowser;
@@ -510,20 +494,16 @@ class UserChrome_js{
         },5000);
         windowUtils.waitWindowLoading(window)
         .then(() => {
-          // startup is fine, clear timeout
           window.clearTimeout(timeout);
         })
       }
-      // Inject scripts to window
       const disabledScripts = getDisabledScripts();
-      // Note, sys.mjs scripts have .regex = null
       const scriptsForWindow = this.scripts.filter(s => s.regex?.test(window.location.href));
-      
-      // .uc.mjs scripts are loaded via module loader
+
       if(scriptsForWindow.some(s => s.isESM && !disabledScripts.includes(s.filename))){
         MODULE_LOADER.ready().then(m => m.executeInGlobal(window));
       }
-      
+
       for(let script of scriptsForWindow){
         if(script.isESM || disabledScripts.includes(script.filename) || script.injectionFailed || script.noExec || (script.onlyonce && script.isRunning)) {
           continue
@@ -548,7 +528,6 @@ class UserChrome_js{
     }
   }
 
-  // Add simple script menu to menubar tools popup
   generateScriptMenuItemsIfNeeded(aDoc){
     {
       let menu = aDoc.getElementById("userScriptsMenu");
@@ -637,10 +616,6 @@ class UserChrome_js{
     if(aSubject.document.isUncommittedInitialDocument){
       const parent = aSubject.parent;
       aSubject.addEventListener("DOMContentLoaded",()=>{
-        // If there's any better way to know if the subject is a dialog
-        // or not then please fix this.
-        // Note! window chromeFlag openas_dialog doesn't tell "dialoginess"
-        // for this purpose.
         const isDialoglike = !aSubject.toolbar?.visible;
         if(isDialoglike){
           this.onDOMContent(aSubject.document);
@@ -655,7 +630,7 @@ class UserChrome_js{
       aSubject.addEventListener('DOMContentLoaded', this, {once: !this.PERSISTENT_DOMCONTENT_CALLBACK, capture: true});
     }
   }
-  
+
   handleEvent(aEvent){
     switch (aEvent.type){
       case "DOMContentLoaded":
@@ -665,7 +640,6 @@ class UserChrome_js{
         console.warn(new Error("unexpected event received",{cause:aEvent}));
     }
   }
-  
 }
 
 const _ucjs = !Services.appinfo.inSafeMode && new UserChrome_js();

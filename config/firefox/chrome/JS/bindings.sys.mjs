@@ -1,6 +1,3 @@
-// ---- Key bindings ----------------------------------------------------------
-// Keys -> command names. Page commands run right here; the rest are browser
-// commands that each side carries out its own way (see runBrowserCommand).
 export const BINDINGS = {
   "/": "find",
   n: "findNext",
@@ -30,8 +27,8 @@ export const BINDINGS = {
   X: "restoreTab",
   H: "goBack",
   L: "goForward",
-  J: "nextTab",     // right (Vimium default: K)
-  K: "previousTab", // left  (Vimium default: J)
+  J: "nextTab",
+  K: "previousTab",
   "?": "showHelp",
 };
 
@@ -94,8 +91,6 @@ export const BROWSER_COMMANDS = new Set([
   "openClipboardUrl", "openClipboardUrlNewTab", "tabGroupMenu", "tabGroupToggle",
 ]);
 
-// Commands that fire again on key auto-repeat. With smooth scrolling, a held
-// j/k is handled by the scroll animation itself, like in Vimium.
 const REPEATABLE = new Set(["findNext", "findPrevious", "nextTab", "previousTab"]);
 const SCROLL_REPEATABLE = new Set(["scrollDown", "scrollUp"]);
 
@@ -104,7 +99,6 @@ export function isRepeatable(command, smoothScroll) {
   return !smoothScroll && SCROLL_REPEATABLE.has(command);
 }
 
-// Every unfinished part of a multi-key binding, e.g. "g" for "gg".
 const PREFIXES = new Set();
 for (const keys of Object.keys(BINDINGS)) {
   for (let i = 1; i < keys.length; i++) PREFIXES.add(keys.slice(0, i));

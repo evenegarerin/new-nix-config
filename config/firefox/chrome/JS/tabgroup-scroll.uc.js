@@ -4,17 +4,6 @@
 // @include        main
 // ==/UserScript==
 
-/*
- * Works together with the tab-group rules in userChrome.css: the active group fills
- * the remaining sidebar space and scrolls inside its own border. CSS can't scroll a
- * container to an element, so this script keeps the selected tab, plus SCROLL_OFF
- * neighbours on each side (like vim's scrolloff), visible inside its group. If the
- * group is too short for all that context, the selected tab is centred instead.
- *
- * If a change to this file doesn't take effect after restarting Firefox,
- * fx-autoconfig is serving a cached copy: about:support → "Clear startup cache…".
- */
-
 (function () {
   "use strict";
 

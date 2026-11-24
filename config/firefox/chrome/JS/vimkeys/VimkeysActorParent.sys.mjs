@@ -1,6 +1,3 @@
-// Receives browser commands (x, t, /, H, …) from file:// pages and hands them
-// to vimkeys.uc.js in the browser window that shows the page.
-
 const MODES = new Set(["visual", "insert"]);
 
 export class VimkeysActorParent extends JSWindowActorParent {

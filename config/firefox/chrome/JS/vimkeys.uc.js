@@ -4,12 +4,6 @@
 // @include        main
 // ==/UserScript==
 
-// Settings, key bindings, hints and scrolling live in vimkeys/core.sys.mjs.
-// VimkeysActor brings them to every page (about:config, the new tab page,
-// file://, …) and sends browser commands here. This script
-// covers what only the browser window can do: tab, history and find commands
-// (see runBrowserCommand), browser dialogs, and registering the actor.
-
 (function () {
   "use strict";
 
@@ -99,8 +93,6 @@
     }
   }
 
-  // ---- Browser commands ----------------------------------------------------
-  // `browser` is the tab's <browser> the key came from.
   const COMMANDS = {
     find: () => findBarCommand("onFindCommand"),
     findNext: () => findBarCommand("onFindAgainCommand", false),
@@ -131,7 +123,6 @@
   };
 
   function commandFor(name) {
-    // Names can come from a page's content process, so only known ones run.
     if (!BROWSER_COMMANDS.has(name)) return null;
     if (Object.hasOwn(COMMANDS, name)) return COMMANDS[name];
     const extras = window.vimkeysCommands;
@@ -153,7 +144,6 @@
       .catch((err) => console.error("[vimkeys]", err));
   }
 
-  // Used by VimkeysActorParent for keys pressed in pages.
   window.vimkeys = { runBrowserCommand, setMode };
 
   function peerTabs(tab) {
@@ -286,7 +276,6 @@
     findBar[method](...args);
   }
 
-  // Respects your new-tab page setting and focuses the address bar.
   function openNewTab() {
     if (typeof gBrowser.addAdjacentNewTab === "function") {
       gBrowser.addAdjacentNewTab(gBrowser.selectedTab);
@@ -367,13 +356,6 @@
     }
   }
 
-  // ---- Browser dialogs -----------------------------------------------------
-  // Pages, about:config included, get their keys from VimkeysActor. What's left
-  // here are Firefox's own dialogs (confirmations, alerts, …): they sit on top
-  // of any tab, and the actor does not reach them. Only f is handled there;
-  // Enter, Escape and Tab keep their usual dialog behaviour.
-  // Firefox shows them in a <browser class="dialogFrame"> in the browser
-  // window (tab-modal and window-modal ones alike).
   const dialogHints = new KeyHandler({ hintDocument: () => null, runBrowserCommand: () => {} });
 
   function findBarAccepting(event) {
@@ -408,7 +390,6 @@
     return frame.ownerDocument === document && frame.classList?.contains("dialogFrame");
   }
 
-  // The browser dialog a window belongs to, if any.
   function dialogFrameOf(win) {
     while (win && win !== window) {
       const frame = win.frameElement;
@@ -419,10 +400,6 @@
     return null;
   }
 
-  // ---- Pages ---------------------------------------------------------------
-  // The actor comes to every page in a tab (see VimkeysActorChild). Registered
-  // here rather than with fx-autoconfig's @WindowActor header, which only
-  // allows about:-page processes.
   const ACTOR_NAME = "VimkeysActor";
   const ACTOR_DIR = "chrome://userscripts/content/vimkeys/";
   const ACTOR_OPTIONS = {
@@ -431,28 +408,17 @@
       esModuleURI: ACTOR_DIR + "VimkeysActorChild.sys.mjs",
       events: { DOMDocElementInserted: {}, DOMContentLoaded: {}, pageshow: {} },
     },
-    // No `matches`: every page. Only pages in tabs, though; not sidebars,
-    // extension popups or devtools.
     messageManagerGroups: ["browsers"],
     allFrames: true,
-    // Firefox refuses actors in web and file:// processes unless they are
-    // declared safe there, i.e. their parent side can't be abused by a
-    // compromised page process. Ours only accepts a fixed list of command
-    // names (see runBrowserCommand), so the worst a hostile page could do is
-    // what you could do yourself with a key press: close a tab, switch tabs, …
     safeForUntrustedWebProcess: true,
   };
 
   function registerPageActor() {
-    // Every browser window runs this script; only the first one registers.
     if (session.pageActorRegistered) return;
     session.pageActorRegistered = true;
     try {
       ChromeUtils.registerWindowActor(ACTOR_NAME, ACTOR_OPTIONS);
     } catch {
-      // The name is taken before any window of ours registered it, most likely
-      // by an old copy of this script whose @WindowActor header made
-      // fx-autoconfig register it without file:// support. Replace that one.
       console.warn(`[vimkeys] '${ACTOR_NAME}' was already registered elsewhere ` +
         "(an old @WindowActor header?); replacing it with this version.");
       try {
@@ -488,7 +454,6 @@
     },
   };
 
-  // ---- Startup -------------------------------------------------------------
   function init() {
     window.addEventListener("keydown", onKeyDown, true);
     gBrowser.addTabsProgressListener(progressListener);
@@ -497,7 +462,6 @@
       () => gBrowser.removeTabsProgressListener(progressListener),
       { once: true }
     );
-    // Clicking anywhere in the window or switching tabs ends dialog hints.
     window.addEventListener("mousedown", () => dialogHints.exitHints(), true);
     gBrowser.tabContainer.addEventListener("TabSelect", () => {
       dialogHints.exitHints();

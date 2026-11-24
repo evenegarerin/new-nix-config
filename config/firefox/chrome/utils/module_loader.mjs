@@ -1,10 +1,10 @@
 {
   const PREF_SCRIPTSDISABLED = 'userChromeJS.scriptsDisabled';
-  
+
   let { loaderModuleLink } = ChromeUtils.importESModule("chrome://userchromejs/content/utils.sys.mjs");
-  
+
   let disabledScripts = Services.prefs.getStringPref(PREF_SCRIPTSDISABLED,"").split(",");
-  
+
   let moduleScripts = loaderModuleLink.matchScripts(s => s.isESM
     && s.regex?.test(window.location.href)
     && !disabledScripts.includes(s.filename)

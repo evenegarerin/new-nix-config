@@ -1,7 +1,3 @@
-// Comes to every page in a tab. Page commands (hints, scrolling) run right
-// here via the shared core; browser commands (x, t, /, …) go to
-// VimkeysActorParent, which hands them to vimkeys.uc.js.
-
 import { KeyHandler, eventTarget, windowOf } from "./core.sys.mjs";
 
 export class VimkeysActorChild extends JSWindowActorChild {
@@ -60,9 +56,6 @@ export class VimkeysActorChild extends JSWindowActorChild {
   }
 
   #shouldTakeOver() {
-    // Other extensions' frames sit inside pages (pickers, popups, panels):
-    // leave them alone. A whole extension page in its own tab (e.g. uBlock's
-    // dashboard) is fine.
     if (this.document.nodePrincipal.addonId) return !this.browsingContext.parent;
     return true;
   }

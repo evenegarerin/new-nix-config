@@ -14,7 +14,7 @@ export class FileSystem{
     }
     throw ResultError.fromKind(FileSystem.ERROR_KIND_INVALID_ARGUMENT,{expected: "FileSystem.RESULT_FILE | FileSystem.RESULT_DIRECTORY"})
   }
-  
+
   static convertChromeURIToFileURI(aURI){
     const registry = Cc["@mozilla.org/chrome/chrome-registry;1"].getService(Ci.nsIChromeRegistry);
     return registry.convertChromeURL(
@@ -23,7 +23,6 @@ export class FileSystem{
         : Services.io.newURI(aURI)
     );
   }
-  // Call to .parent is needed because chrome urls get implicit "filename" based on the provider
   static #SCRIPT_URI;
   static #STYLE_URI;
   static #RESOURCE_URI;
@@ -44,31 +43,31 @@ export class FileSystem{
       FileSystem.RESULT_DIRECTORY
     );
   }
-  
+
   static get SCRIPT_URI(){
     return Services.io.newURI(FileSystem.#SCRIPT_URI)
   }
-  
+
   static get STYLE_URI(){
     return Services.io.newURI(FileSystem.#STYLE_URI)
   }
-  
+
   static get RESOURCE_URI(){
     return Services.io.newURI(FileSystem.#RESOURCE_URI)
   }
-  
+
   static getResourceDir(){
     return FileSystemResult.fromNsIFile(FileSystem.RESOURCE_URI.QueryInterface(Ci.nsIFileURL).file)
   }
-  
+
   static getScriptDir(){
     return FileSystemResult.fromNsIFile(FileSystem.SCRIPT_URI.QueryInterface(Ci.nsIFileURL).file)
   }
-  
+
   static getStyleDir(){
     return FileSystemResult.fromNsIFile(FileSystem.STYLE_URI.QueryInterface(Ci.nsIFileURL).file)
   }
-  
+
   static #getEntryFromString(aFilename, baseFileURI){
     let baseDirectory = baseFileURI.QueryInterface(Ci.nsIFileURL).file;
     if(typeof aFilename !== "string"){
@@ -88,7 +87,7 @@ export class FileSystem{
     }
     return FileSystemResult.fromNsIFile(baseDirectory)
   }
-  
+
   static getEntry(aFilename, options = {}){
     if(aFilename instanceof Ci.nsIURI){
       if(aFilename.scheme === "chrome"){
@@ -124,7 +123,7 @@ export class FileSystem{
     }
     cvstream.close();
     stream.close();
-    
+
     return FileSystemResult.fromContent(rv)
   }
   static readFileSync(aFile, options = {}) {
@@ -173,10 +172,8 @@ export class FileSystem{
     return IniConfig.fromURI(fileURI)
   }
   static #appendToBaseURI(aPath,aFileURI){
-    // Normally, this API can only write into resources directory
-    // Writing outside of resources can be enabled using following pref
     const disallowUnsafeWrites = !Services.prefs.getBoolPref("userChromeJS.allowUnsafeWrites",false);
-    
+
     const baseURI = aFileURI || FileSystem.RESOURCE_URI;
     let baseParts = PathUtils.split(baseURI.QueryInterface(Ci.nsIFileURL).file.path);
     let pathParts = aPath.split(/[\\\/]/);
@@ -241,7 +238,7 @@ export class IniConfig{
       return
     }
     this.#error = null;
-    
+
     let keys = Object.keys(iniFile.data);
     let iniSections = iniFile.sections();
     let removedSections = new Set();
@@ -265,7 +262,7 @@ export class IniConfig{
       }
     }
   }
-  
+
   isError(){
     return this.#error != null
   }
@@ -339,10 +336,9 @@ export class IniUtils{
     return result
   }
   static write(aIniFile){
-    
     IOUtils.writeUTF8( fileName, content, options )
   }
-  
+
   static #iniValue(str){
     if(str === "true")
       return true
@@ -355,7 +351,7 @@ export class IniUtils{
       ? str
       : n
   }
-  
+
   static IniFile = class{
     constructor(filename){
       this.urispec = filename;
@@ -371,7 +367,6 @@ export class IniUtils{
 }
 
 class ResultError extends Error{
-  
   constructor(kind,options,info = {}){
     super(ResultError.toMessage(kind,info),options);
     this.kind = kind;
@@ -418,7 +413,7 @@ class FileSystemResult{
     this.#result = data;
     this.#type = resultType;
   }
-  
+
   get fileURI(){
     if(this.isError()){
       return null
