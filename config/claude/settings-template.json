@@ -47,5 +47,6 @@
     "command": "~/.claude/statusline.sh"
   },
   "autoCompactWindow": 300000,
-  "autoCompactEnabled": true
+  "autoCompactEnabled": true,
+  "editorMode": "vim"
 }
