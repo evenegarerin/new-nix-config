@@ -5,5 +5,11 @@
 backend: Clipboard
 paste_shortcut: CTRL+SHIFT+V
 
+pre_paste_delay: 20
+paste_shortcut_event_delay: 5
+backspace_delay: 1
+evdev_modifier_delay: 5
+restore_clipboard_delay: 100
+
 keyboard_layout:
   layout: us
