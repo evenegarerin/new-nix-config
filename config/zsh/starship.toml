@@ -1,0 +1,52 @@
+add_newline = false
+format = """
+$fill
+$directory( [\\(](75)$git_branch${custom.git_dirty}[\\)](75)) $character"""
+right_format = "$status$cmd_duration$python$username$hostname"
+continuation_prompt = '[\\ ](red)'
+
+[fill]
+symbol = "-"
+style = "237"
+
+[directory]
+format = "[$path]($style)"
+style = "32"
+truncation_length = 100
+truncate_to_repo = false
+
+[git_branch]
+format = "[$branch](78)"
+
+[custom.git_dirty]
+when = 'test -n "$(git status --porcelain 2>/dev/null | head -c1)"'
+require_repo = true
+format = "[*](214)"
+shell = ["sh"]
+
+[character]
+success_symbol = "[»](105)"
+error_symbol = "[»](105)"
+vimcmd_symbol = "[»](105)"
+
+[status]
+disabled = false
+format = "[$status ↵](red) "
+
+[cmd_duration]
+min_time = 3000
+format = "[$duration](214) "
+
+[python]
+format = '([\[$virtualenv\]](75) )'
+detect_extensions = []
+detect_files = []
+detect_folders = []
+
+[username]
+show_always = true
+format = "[$user](237)"
+
+[hostname]
+ssh_only = false
+format = "[@$hostname](237)"

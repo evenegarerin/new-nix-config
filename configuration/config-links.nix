@@ -30,6 +30,7 @@ let
 
   homeLinks = {
     ".zshrc" = "zsh/.zshrc";
+    ".config/starship.toml" = "zsh/starship.toml";
     ".tmux.conf" = "tmux/.tmux.conf";
     ".gnupg/gpg-agent.conf" = "gnupg/gpg-agent.conf";
     ".claude/keybindings.json" = "claude/keybindings.json";

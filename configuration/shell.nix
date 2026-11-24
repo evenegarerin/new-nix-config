@@ -7,20 +7,12 @@
     autosuggestions.enable = true;
     syntaxHighlighting.enable = true;
 
-    ohMyZsh = {
-      enable = true;
-      plugins = [
-        "git"
-        "history"
-        "command-not-found"
-      ];
-      theme = "af-magic";
-    };
-
     interactiveShellInit = ''
       source ${pkgs.zsh-vi-mode}/share/zsh-vi-mode/zsh-vi-mode.plugin.zsh
     '';
   };
+
+  programs.starship.enable = true;
 
   programs.zoxide = {
     enable = true;
