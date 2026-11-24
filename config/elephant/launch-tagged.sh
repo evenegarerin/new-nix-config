@@ -13,10 +13,11 @@ app_dirs() (
     done
 )
 
-# Rebuild if the cache is missing or any applications dir changed since
-if [ ! -f "$cache" ] || app_dirs | while IFS= read -r d; do
-        find "$d" -type d -newer "$cache"
-    done | grep -q .; then
+key=$(app_dirs | while IFS= read -r d; do
+    printf '%s %s\n' "$(readlink -f "$d")" "$(stat -L -c %Y "$d")"
+done)
+
+if [ ! -f "$cache" ] || [ "$key" != "$(cat "$cache.key" 2>/dev/null)" ]; then
     mkdir -p "${cache%/*}"
     app_dirs | while IFS= read -r d; do
         find -L "$d" -type f -name '*.desktop' -exec awk '
@@ -29,7 +30,7 @@ if [ ! -f "$cache" ] || app_dirs | while IFS= read -r d; do
                 gsub(/[ \t]+/, " ", c); sub(/^ /, "", c); sub(/ $/, "", c)
                 print c
             }' {} +
-    done | sort -u > "$cache.tmp" && mv "$cache.tmp" "$cache"
+    done | sort -u > "$cache.tmp" && mv "$cache.tmp" "$cache" && printf '%s\n' "$key" > "$cache.key"
 fi
 
 if [ "$mode" = new-workspace ] && grep -Fxq -- "$*" "$cache"; then
