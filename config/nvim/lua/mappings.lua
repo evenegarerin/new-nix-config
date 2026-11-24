@@ -39,6 +39,7 @@ keymap.set("n", "<leader>w", function()
 end, { silent = true, desc = "save buffer" })
 keymap.set("n", "<leader>q", "<cmd>x<cr>", { silent = true, desc = "quit current window" })
 keymap.set("n", "<leader>Q", "<cmd>qa!<cr>", { silent = true, desc = "quit nvim" })
+keymap.set("n", "<leader>u", "<cmd>edit!<cr>", { silent = true, desc = "reload buffer, discard changes" })
 
 keymap.set("n", [[\x]], "<cmd>windo lclose <bar> cclose <cr>", {
   silent = true,
