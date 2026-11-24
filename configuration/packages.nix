@@ -120,6 +120,7 @@
       # usbutils
       grim
       lazygit
+      lazydocker
       secretspec
       docker
       jdk25
