@@ -20,6 +20,7 @@
     ./configuration/theming.nix
     ./configuration/users.nix
     ./configuration/virtualisation.nix
+    ./configuration/espanso.nix
   ];
 
   nix.settings.experimental-features = [

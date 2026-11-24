@@ -1,0 +1,9 @@
+# espanso configuration file
+
+# this file is required without it espanso has a panic attack.
+
+backend: Clipboard
+paste_shortcut: CTRL+SHIFT+V
+
+keyboard_layout:
+  layout: us

@@ -1,0 +1,35 @@
+# espanso match file
+
+# For a complete introduction, visit the official docs at: https://espanso.org/docs/
+
+# You can use this file to define the base matches (aka snippets)
+# that will be available in every application when using espanso.
+
+# Matches are substitution rules: when you type the "trigger" string
+# it gets replaced by the "replace" string.
+
+# yaml-language-server: $schema=https://raw.githubusercontent.com/espanso/espanso/dev/schemas/match.schema.json
+
+matches:
+  - trigger: ";ue"
+    replace: "ü"
+
+  - trigger: ";oe"
+    replace: "ö"
+
+  - trigger: ";ae"
+    replace: "ä"
+
+  - trigger: ";ss"
+    replace: "ß"
+
+  - trigger: ";Ue"
+    replace: "Ü"
+
+  - trigger: ";Oe"
+    replace: "Ö"
+
+  - trigger: ";Ae"
+    replace: "Ä"
+
+# And much more! For more information, visit the docs: https://espanso.org/docs/

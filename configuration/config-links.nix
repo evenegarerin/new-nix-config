@@ -23,6 +23,8 @@ let
       "keyd/app.conf"
       "superfile/config.toml"
       "superfile/hotkeys.toml"
+      "espanso/config/default.yml"
+      "espanso/match/base.yml"
     ] (name: name)
     // {
       "VSCodium/User/settings.json" = "vscodium/settings.json";
@@ -37,14 +39,16 @@ let
     ".claude/statusline.sh" = "claude/statusline.sh";
   };
 
-  links =
-    lib.mapAttrs' (name: lib.nameValuePair ".config/${name}") xdgLinks // homeLinks;
+  links = lib.mapAttrs' (name: lib.nameValuePair ".config/${name}") xdgLinks // homeLinks;
 
   dirs = {
     ".config" = "0755";
     ".config/herdr" = "0755";
     ".config/keyd" = "0755";
     ".config/superfile" = "0755";
+    ".config/espanso" = "0755";
+    ".config/espanso/config" = "0755";
+    ".config/espanso/match" = "0755";
     ".config/VSCodium" = "0700";
     ".config/VSCodium/User" = "0755";
     ".gnupg" = "0700";
