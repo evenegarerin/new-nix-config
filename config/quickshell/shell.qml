@@ -4,4 +4,6 @@ ShellRoot {
   Bar {}
 
   VisualKeys {}
+
+  SessionRestore {}
 }

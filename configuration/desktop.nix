@@ -37,6 +37,8 @@ let
   '';
 in
 {
+  imports = [ ../selfBuild/hyprland-session-restore.nix ];
+
   # Wayland session stack: compositor, greeter, portals, and the desktop auth/service agents.
   security.polkit.enable = true;
 
@@ -70,6 +72,8 @@ in
   services.elephant.enable = true;
 
   systemd.user.services.elephant.enableDefaultPath = false;
+
+  services.hyprland-session-restore.enable = true;
 
   xdg.portal = {
     enable = true;
