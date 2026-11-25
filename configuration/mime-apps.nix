@@ -9,5 +9,6 @@
     "application/pdf" = [ "org.pwmt.zathura.desktop" ];
     "image/png" = [ "imv.desktop" ];
     "image/jpeg" = [ "imv.desktop" ];
+    "application/json" = [ "nvim" ];
   };
 }
