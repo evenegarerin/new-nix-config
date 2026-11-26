@@ -18,7 +18,6 @@
       ruff
       ripgrep
       fd
-      imv
       mission-center
       # nwg-displays
       # nwg-look
@@ -27,8 +26,6 @@
       wlrctl
       nemo
       xev
-      (callPackage ../selfBuild/vtop.nix { })
-      (callPackage ../selfBuild/vimnm.nix { })
       showmethekey
       keypunch
       appflowy
@@ -37,8 +34,6 @@
       pulseaudio
       brightnessctl
       bluez
-      bluetui
-      typtea
       llmfit
       pnpm
       nodejs
@@ -133,12 +128,9 @@
           latexindent
         ]
       ))
-      zathura # PDF viewer, SyncTeX source for vimtex
       posting
       udiskie
       nvd
-      rmpc
-      wiremix
     ])
     ++ (with pkgs-unstable; [
     ]);

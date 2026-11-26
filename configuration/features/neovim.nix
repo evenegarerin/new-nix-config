@@ -17,6 +17,15 @@ let
       ) grammars
     )}
   '';
+
+  nvim-zi = pkgs.writeShellScript "nvim-zi" ''
+    if [ "$#" -gt 0 ]; then
+      exec nvim "$@"
+    fi
+
+    dir=$(zoxide query -i) && cd "$dir"
+    exec nvim "''${dir:-.}"
+  '';
 in
 {
   environment.systemPackages = [
@@ -26,6 +35,20 @@ in
   environment.pathsToLink = [ "/share/nvim" ];
 
   environment.variables.EDITOR = "nvim";
+
+  my.tuiApps.nvim = {
+    desktopName = "Neovim";
+    genericName = "Text Editor";
+    categories = [
+      "Development"
+      "IDE"
+      "TextEditor"
+    ];
+    command = "${nvim-zi} %F";
+    icon = "nvim";
+  };
+
+  xdg.mime.defaultApplications."application/json" = [ "nvim" ];
 
   my.links.".config/nvim" = "nvim";
 }

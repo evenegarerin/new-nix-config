@@ -31,6 +31,12 @@ in
 
   environment.variables.BROWSER = "firefox";
 
+  xdg.mime.defaultApplications = {
+    "x-scheme-handler/http" = [ "firefox.desktop" ];
+    "x-scheme-handler/https" = [ "firefox.desktop" ];
+    "text/html" = [ "firefox.desktop" ];
+  };
+
   my.links.".config/mozilla/firefox/default/chrome" = "firefox/chrome";
   my.dirs.".config/mozilla/firefox/default" = "0700";
 
