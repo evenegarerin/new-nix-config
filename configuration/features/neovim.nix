@@ -1,5 +1,14 @@
-{ pkgs, lib, ... }:
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
 let
+  user = config.my.user;
+  home = config.users.users.${user}.home;
+  configDir = "${home}/nix-config/config";
+
   grammars = with pkgs.tree-sitter-grammars; {
     nix = tree-sitter-nix;
     json = tree-sitter-json;
@@ -21,4 +30,8 @@ in
 {
   environment.systemPackages = [ parsers ];
   environment.pathsToLink = [ "/share/nvim" ];
+
+  systemd.tmpfiles.rules = [
+    "L+ ${home}/.config/nvim - - - - ${configDir}/nvim"
+  ];
 }

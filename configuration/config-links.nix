@@ -10,7 +10,6 @@ let
       "elephant"
       "hypr"
       "kitty"
-      "nvim"
       "qutebrowser"
       "swaync"
       "waybar"
@@ -23,8 +22,6 @@ let
       "keyd/app.conf"
       "superfile/config.toml"
       "superfile/hotkeys.toml"
-      "espanso/config/default.yml"
-      "espanso/match/base.yml"
     ] (name: name)
     // {
       "VSCodium/User/settings.json" = "vscodium/settings.json";
@@ -46,9 +43,6 @@ let
     ".config/herdr" = "0755";
     ".config/keyd" = "0755";
     ".config/superfile" = "0755";
-    ".config/espanso" = "0755";
-    ".config/espanso/config" = "0755";
-    ".config/espanso/match" = "0755";
     ".config/VSCodium" = "0700";
     ".config/VSCodium/User" = "0755";
     ".gnupg" = "0700";

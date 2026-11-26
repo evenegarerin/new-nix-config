@@ -3,6 +3,7 @@
 let
   user = config.my.user;
   home = config.users.users.${user}.home;
+  configDir = "${home}/nix-config/config";
   firefoxDir = "${home}/.config/mozilla/firefox";
 
   profilesIni = pkgs.writeText "profiles.ini" ''
@@ -26,7 +27,7 @@ in
         sha256 = "1mx679fbc4d9x4bnqajqx5a95y1lfasvf90pbqkh9sm3ch945p40";
       }
     );
-    policies = (builtins.fromJSON (builtins.readFile ../config/firefox/policies.json)).policies;
+    policies = (builtins.fromJSON (builtins.readFile "${configDir}/firefox/policies.json")).policies;
   };
 
   systemd.tmpfiles.rules = [
@@ -34,6 +35,6 @@ in
     "d ${firefoxDir} 0755 ${user} users -"
     "d ${firefoxDir}/default 0700 ${user} users -"
     "L+ ${firefoxDir}/profiles.ini - - - - ${profilesIni}"
-    "L+ ${firefoxDir}/default/chrome - - - - ${home}/nix-config/config/firefox/chrome"
+    "L+ ${firefoxDir}/default/chrome - - - - ${configDir}/firefox/chrome"
   ];
 }
