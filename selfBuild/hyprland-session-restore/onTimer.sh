@@ -21,3 +21,8 @@ done < <(jq -r '.[] | "\(.pid) \(.initialTitle)"' <<< "$clients" | sort -u)
 
 jq --argjson argvs "$argvs" 'map(. + {argv: ($argvs[.pid | tostring] // [])})' <<< "$clients" > "$tmp"
 mv "$tmp" "$target"
+
+for f in "$STATE_DIRECTORY"/nvim/*.vim; do
+  [[ -e $f ]] || continue
+  grep -qF "$f" "$target" "$STATE_DIRECTORY/last-session.json" 2>/dev/null || rm -f "$f"
+done

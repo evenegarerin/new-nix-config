@@ -40,5 +40,22 @@ if [[ ${argv[0]} == /nix/store/* ]] && wrapper=$(command -v "$exe"); then
   argv=("$exe" "${argv[@]:1+n}")
 fi
 
+if [[ $exe == nvim ]]; then
+  sock=""
+  for p in "$fgp" $(pgrep -P "$fgp"); do
+    s="${XDG_RUNTIME_DIR:-/tmp}/nvim.$p.0"
+    [[ -S $s ]] || s=$(find "${TMPDIR:-/tmp}" -type s -name "nvim.$p.*" 2>/dev/null | head -n1 || true)
+    if [[ -S $s ]]; then
+      sock=$s
+      break
+    fi
+  done
+  session="$STATE_DIRECTORY/nvim/$fgp-$(awk '{print $22}' "/proc/$fgp/stat").vim"
+  mkdir -p "${session%/*}"
+  if [[ -n $sock ]] && timeout 5 nvim --server "$sock" --remote-expr "execute('mksession! ' . fnameescape('$session'))" >/dev/null; then
+    argv=(nvim -S "$session")
+  fi
+fi
+
 quoted=$(printf '%q ' "${argv[@]}")
 echo "$kitty -- ${quoted% }"
