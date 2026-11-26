@@ -4,8 +4,6 @@
 local keymap = vim.keymap
 local uv = vim.uv
 
-local utils = require("utils")
-
 -- Save key strokes: no shift needed to reach the command line.
 -- NOTE: this costs `;` as repeat-f. Stage 10's hop.nvim takes over `f` anyway.
 keymap.set({ "n", "x" }, ";", ":")
@@ -248,13 +246,3 @@ keymap.set(
   "<cmd>StripTrailingWhitespace<cr>",
   { desc = "remove trailing space" }
 )
-
--- Open an external kitty window in the current directory.
-keymap.set("n", "<leader>t", function()
-  if not utils.executable("kitty") then
-    vim.notify("kitty not found on PATH", vim.log.levels.ERROR, { title = "nvim-config" })
-    return
-  end
-
-  vim.system({ "kitty", "--directory", vim.fn.getcwd() }, { detach = true })
-end, { desc = "open kitty in cwd" })
