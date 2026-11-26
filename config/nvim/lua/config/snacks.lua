@@ -23,8 +23,13 @@ vim.keymap.set("n", "<leader>gh", function()
 end, { desc = "lazygit: history of this file" })
 
 vim.keymap.set("n", "<leader>t", function()
+  local default_colors = {}
+  for i = 0, 15 do
+    default_colors["terminal_color_" .. i] = false
+  end
   Snacks.terminal.toggle(nil, {
     win = {
+      b = default_colors,
       position = "float",
       border = "rounded",
       keys = {
