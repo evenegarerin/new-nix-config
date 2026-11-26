@@ -3,54 +3,43 @@
 let
   user = config.my.user;
   home = config.users.users.${user}.home;
-  configDir = "${home}/nix-config/config";
+  cfg = config.my;
 
-  xdgLinks =
-    lib.genAttrs [
-      "elephant"
-      "hypr"
-      "kitty"
-      "qutebrowser"
-      "swaync"
-      "waybar"
-      "yazi"
-      "wallpapers"
-      "pcmanfm"
-      "walker"
-      "quickshell"
-      "herdr/config.toml"
-      "keyd/app.conf"
-      "superfile/config.toml"
-      "superfile/hotkeys.toml"
-    ] (name: name)
-    // {
-      "VSCodium/User/settings.json" = "vscodium/settings.json";
-    };
+  parents =
+    path:
+    let
+      parts = lib.splitString "/" path;
+    in
+    map (n: lib.concatStringsSep "/" (lib.take n parts)) (lib.range 1 (builtins.length parts - 1));
 
-  homeLinks = {
-    ".zshrc" = "zsh/.zshrc";
-    ".config/starship.toml" = "zsh/starship.toml";
-    ".tmux.conf" = "tmux/.tmux.conf";
-    ".gnupg/gpg-agent.conf" = "gnupg/gpg-agent.conf";
-    ".claude/keybindings.json" = "claude/keybindings.json";
-    ".claude/statusline.sh" = "claude/statusline.sh";
-  };
-
-  links = lib.mapAttrs' (name: lib.nameValuePair ".config/${name}") xdgLinks // homeLinks;
-
-  dirs = {
-    ".config" = "0755";
-    ".config/herdr" = "0755";
-    ".config/keyd" = "0755";
-    ".config/superfile" = "0755";
-    ".config/VSCodium" = "0700";
-    ".config/VSCodium/User" = "0755";
-    ".gnupg" = "0700";
-    ".claude" = "0755";
-  };
+  dirs =
+    lib.genAttrs (lib.unique (lib.concatMap parents (builtins.attrNames cfg.links))) (_: "0755")
+    // cfg.dirs;
 in
 {
-  systemd.tmpfiles.rules =
-    lib.mapAttrsToList (path: mode: "d ${home}/${path} ${mode} ${user} users -") dirs
-    ++ lib.mapAttrsToList (path: target: "L+ ${home}/${path} - - - - ${configDir}/${target}") links;
+  options.my = {
+    configDir = lib.mkOption {
+      type = lib.types.str;
+      default = "${home}/nix-config/config";
+      description = "Directory in the repository that holds the linked config files.";
+    };
+
+    links = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      default = { };
+      description = "Symlinks in the home directory, mapping a path relative to home to a path relative to my.configDir.";
+    };
+
+    dirs = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      default = { };
+      description = "Directories in the home directory with a non-default mode, mapping a path relative to home to its mode.";
+    };
+  };
+
+  config = {
+    systemd.tmpfiles.rules =
+      lib.mapAttrsToList (path: mode: "d ${home}/${path} ${mode} ${user} users -") dirs
+      ++ lib.mapAttrsToList (path: target: "L+ ${home}/${path} - - - - ${cfg.configDir}/${target}") cfg.links;
+  };
 }

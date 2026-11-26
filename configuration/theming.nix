@@ -92,6 +92,8 @@ in
     environment.etc."xdg/kdeglobals".source =
       "${pkgs.dracula-theme}/share/color-schemes/Dracula.colors";
 
+    my.links.".config/wallpapers" = "wallpapers";
+
     environment.pathsToLink = [
       "/share/glib-2.0/schemas"
     ];

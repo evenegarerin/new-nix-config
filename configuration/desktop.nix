@@ -37,8 +37,6 @@ let
   '';
 in
 {
-  imports = [ ../selfBuild/hyprland-session-restore.nix ];
-
   # Wayland session stack: compositor, greeter, portals, and the desktop auth/service agents.
   security.polkit.enable = true;
 
@@ -54,13 +52,6 @@ in
     };
   };
 
-  programs.hyprland = {
-    enable = true;
-    withUWSM = true;
-    package = pkgs-unstable.hyprland;
-    portalPackage = pkgs-unstable.xdg-desktop-portal-hyprland;
-  };
-
   services.udisks2.enable = true;
   services.gvfs.enable = true;
   services.dbus.enable = true;
@@ -68,12 +59,6 @@ in
   services.upower.enable = true;
 
   services.blueman.enable = true;
-
-  services.elephant.enable = true;
-
-  systemd.user.services.elephant.enableDefaultPath = false;
-
-  services.hyprland-session-restore.enable = true;
 
   xdg.portal = {
     enable = true;

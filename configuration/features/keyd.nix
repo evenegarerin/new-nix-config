@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, ... }:
 
 {
   # The keyd group and the capability override exist only for this service, so they live with it.
@@ -12,4 +12,8 @@
 
   users.groups.keyd = { };
   systemd.services.keyd.serviceConfig.CapabilityBoundingSet = [ "CAP_SETGID" ];
+
+  environment.systemPackages = [ pkgs.keyd ];
+
+  my.links.".config/keyd/app.conf" = "keyd/app.conf";
 }

@@ -3,9 +3,7 @@
 {
   environment.systemPackages =
     (with pkgs; [
-      kitty
       file
-      waybar
       gnote
       glib
       lowfi
@@ -13,7 +11,6 @@
       wev
       mp3gain
       evtest
-      pcmanfm
       pass
       prettier
       resonance
@@ -27,9 +24,7 @@
       # nwg-look
       devenv
       playerctl
-      hyprcursor
       wlrctl
-      keyd
       nemo
       xev
       (callPackage ../selfBuild/vtop.nix { })
@@ -61,7 +56,6 @@
       git
       fzf
       networkmanagerapplet
-      hyprpaper
       elmPackages.elm-format
       elmPackages.elm-language-server
       elmPackages.elm
@@ -77,20 +71,12 @@
       postman
       gnome-calculator
       # qalculate-gtk
-      yazi
       # wofi
       # ulauncher
-      walker
       # qutebrowser
-      hyprlock
-      hypridle
-      vscodium
       # claude-code
-      gnupg
-      pinentry-tty
       gnome-text-editor
       chromium
-      tmux
       just
       bubblewrap
       nftables
@@ -102,7 +88,6 @@
       pinta
       blender
       # ddcutil
-      neovim
       nixd
       lua-language-server
       stylua
@@ -151,17 +136,10 @@
       zathura # PDF viewer, SyncTeX source for vimtex
       posting
       udiskie
-      swaynotificationcenter
       nvd
       rmpc
       wiremix
     ])
     ++ (with pkgs-unstable; [
-      claude-code
-      herdr
-      hyprshot
-      quickshell
-      superfile
-      hyprmod
     ]);
 }
