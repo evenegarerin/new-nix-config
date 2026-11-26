@@ -1,0 +1,34 @@
+# ~/.config/voxtype/config.toml
+engine = "whisper"
+
+[hotkey]
+enabled = false # Hyprland handles the key via `voxtype record start/stop`
+
+[audio]
+device = "default"
+max_duration_secs = 900 # 15 min cap;
+pause_media = true      # pause music/video while the mic is live
+
+[audio.feedback]
+enabled = true   # beep on start/stop
+theme = "subtle"
+volume = 0.5
+
+[whisper]
+backend = "local"
+model = "large-v3-turbo"            # most accurate model voxtype offers
+language = ["en", "de"]             # detect between English and German only
+translate = false
+on_demand_loading = false           # keep the model in VRAM, no load delay
+gpu_isolation = false               # set true on a laptop with hybrid graphics
+context_window_optimization = false # causes repetition on large-v3
+eager_processing = false            # single pass is more accurate than chunking
+streaming = false                   # streaming would force toggle mode
+
+[output]
+mode = "paste"
+paste_keys = "auto"      # ctrl+v in apps, ctrl+shift+v in terminals
+restore_clipboard = true # put old clipboard back afterwards
+
+# i might want on_demand_loading, gpu_isolation, eager_processing and streaming to be true, needs testing.
+# i also might want output mode to be type

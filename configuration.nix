@@ -21,6 +21,7 @@
     ./configuration/users.nix
     ./configuration/virtualisation.nix
     ./configuration/espanso.nix
+    ./configuration/voxtype.nix
   ];
 
   nix.settings.experimental-features = [
