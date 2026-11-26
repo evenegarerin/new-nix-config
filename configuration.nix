@@ -7,21 +7,21 @@
     ./configuration/config-links.nix
     ./configuration/desktop.nix
     ./configuration/desktop-files.nix
-    ./configuration/firefox.nix
+    ./configuration/features/firefox.nix
     ./configuration/hardware.nix
     ./configuration/home.nix
     ./configuration/keyd.nix
     ./configuration/locale.nix
     ./configuration/mime-apps.nix
-    ./configuration/neovim.nix
+    ./configuration/features/neovim.nix
     ./configuration/networking.nix
     ./configuration/packages.nix
     ./configuration/shell.nix
     ./configuration/theming.nix
     ./configuration/users.nix
     ./configuration/virtualisation.nix
-    ./configuration/espanso.nix
-    ./configuration/voxtype.nix
+    ./configuration/features/espanso.nix
+    ./configuration/features/voxtype.nix
   ];
 
   nix.settings.experimental-features = [
