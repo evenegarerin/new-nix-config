@@ -309,6 +309,7 @@ api.nvim_create_autocmd("ColorScheme", {
     end
 
     vim.api.nvim_set_hl(0, "NvimTreeWinSeparator", { bg = "none", fg = "#a3a3a3" })
+    vim.api.nvim_set_hl(0, "WinSeparator", { bg = "none", fg = "#828282" })
 
     vim.api.nvim_set_hl(0, "StatusColumnSeparator", { bg = "none", fg = "#828282" })
   end,

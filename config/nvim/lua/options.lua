@@ -79,7 +79,7 @@ opt.relativenumber = true
 opt.scrolloff = 5
 opt.sidescrolloff = 3
 opt.startofline = false
-opt.virtualedit = "block"
+opt.virtualedit = "all"
 
 ------------------------------------------------------------------------
 --                             search                                 --
@@ -127,7 +127,8 @@ opt.listchars = {
   nbsp = "␣",
 }
 
-opt.guicursor = "n-v:block-Cursor/lCursor,i-c-ci-ve:ver50-blinkwait50-blinkoff100-blinkon175-Cursor2/lCursor2,r-cr:hor20,o:hor20"
+opt.guicursor =
+  "n-v:block-Cursor/lCursor,i-c-ci-ve:ver50-blinkwait50-blinkoff100-blinkon175-Cursor2/lCursor2,r-cr:hor20,o:hor20"
 
 opt.mouse = "n"
 opt.mousemodel = "popup"
