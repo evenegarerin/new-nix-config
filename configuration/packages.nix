@@ -131,6 +131,7 @@
       posting
       udiskie
       nvd
+      glab
     ])
     ++ (with pkgs-unstable; [
     ]);
