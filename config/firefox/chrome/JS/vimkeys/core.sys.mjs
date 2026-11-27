@@ -82,8 +82,9 @@ export class KeyHandler {
   #mode = null;
   #scroller = new Scroller();
 
-  constructor({ hintDocument, runBrowserCommand, onModeChange = null }) {
+  constructor({ hintDocument, runBrowserCommand, onModeChange = null, frameHints = null }) {
     this.hintDocument = hintDocument;
+    this.frameHints = frameHints;
     this.runBrowserCommand = runBrowserCommand;
     this.onModeChange = onModeChange;
   }
@@ -209,12 +210,26 @@ export class KeyHandler {
     this.#hints?.exit();
   }
 
-  startHints(doc, newTab = false) {
+  startHints(doc, action = "open") {
     this.exitHints();
     this.#hints = startHints(doc, () => {
       this.#hints = null;
       this.refreshMode();
-    }, newTab);
+    }, action);
+    this.refreshMode();
+  }
+
+  #beginHints(ctx, action) {
+    if (!this.frameHints) {
+      const doc = this.hintDocument(ctx);
+      if (doc) this.startHints(doc, action);
+      return;
+    }
+    this.exitHints();
+    this.#hints = this.frameHints(action, () => {
+      this.#hints = null;
+      this.refreshMode();
+    });
     this.refreshMode();
   }
 
@@ -247,16 +262,12 @@ export class KeyHandler {
 
   #run(name, ctx) {
     switch (name) {
-      case "linkHints": {
-        const doc = this.hintDocument(ctx);
-        if (doc) this.startHints(doc);
-        return undefined;
-      }
-      case "linkHintsNewTab": {
-        const doc = this.hintDocument(ctx);
-        if (doc) this.startHints(doc, true);
-        return undefined;
-      }
+      case "linkHints":
+        return this.#beginHints(ctx, "open");
+      case "linkHintsNewTab":
+        return this.#beginHints(ctx, "newTab");
+      case "linkHintsCopy":
+        return this.#beginHints(ctx, "copy");
       case "visualMode": {
         const doc = this.hintDocument(ctx);
         if (doc) this.startVisual(doc);
@@ -470,17 +481,19 @@ function frameDocument(el) {
   }
 }
 
-function collectTargets(doc, offsetX, offsetY, out, seen) {
+function collectTargets(doc, offsetX, offsetY, out, seen, linksOnly, recurse) {
   for (const el of walk(doc)) {
     if (el.localName === "iframe" || el.localName === "frame" || el.localName === "browser") {
+      if (!recurse) continue;
       const sub = frameDocument(el);
       const r = el.getBoundingClientRect();
       if (sub && r.width > 0 && r.height > 0) {
-        collectTargets(sub, offsetX + r.left + el.clientLeft, offsetY + r.top + el.clientTop, out, seen);
+        collectTargets(sub, offsetX + r.left + el.clientLeft, offsetY + r.top + el.clientTop, out, seen, linksOnly, recurse);
       }
       continue;
     }
     if (el.disabled || !el.matches(CLICKABLE)) continue;
+    if (linksOnly && !linkHrefOf(el)) continue;
     const rect = visibleRect(el);
     if (!rect) continue;
     const x = offsetX + rect.left;
@@ -514,14 +527,19 @@ function linkHrefOf(el) {
   return el.href || null;
 }
 
-function activate(el, newTab) {
-  if (newTab && linkHrefOf(el)) {
+function activate(el, action) {
+  if (action === "copy") {
+    copyText(linkHrefOf(el));
+    return;
+  }
+  if (action === "newTab" && linkHrefOf(el)) {
     const win = windowOf(el);
     el.dispatchEvent(new win.MouseEvent("click", {
       bubbles: true,
       cancelable: true,
       view: win,
       ctrlKey: true,
+      shiftKey: Services.prefs.getBoolPref("browser.tabs.loadInBackground", true),
     }));
     return;
   }
@@ -546,15 +564,42 @@ function activate(el, newTab) {
   el.click();
 }
 
-function startHints(doc, onExit, newTab = false) {
-  const win = doc.defaultView;
+export function collectHintTargets(doc, action, recurse = true) {
   const targets = [];
-  collectTargets(doc, 0, 0, targets, new Set());
-  if (!targets.length) return null;
+  collectTargets(doc, 0, 0, targets, new Set(), action === "copy", recurse);
+  return targets;
+}
 
+export function visibleFrameIds(doc) {
+  const ids = [];
+  for (const el of walk(doc)) {
+    if (el.localName !== "iframe" && el.localName !== "frame") continue;
+    const id = el.browsingContext?.id;
+    if (id === undefined) continue;
+    if (el.checkVisibility && !el.checkVisibility({ checkVisibilityCSS: true, visibilityProperty: true })) continue;
+    const win = windowOf(el);
+    const r = el.getBoundingClientRect();
+    if (r.width < 3 || r.height < 3) continue;
+    if (r.bottom <= 0 || r.right <= 0 || r.top >= win.innerHeight || r.left >= win.innerWidth) continue;
+    ids.push(id);
+  }
+  return ids;
+}
+
+export function readHintKey(event) {
+  if (event.ctrlKey || event.altKey || event.metaKey) return "cancel";
+  if (event.key === "Shift" || event.key === "CapsLock") return null;
+  consume(event);
+  if (event.key === "Escape") return "cancel";
+  if (event.key === "Backspace") return "back";
+  const ch = event.key.toLowerCase();
+  return ch.length === 1 && SETTINGS.hintChars.includes(ch) ? ch : null;
+}
+
+export function showHints(doc, targets, labels, action, onExit) {
+  const win = doc.defaultView;
   const container = mountOverlay(doc);
   const shadow = container.attachShadow({ mode: "closed" });
-  const labels = makeLabels(targets.length);
 
   const items = targets.map(({ el, x, y }, i) => {
     const node = doc.createElementNS(HTML_NS, "span");
@@ -569,20 +614,8 @@ function startHints(doc, onExit, newTab = false) {
     return { el, label: labels[i], node, typedNode, restNode };
   });
 
-  let typed = "";
   let done = false;
   const capture = { capture: true };
-
-  const update = () => {
-    for (const item of items) {
-      const match = item.label.startsWith(typed);
-      item.node.style.display = match ? "block" : "none";
-      if (match) {
-        item.typedNode.textContent = typed.toUpperCase();
-        item.restNode.data = item.label.slice(typed.length).toUpperCase();
-      }
-    }
-  };
 
   const onVisibility = () => {
     if (doc.hidden) exit();
@@ -609,35 +642,52 @@ function startHints(doc, onExit, newTab = false) {
       return !done && container.isConnected;
     },
     exit,
+    filter(typed) {
+      for (const item of items) {
+        const match = item.label.startsWith(typed);
+        item.node.style.display = match ? "block" : "none";
+        if (match) {
+          item.typedNode.textContent = typed.toUpperCase();
+          item.restNode.data = item.label.slice(typed.length).toUpperCase();
+        }
+      }
+    },
+    activate(label) {
+      const item = items.find((candidate) => candidate.label === label);
+      exit();
+      if (item) activate(item.el, action);
+    },
+  };
+}
+
+function startHints(doc, onExit, action = "open") {
+  const targets = collectHintTargets(doc, action);
+  if (!targets.length) return null;
+  const labels = makeLabels(targets.length);
+  const overlay = showHints(doc, targets, labels, action, onExit);
+  let typed = "";
+
+  return {
+    get alive() {
+      return overlay.alive;
+    },
+    exit: overlay.exit,
     onKey(event) {
-      if (event.ctrlKey || event.altKey || event.metaKey) {
-        exit();
+      const key = readHintKey(event);
+      if (key === "cancel") {
+        overlay.exit();
         return;
       }
-      if (event.key === "Shift" || event.key === "CapsLock") return;
-      consume(event);
-
-      if (event.key === "Escape") {
-        exit();
-        return;
-      }
-      if (event.key === "Backspace") {
-        typed = typed.slice(0, -1);
-        update();
-        return;
-      }
-      const ch = event.key.toLowerCase();
-      if (ch.length !== 1 || !SETTINGS.hintChars.includes(ch)) return;
-
-      const matches = items.filter((item) => item.label.startsWith(typed + ch));
+      if (!key) return;
+      const next = key === "back" ? typed.slice(0, -1) : typed + key;
+      const matches = labels.filter((label) => label.startsWith(next));
       if (!matches.length) return;
-      typed += ch;
+      typed = next;
       if (matches.length === 1) {
-        exit();
-        activate(matches[0].el, newTab);
+        overlay.activate(matches[0]);
         return;
       }
-      update();
+      overlay.filter(typed);
     },
   };
 }
@@ -788,6 +838,10 @@ function copySelection(selection) {
     console.error(LOG_PREFIX, err);
     return;
   }
+  copyText(text);
+}
+
+function copyText(text) {
   if (!text) return;
   try {
     Cc["@mozilla.org/widget/clipboardhelper;1"]

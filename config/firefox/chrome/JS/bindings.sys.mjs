@@ -19,7 +19,8 @@ export const BINDINGS = {
   ge: "editUrl",
   r: "reload",
   R: "reloadHard",
-  yy: "copyUrl",
+  y: "linkHintsCopy",
+  Y: "copyUrl",
   p: "openClipboardUrl",
   P: "openClipboardUrlNewTab",
   t: "newTab",
@@ -37,6 +38,7 @@ export const HELP = [
   ["Navigating the page", [
     ["linkHints", "Open a link in the current tab"],
     ["linkHintsNewTab", "Open a link in a new tab"],
+    ["linkHintsCopy", "Copy a link's URL to the clipboard"],
     ["visualMode", "Enter visual mode (hjkl selects, y copies, v or Escape exits)"],
     ["reload", "Reload the page"],
     ["reloadHard", "Reload the page, ignoring the cache"],

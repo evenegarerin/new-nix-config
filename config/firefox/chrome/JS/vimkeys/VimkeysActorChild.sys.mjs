@@ -1,17 +1,114 @@
-import { KeyHandler, eventTarget, windowOf } from "./core.sys.mjs";
+import {
+  KeyHandler, collectHintTargets, eventTarget, readHintKey, showHints, visibleFrameIds, windowOf,
+} from "./core.sys.mjs";
 
 export class VimkeysActorChild extends JSWindowActorChild {
   #keys = null;
   #modeRefreshScheduled = false;
+  #pendingHints = null;
+  #overlay = null;
+  #remoteHints = null;
 
   handleEvent() {
     this.#attach();
   }
 
   receiveMessage(message) {
-    if (message.name === "Vimkeys:attach") this.#attach();
-    if (message.name === "Vimkeys:resetPending") this.#keys?.resetPending();
-    if (message.name === "Vimkeys:stop") this.#keys?.stop();
+    switch (message.name) {
+      case "Vimkeys:attach":
+        this.#attach();
+        break;
+      case "Vimkeys:resetPending":
+        this.#keys?.resetPending();
+        break;
+      case "Vimkeys:stop":
+        this.#keys?.stop();
+        break;
+      case "Vimkeys:hintsCollect":
+        return this.#collectHints(message.data?.action);
+      case "Vimkeys:hintsShow":
+        this.#showHints(message.data?.labels ?? []);
+        break;
+      case "Vimkeys:hintsFilter":
+        this.#overlay?.filter(message.data?.typed ?? "");
+        break;
+      case "Vimkeys:hintsActivate": {
+        const overlay = this.#overlay;
+        this.#overlay = null;
+        this.#remoteHints?.finish();
+        overlay?.activate(message.data?.label);
+        break;
+      }
+      case "Vimkeys:hintsEnd":
+        this.#closeOverlay();
+        this.#remoteHints?.finish();
+        break;
+    }
+    return undefined;
+  }
+
+  #send(name, data = {}) {
+    try {
+      this.sendAsyncMessage(name, data);
+    } catch {}
+  }
+
+  #collectHints(action) {
+    this.#closeOverlay();
+    this.#pendingHints = null;
+    const doc = this.document;
+    if (!doc?.documentElement || doc.hidden || !this.#shouldTakeOver()) return null;
+    const targets = collectHintTargets(doc, action, false);
+    this.#pendingHints = { targets, action };
+    return { count: targets.length, frames: visibleFrameIds(doc) };
+  }
+
+  #showHints(labels) {
+    const pending = this.#pendingHints;
+    this.#pendingHints = null;
+    if (!pending || !labels.length || labels.length !== pending.targets.length) return;
+    const overlay = showHints(this.document, pending.targets, labels, pending.action, () => {
+      if (this.#overlay !== overlay) return;
+      this.#overlay = null;
+      this.#send("Vimkeys:hintsCancel");
+    });
+    this.#overlay = overlay;
+  }
+
+  #closeOverlay() {
+    const overlay = this.#overlay;
+    this.#overlay = null;
+    overlay?.exit();
+  }
+
+  #startFrameHints(action, onExit) {
+    this.#remoteHints?.finish();
+    let done = false;
+    const end = (cancel) => {
+      if (done) return;
+      done = true;
+      if (this.#remoteHints === hints) this.#remoteHints = null;
+      if (cancel) this.#send("Vimkeys:hintsCancel");
+      onExit();
+    };
+    const hints = {
+      get alive() {
+        return !done;
+      },
+      exit: () => end(true),
+      finish: () => end(false),
+      onKey: (event) => {
+        const key = readHintKey(event);
+        if (key === "cancel") {
+          end(true);
+        } else if (key) {
+          this.#send("Vimkeys:hintsKey", { key });
+        }
+      },
+    };
+    this.#remoteHints = hints;
+    this.#send("Vimkeys:hintsStart", { action });
+    return hints;
   }
 
   #attach() {
@@ -23,6 +120,7 @@ export class VimkeysActorChild extends JSWindowActorChild {
       hintDocument: () => this.document,
       runBrowserCommand: (name) => this.sendAsyncMessage("Vimkeys:command", { name }),
       onModeChange: (mode) => this.#reportMode(mode),
+      frameHints: (action, onExit) => this.#startFrameHints(action, onExit),
     });
 
     win.addEventListener("keydown", (e) => this.#onKeyDown(e), true);
@@ -71,6 +169,9 @@ export class VimkeysActorChild extends JSWindowActorChild {
   }
 
   didDestroy() {
+    this.#closeOverlay();
+    this.#pendingHints = null;
+    this.#remoteHints?.finish();
     this.#keys?.stop();
     this.#keys = null;
   }
