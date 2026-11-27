@@ -19,7 +19,7 @@ Singleton {
   // 30px on each side by preference (a deliberate departure from waybar)
   readonly property int centerPadding: 30
   // two adjacent modules each contribute 5px of padding
-  readonly property int moduleGap: 10
+  readonly property int moduleGap: 14
   // ...plus 5px of extra breathing room, in the center section only
   readonly property int centerGap: 15
   readonly property int rounding: 15
@@ -52,12 +52,12 @@ Singleton {
   readonly property color batteryCritical: Qt.rgba(245 / 255, 60 / 255, 60 / 255, 0.6)
 
   readonly property var herdr: ({
-    "blocked": Qt.rgba(245 / 255, 60 / 255, 60 / 255, 0.6),
-    "done": Qt.rgba(21 / 255, 184 / 255, 13 / 255, 0.6),
-    "working": Qt.rgba(33 / 255, 255 / 255, 211 / 255, 0.6),
-    "idle": Qt.rgba(255 / 255, 190 / 255, 97 / 255, 0.6),
-    "unknown": Qt.rgba(72 / 255, 104 / 255, 98 / 255, 0.6)
-  })
+      "blocked": Qt.rgba(245 / 255, 60 / 255, 60 / 255, 0.6),
+      "done": Qt.rgba(21 / 255, 184 / 255, 13 / 255, 0.6),
+      "working": Qt.rgba(33 / 255, 255 / 255, 211 / 255, 0.6),
+      "idle": Qt.rgba(255 / 255, 190 / 255, 97 / 255, 0.6),
+      "unknown": Qt.rgba(72 / 255, 104 / 255, 98 / 255, 0.6)
+    })
 
   // Right-align `value` in a field `width` wide, the way waybar's
   // `{usage:>2}` format spec does.
