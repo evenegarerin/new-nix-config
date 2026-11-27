@@ -158,7 +158,10 @@
   counter-increment: grouptabs;
 }
 #tabbrowser-tabs[orient="vertical"]
-  tab-group:not([collapsed]):not(:has(> .tabbrowser-tab[selected]))
+  tab-group:not([collapsed]):not(:has(
+    > .tabbrowser-tab[selected],
+    > tab-split-view-wrapper > .tabbrowser-tab[selected]
+  ))
   > .tabbrowser-tab:not(:first-of-type) {
   order: 2;
   visibility: hidden !important;
@@ -170,7 +173,10 @@
   overflow: hidden !important;
 }
 #tabbrowser-tabs[orient="vertical"]
-  tab-group:not([collapsed]):not(:has(> .tabbrowser-tab[selected]))::after {
+  tab-group:not([collapsed]):not(:has(
+    > .tabbrowser-tab[selected],
+    > tab-split-view-wrapper > .tabbrowser-tab[selected]
+  ))::after {
   order: 1;
   content: counter(grouptabs);
   display: flex;
@@ -199,7 +205,10 @@ scrollbox[part="scrollbox"][orient="vertical"][smoothscroll="true"]
 }
 #tabbrowser-tabs[orient="vertical"]
   #tabbrowser-arrowscrollbox
-  > tab-group:not([collapsed]):has(> .tabbrowser-tab[selected]) {
+  > tab-group:not([collapsed]):has(
+    > .tabbrowser-tab[selected],
+    > tab-split-view-wrapper > .tabbrowser-tab[selected]
+  ) {
   flex: 0 1 auto !important;
   max-height: none !important;
   overflow-y: auto !important;
@@ -208,15 +217,55 @@ scrollbox[part="scrollbox"][orient="vertical"][smoothscroll="true"]
 }
 #tabbrowser-tabs[orient="vertical"]
   #tabbrowser-arrowscrollbox
-  > tab-group:not([collapsed]):has(> .tabbrowser-tab[selected]):has(
+  > tab-group:not([collapsed]):has(
+    > .tabbrowser-tab[selected],
+    > tab-split-view-wrapper > .tabbrowser-tab[selected]
+  ):has(
     > .tabbrowser-tab:nth-of-type(4)
   ) {
   min-height: 120px !important;
 }
 #tabbrowser-tabs[orient="vertical"]
   #tabbrowser-arrowscrollbox
-  > tab-group:not([collapsed]):has(> .tabbrowser-tab[selected]):not(
+  > tab-group:not([collapsed]):has(
+    > .tabbrowser-tab[selected],
+    > tab-split-view-wrapper > .tabbrowser-tab[selected]
+  ):not(
     :has(> .tabbrowser-tab:nth-of-type(4))
   ) {
   flex-shrink: 0 !important;
+}
+
+#tabbrowser-tabpanels[splitview]
+  .split-view-panel.deck-selected
+  > .browserContainer {
+  border-color: #fff !important;
+  outline: none !important;
+}
+#tabbrowser-tabpanels[splitview]
+  .split-view-panel.deck-selected
+  > .browserContainer:-moz-window-inactive {
+  border-color: var(--chrome-content-separator-color) !important;
+}
+
+#tabbrowser-tabs[orient="vertical"]:not([expanded]) tab-split-view-wrapper {
+  padding: 0 !important;
+  margin-inline-start: 3px !important;
+}
+#tabbrowser-tabs tab-split-view-wrapper {
+  background-color: color-mix(
+    in srgb,
+    var(--tab-background-color-hover) 50%,
+    transparent
+  ) !important;
+}
+#tabbrowser-tabs tab-split-view-wrapper:not([hasactivetab]) {
+  outline: none !important;
+}
+#tabbrowser-tabs
+  tab-split-view-wrapper:not([hasactivetab])
+  .tabbrowser-tab
+  > .tab-stack {
+  border-block-end: none !important;
+  border-inline-start-color: transparent !important;
 }
