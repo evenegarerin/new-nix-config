@@ -18,6 +18,10 @@
   overflow: hidden !important;
 }
 
+#sidebar-tools-and-extensions-splitter {
+  display: none !important;
+}
+
 .tab-close-button {
   display: none !important;
 }
@@ -154,15 +158,22 @@
 #tabbrowser-tabs[orient="vertical"] tab-group {
   counter-reset: grouptabs;
 }
-#tabbrowser-tabs[orient="vertical"] tab-group > .tabbrowser-tab {
+#tabbrowser-tabs[orient="vertical"] tab-group > .tabbrowser-tab,
+#tabbrowser-tabs[orient="vertical"]
+  tab-group
+  > tab-split-view-wrapper
+  > .tabbrowser-tab {
   counter-increment: grouptabs;
 }
 #tabbrowser-tabs[orient="vertical"]
-  tab-group:not([collapsed]):not(:has(
-    > .tabbrowser-tab[selected],
-    > tab-split-view-wrapper > .tabbrowser-tab[selected]
-  ))
-  > .tabbrowser-tab:not(:first-of-type) {
+  tab-group:not([collapsed]):not(
+    :has(
+      > .tabbrowser-tab[selected],
+      > tab-split-view-wrapper > .tabbrowser-tab[selected]
+    )
+  )
+  > :is(.tabbrowser-tab, tab-split-view-wrapper)
+  ~ :is(.tabbrowser-tab, tab-split-view-wrapper) {
   order: 2;
   visibility: hidden !important;
   height: 0 !important;
@@ -173,10 +184,12 @@
   overflow: hidden !important;
 }
 #tabbrowser-tabs[orient="vertical"]
-  tab-group:not([collapsed]):not(:has(
-    > .tabbrowser-tab[selected],
-    > tab-split-view-wrapper > .tabbrowser-tab[selected]
-  ))::after {
+  tab-group:not([collapsed]):not(
+    :has(
+      > .tabbrowser-tab[selected],
+      > tab-split-view-wrapper > .tabbrowser-tab[selected]
+    )
+  )::after {
   order: 1;
   content: counter(grouptabs);
   display: flex;
@@ -220,9 +233,7 @@ scrollbox[part="scrollbox"][orient="vertical"][smoothscroll="true"]
   > tab-group:not([collapsed]):has(
     > .tabbrowser-tab[selected],
     > tab-split-view-wrapper > .tabbrowser-tab[selected]
-  ):has(
-    > .tabbrowser-tab:nth-of-type(4)
-  ) {
+  ):has(> .tabbrowser-tab:nth-of-type(4)) {
   min-height: 120px !important;
 }
 #tabbrowser-tabs[orient="vertical"]
@@ -230,9 +241,7 @@ scrollbox[part="scrollbox"][orient="vertical"][smoothscroll="true"]
   > tab-group:not([collapsed]):has(
     > .tabbrowser-tab[selected],
     > tab-split-view-wrapper > .tabbrowser-tab[selected]
-  ):not(
-    :has(> .tabbrowser-tab:nth-of-type(4))
-  ) {
+  ):not(:has(> .tabbrowser-tab:nth-of-type(4))) {
   flex-shrink: 0 !important;
 }
 
