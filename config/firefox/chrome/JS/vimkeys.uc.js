@@ -105,8 +105,9 @@
     findNext: () => findBarCommand("onFindAgainCommand", false),
     findPrevious: () => findBarCommand("onFindAgainCommand", true),
     newTab: () => openNewTab(),
-    closeTab: (browser) => gBrowser.removeTab(tabFor(browser), { animate: true }),
+    closeTab: (browser) => closeTab(tabFor(browser)),
     restoreTab: () => restoreTab(),
+    splitView: () => BrowserCommands.addTabSplitView(),
     goBack: (browser) => browser.canGoBack && browser.goBack(),
     goForward: (browser) => browser.canGoForward && browser.goForward(),
     nextTab: () => cycleTabs(1),
@@ -276,6 +277,12 @@
 
   function tabFor(browser) {
     return gBrowser.getTabForBrowser(browser) ?? gBrowser.selectedTab;
+  }
+
+  function closeTab(tab) {
+    const partner = tab.splitview?.tabs.find((other) => other !== tab && !other.closing);
+    if (partner) gBrowser.setSuccessor(tab, partner);
+    gBrowser.removeTab(tab, { animate: true });
   }
 
   async function findBarCommand(method, ...args) {
@@ -506,8 +513,16 @@
     },
   };
 
+  function focusSplitAfterSwitch() {
+    if (!gBrowser.selectedTab.splitview) return;
+    const active = document.activeElement;
+    if (active && active !== document.body && active !== document.documentElement) return;
+    gBrowser.selectedBrowser.focus();
+  }
+
   function init() {
     window.addEventListener("keydown", onKeyDown, true);
+    gBrowser.addEventListener("TabSwitchDone", focusSplitAfterSwitch);
     gBrowser.addTabsProgressListener(progressListener);
     window.addEventListener(
       "unload",

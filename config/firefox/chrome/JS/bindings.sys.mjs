@@ -25,6 +25,7 @@ export const BINDINGS = {
   t: "newTab",
   x: "closeTab",
   X: "restoreTab",
+  V: "splitView",
   H: "goBack",
   L: "goForward",
   J: "nextTab",
@@ -67,6 +68,7 @@ export const HELP = [
     ["newTab", "Create a new tab"],
     ["closeTab", "Close the current tab"],
     ["restoreTab", "Restore a closed tab"],
+    ["splitView", "Open a vertical split next to the current tab"],
     ["nextTab", "Go one tab right inside the current group"],
     ["previousTab", "Go one tab left inside the current group"],
     ["openOmnibarTabs", "Search through your open tabs"],
@@ -89,10 +91,11 @@ export const BROWSER_COMMANDS = new Set([
   "openOmnibarBookmarksNewTab", "openOmnibarTabs",
   "editUrl", "reload", "reloadHard", "copyUrl",
   "openClipboardUrl", "openClipboardUrlNewTab", "tabGroupMenu", "tabGroupToggle",
+  "splitView",
 ]);
 
 export const WINDOW_KEYS = new Set([
-  "p", "P", "J", "K", "o", "O", "b", "B", "ge", "t", "x", "T", "m",
+  "p", "P", "J", "K", "o", "O", "b", "B", "ge", "t", "x", "T", "m", "V",
 ]);
 
 const REPEATABLE = new Set(["findNext", "findPrevious", "nextTab", "previousTab"]);
